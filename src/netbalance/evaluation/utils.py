@@ -34,6 +34,9 @@ def evaluate_binary_classification(
     y_test = data.associations[:, 2]
     result = Result()
 
+    # Entropy
+    result.ent = data.get_stats()["ent"]
+
     # Add predictions to the result
     result.predictions = y_predict
 

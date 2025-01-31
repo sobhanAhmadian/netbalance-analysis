@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from sklearn.metrics import RocCurveDisplay, auc
 
@@ -41,6 +43,7 @@ class Result:
         self.max_f1 = 0
         self.fpr = None
         self.tpr = None
+        self.ent: float = 0.0
 
     def get_result(self):
         """
@@ -79,9 +82,9 @@ class CrossValidationResult:
 
     def __init__(self):
         self.result = Result()
-        self.fold_results = []
-        self.is_result_calculated = False
-        self.k = 0
+        self.fold_results: List[Result] = []
+        self.is_result_calculated: bool = False
+        self.k: int = 0
 
     def add_fold_result(self, test_result):
         """
@@ -118,6 +121,7 @@ class CrossValidationResult:
         self.result.precision = self.result.precision / k
         self.result.mcc = self.result.mcc / k
         self.result.max_f1 = self.result.max_f1 / k
+        self.result.ent = self.result.ent / k
 
     def _accumulate(self, test_result):
         """
@@ -135,6 +139,7 @@ class CrossValidationResult:
         self.result.precision += test_result.precision
         self.result.mcc += test_result.mcc
         self.result.max_f1 += test_result.max_f1
+        self.result.ent += test_result.ent
 
     def get_roc_curve(self, ax, mean_fpr=np.linspace(0, 1, 100)):
         """

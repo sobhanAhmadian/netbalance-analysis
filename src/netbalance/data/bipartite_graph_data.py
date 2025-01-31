@@ -370,8 +370,8 @@ class BGData(Data):
         self._calculate_node_stats(interaction, stats["a"], axis=1)
         self._calculate_node_stats(interaction, stats["b"], axis=0)
 
-        per_a_ent = stats["a"]["ent"]
-        per_b_ent = stats["b"]["ent"]
+        per_a_ent = stats["a"]["ent"].item()
+        per_b_ent = stats["b"]["ent"].item()
         stats["ent"] = (per_a_ent + per_b_ent) / 2
 
         return stats
@@ -440,7 +440,7 @@ class BGData(Data):
         )
 
         weights = total / total.sum()
-        return np.dot(entropy, weights)
+        return np.dot(entropy, weights).item()
 
 
 class BGTrainTestSpliter(TrainTestSplitter):
