@@ -14,3 +14,4 @@ RESULTS_DIR_DICT = {
 
 warm_color1 = "#ffafcc"
 cold_color1 = "#a2d2ff"
+cold_color2 = "#82c0fa"

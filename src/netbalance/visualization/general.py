@@ -1,5 +1,5 @@
 import math
-from typing import Union
+from typing import Union, List
 
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -130,3 +130,58 @@ def plot_per_group_associations(
     print(
         f"Figure Saved: {figs_folder}/per_{cluster_name.lower()}_num_associations.pdf"
     )
+
+
+def plot_ent_vs_auc_dist(
+    auc_list: Union[List[float], np.ndarray],
+    auc_list_list: Union[List[List[float]], np.ndarray],
+    ent_list: Union[List[float], np.ndarray],
+    model_name: str,
+    dataset_name: str,
+    figs_folder: str,
+    cold_color: str,
+    warm_color: str,
+    xlim_left: float = -0.1,
+    xlim_right: float = 1.1,
+    ylim_up: float = 1.0,
+    ylim_down: float = 0.4,
+):
+    fig, axe = plt.subplots(figsize=(10, 8))
+    axe.plot(ent_list, auc_list, label="AUC", color=cold_color, marker="o")
+
+    violins = axe.violinplot(
+        auc_list_list,
+        positions=ent_list,
+        widths=0.03,
+        showmeans=False,
+        showextrema=True,
+    )
+
+    # Customize violin plot colors
+    for pc in violins["bodies"]:
+        pc.set_facecolor(warm_color)
+        pc.set_edgecolor(cold_color)
+        pc.set_alpha(0.4)
+
+    violins["cbars"].set_color(cold_color)
+    violins["cmins"].set_color(cold_color)
+    violins["cmaxes"].set_color(cold_color)
+
+    # Set plot properties
+    axe.set_xlabel("Entropy")
+    axe.set_ylabel("AUC")
+    axe.set_title(
+        f"{dataset_name.upper()} Entropy vs {model_name.upper()} AUC Distribution"
+    )
+    axe.set_xlim([xlim_left, xlim_right])
+    axe.set_ylim([ylim_down, ylim_up])
+
+    # Add grid and legend
+    axe.grid(axis="y", linestyle="--", alpha=0.7)
+    axe.legend()
+
+    # Tight layout and save
+    fig.tight_layout()
+    file_name = f"{figs_folder}/entropy_vs_auc_violinplot.pdf"
+    plt.savefig(file_name)
+    print(f"\nFigure Saved: {file_name}")

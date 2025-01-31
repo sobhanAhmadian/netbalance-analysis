@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Union
+from typing import Callable, Union, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,59 @@ from .result import BGCCrossValidationResult
 from .utils import evaluate_binary_classification
 
 logger = prj_logger.getLogger(__name__)
+
+
+def get_ent_vs_auc(
+    model_result_dir: str,
+    dataset_name: str,
+    test_balance_kwargs: dict,
+    cluster_a_node_names: List[str],
+    cluster_b_node_names: List[str],
+    num_cross_validation: int = 2,
+    num_negative_sampling: int = 2,
+) -> Tuple[List[float], List[List[float]], List[float]]:
+    """Get the AUC results of a model for different desired dataset entropy values.
+
+    Args:
+        model_result_dir (str): The directory containing the prediction files.
+        dataset_name (str): The name of the dataset.
+        test_balance_kwargs (dict): The keyword arguments for balancing the test data using rho method.
+        cluster_a_node_names (List[str]): The names of the nodes in cluster A.
+        cluster_b_node_names (List[str]): The names of the nodes in cluster B.
+        num_cross_validation (int, optional): The number of cross-validation (for each entropy). Defaults to 1.
+        num_negative_sampling (int, optional): The number of negative samples (for each entropy). Defaults to 1.
+
+    Returns:
+        Tuple[List[float], List[List[float]], List[float]]: A tuple containing the AUC results, the AUC results for each fold, and the entropy values.
+    """
+
+    desired_ent_list = np.arange(0.0, 1.05, 0.05).tolist()
+    auc_list = []
+    auc_list_list = []
+    ent_list = []
+
+    for ent in desired_ent_list:
+        print(
+            f"Desired Entropy: {round(ent, 2)} [{desired_ent_list.index(ent) + 1}/{len(desired_ent_list)}]"
+        )
+        results = get_result_of_rcv(
+            save_preds_dir=model_result_dir,
+            cluster_a_node_names=cluster_a_node_names,
+            cluster_b_node_names=cluster_b_node_names,
+            num_cross_validation=num_cross_validation,
+            num_negative_sampling=num_negative_sampling,
+            dataset_name=dataset_name,
+            test_balance_method="rho",
+            test_balance_negative_ratio=1.0,
+            test_balance_kwargs={
+                **test_balance_kwargs,
+                "ent_desired": ent,
+            },
+        )
+        ent_list.append(results.result.ent)
+        auc_list.append(results.result.auc)
+        auc_list_list.append([r.auc for r in results.fold_results])
+    return auc_list, auc_list_list, ent_list
 
 
 def repeated_cross_validation(
