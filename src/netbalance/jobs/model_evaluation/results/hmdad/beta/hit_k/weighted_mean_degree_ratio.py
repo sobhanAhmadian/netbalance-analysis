@@ -1,0 +1,103 @@
+import os
+
+from netbalance.configs import cold_color2, warm_color1
+from netbalance.configs.common import RESULTS_DIR as COMMON_RESULTS_DIR
+from netbalance.configs.weighted_mean_degree_ratio import (
+    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,
+)  # Parameter
+from netbalance.evaluation.general import get_result_of_rcv
+from netbalance.features.hmdad import HMDADDataset as Dataset  # Parameter
+from netbalance.utils import prj_logger
+from netbalance.visualization import plot_x_vs_y_dist, plot_xs_vs_y_dist
+
+logger = prj_logger.getLogger(__name__)
+
+model_name = "weighted_mean_degree_ratio"  # Parameter
+dataset = "hmdad"  # Parameter
+train_neg_samp_method = "beta"  # Parameter
+analyse = "hit_k"  # Parameter
+num_cross_validation = 5  # Parameter
+num_negative_sampling = 1  # Parameter
+
+logger.info(
+    f">>>>>>>>>>>>>>>>> Job: Model Evaluation - Results - {dataset} - {model_name} - {train_neg_samp_method} - {analyse}"
+)
+
+model_result_dir = os.path.join(
+    RESULTS_DIR,
+    f"preds",
+    f"dataset_{dataset}",
+    f"train_neg_samp_{train_neg_samp_method}",
+)
+
+figs_folder = os.path.join(
+    COMMON_RESULTS_DIR,
+    f"figs",
+    "model_evaluation/results",
+    dataset,
+    train_neg_samp_method,
+    analyse,
+    model_name,
+)
+
+if not os.path.exists(figs_folder):
+    os.makedirs(figs_folder, exist_ok=True)
+
+ds = Dataset()
+
+results = get_result_of_rcv(
+    save_preds_dir=model_result_dir,
+    cluster_a_node_names=ds.get_cluster_a_node_names(),
+    cluster_b_node_names=ds.get_cluster_b_node_names(),
+    num_cross_validation=num_cross_validation,
+    num_negative_sampling=num_negative_sampling,
+    test_balance_method=None,
+    dataset_name=dataset,
+)
+
+hit_k_list = results.result.hit_k_list
+hit_k_accuracy_list = results.result.hit_k_accuracy_list
+max_k = len(hit_k_list)
+hit_k_accuracy_list_list = []
+for i in range(len(hit_k_list)):
+    temp = []
+    for r in results.fold_results:
+        temp.append(r.hit_k_accuracy_list[i])
+    hit_k_accuracy_list_list.append(temp)
+per_fold_hit_k_accuracy_list = [r.hit_k_accuracy_list for r in results.fold_results]
+
+plot_x_vs_y_dist(
+    x_list=hit_k_list,
+    y_list=hit_k_accuracy_list,
+    y_list_list=hit_k_accuracy_list_list,
+    figs_folder=figs_folder,
+    cold_color=cold_color2,
+    warm_color=warm_color1,
+    xlim_left=-1,
+    xlim_right=max_k + 1,
+    ylim_down=-0.1,
+    ylim_up=1.1,
+    fig_width=40,
+    violon_width=0.5,
+    x_name="K",
+    y_name="Hit@K Accuracy",
+    title=f"{model_name.upper()} Hit@K Accuracy Distribution",
+)
+
+plot_xs_vs_y_dist(
+    x_list=hit_k_list,
+    y_list_list=per_fold_hit_k_accuracy_list,
+    max_y_plot=4,
+    figs_folder=figs_folder,
+    cold_color=cold_color2,
+    warm_color=warm_color1,
+    xlim_left=-1,
+    xlim_right=max_k + 1,
+    ylim_down=-0.1,
+    ylim_up=1.1,
+    fig_width=40,
+    violon_width=0.5,
+    x_name="K",
+    y_name="Hit@K Accuracy",
+    title=f"{model_name.upper()} Hit@K Accuracy Distribution",
+)

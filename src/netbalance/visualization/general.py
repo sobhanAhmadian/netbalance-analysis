@@ -4,6 +4,7 @@ from typing import Union, List
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 
 def cluster_barplot(
@@ -132,27 +133,31 @@ def plot_per_group_associations(
     )
 
 
-def plot_ent_vs_auc_dist(
-    auc_list: Union[List[float], np.ndarray],
-    auc_list_list: Union[List[List[float]], np.ndarray],
-    ent_list: Union[List[float], np.ndarray],
-    model_name: str,
-    dataset_name: str,
+def plot_x_vs_y_dist(
+    y_list: Union[List[float], np.ndarray],
+    y_list_list: Union[List[List[float]], np.ndarray],
+    x_list: Union[List[float], np.ndarray],
     figs_folder: str,
     cold_color: str,
     warm_color: str,
+    x_name: str = "Entropy",
+    y_name: str = "AUC",
+    title: str = "",
     xlim_left: float = -0.1,
     xlim_right: float = 1.1,
     ylim_up: float = 1.0,
     ylim_down: float = 0.4,
+    fig_width: float = 10,
+    fig_height: float = 8,
+    violon_width: float = 0.03,
 ):
-    fig, axe = plt.subplots(figsize=(10, 8))
-    axe.plot(ent_list, auc_list, label="AUC", color=cold_color, marker="o")
+    fig, axe = plt.subplots(figsize=(fig_width, fig_height))
+    axe.plot(x_list, y_list, color=cold_color, marker="o")
 
     violins = axe.violinplot(
-        auc_list_list,
-        positions=ent_list,
-        widths=0.03,
+        y_list_list,
+        positions=x_list,
+        widths=violon_width,
         showmeans=False,
         showextrema=True,
     )
@@ -168,20 +173,89 @@ def plot_ent_vs_auc_dist(
     violins["cmaxes"].set_color(cold_color)
 
     # Set plot properties
-    axe.set_xlabel("Entropy")
-    axe.set_ylabel("AUC")
-    axe.set_title(
-        f"{dataset_name.upper()} Entropy vs {model_name.upper()} AUC Distribution"
-    )
+    axe.set_xlabel(x_name)
+    axe.set_ylabel(y_name)
+    axe.set_title(title)
     axe.set_xlim([xlim_left, xlim_right])
     axe.set_ylim([ylim_down, ylim_up])
 
     # Add grid and legend
     axe.grid(axis="y", linestyle="--", alpha=0.7)
-    axe.legend()
 
     # Tight layout and save
     fig.tight_layout()
-    file_name = f"{figs_folder}/entropy_vs_auc_violinplot.pdf"
+    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_x_vs_y_dist.pdf"
+    plt.savefig(file_name)
+    print(f"\nFigure Saved: {file_name}")
+
+
+def plot_xs_vs_y_dist(
+    y_list_list: Union[List[List[float]], np.ndarray],
+    x_list: Union[List[float], np.ndarray],
+    figs_folder: str,
+    cold_color: str,
+    warm_color: str,
+    max_y_plot: Union[None, int] = None,
+    x_name: str = "Entropy",
+    y_name: str = "AUC",
+    title: str = "",
+    xlim_left: float = -0.1,
+    xlim_right: float = 1.1,
+    ylim_up: float = 1.0,
+    ylim_down: float = 0.4,
+    fig_width: float = 10,
+    fig_height: float = 8,
+    violon_width: float = 0.03,
+    seed: int = 42,
+):
+    if max_y_plot is None:
+        max_y_plot = len(y_list_list)
+
+    fig, axe = plt.subplots(figsize=(fig_width, fig_height))
+
+    random.seed(seed)
+    samps = random.sample(range(len(y_list_list)), max_y_plot)
+    for i in samps:
+        y_list = y_list_list[i]
+        axe.plot(x_list, y_list + np.random.normal(0, 0.02, len(y_list)))
+
+    violon_data = []
+    for i in range(len(y_list_list[0])):
+        temp = []
+        for j in range(len(y_list_list)):
+            temp.append(y_list_list[j][i])
+        violon_data.append(temp)
+
+    violins = axe.violinplot(
+        violon_data,
+        positions=x_list,
+        widths=violon_width,
+        showmeans=True,
+        showextrema=True,
+    )
+
+    # Customize violin plot colors
+    for pc in violins["bodies"]:
+        pc.set_facecolor(warm_color)
+        pc.set_edgecolor(cold_color)
+        pc.set_alpha(0.4)
+
+    violins["cbars"].set_color(cold_color)
+    violins["cmins"].set_color(cold_color)
+    violins["cmaxes"].set_color(cold_color)
+
+    # Set plot properties
+    axe.set_xlabel(x_name)
+    axe.set_ylabel(y_name)
+    axe.set_title(title)
+    axe.set_xlim([xlim_left, xlim_right])
+    axe.set_ylim([ylim_down, ylim_up])
+
+    # Add grid and legend
+    axe.grid(axis="y", linestyle="--", alpha=0.7)
+
+    # Tight layout and save
+    fig.tight_layout()
+    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_xs_vs_y_dist.pdf"
     plt.savefig(file_name)
     print(f"\nFigure Saved: {file_name}")

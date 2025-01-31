@@ -8,7 +8,7 @@ from netbalance.configs.weighted_mean_degree_ratio import (
 from netbalance.evaluation.general import get_ent_vs_auc
 from netbalance.features.hmdad import HMDADDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
-from netbalance.visualization import plot_ent_vs_auc_dist
+from netbalance.visualization import plot_x_vs_y_dist
 
 logger = prj_logger.getLogger(__name__)
 
@@ -58,13 +58,14 @@ auc_list, auc_list_list, ent_list = get_ent_vs_auc(
     cluster_b_node_names=ds.get_cluster_b_node_names(),
 )
 
-plot_ent_vs_auc_dist(
-    auc_list=auc_list,
-    auc_list_list=auc_list_list,
-    ent_list=ent_list,
-    model_name="WMDR",
-    dataset_name=dataset,
+plot_x_vs_y_dist(
+    y_list=auc_list,
+    y_list_list=auc_list_list,
+    x_list=ent_list,
     figs_folder=figs_folder,
     warm_color=warm_color1,
     cold_color=cold_color2,
+    x_name="Entropy",
+    y_name="AUC",
+    title=f"{dataset.upper()} Entropy vs {model_name.upper()} AUC Distribution",
 )

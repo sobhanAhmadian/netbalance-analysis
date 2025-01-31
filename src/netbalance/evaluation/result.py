@@ -225,6 +225,9 @@ class BGCCrossValidationResult(CrossValidationResult):
         self.result.hit_k_accuracy_a_counter = None
         self.result.hit_k_accuracy_b_counter = None
 
+        self.result.hit_k_list = None
+        self.result.hit_k_accuracy_list = None
+
     def _accumulate(self, test_result):
         super()._accumulate(test_result)
 
@@ -276,6 +279,17 @@ class BGCCrossValidationResult(CrossValidationResult):
                 test_result.hit_k_accuracy_b
             )
 
+        if self.result.hit_k_list is None:
+            self.result.hit_k_list = test_result.hit_k_list
+            self.result.hit_k_accuracy_list = test_result.hit_k_accuracy_list
+        else:
+            min_len = min(len(self.result.hit_k_list), len(test_result.hit_k_list))
+            self.result.hit_k_list = self.result.hit_k_list[:min_len]
+            self.result.hit_k_accuracy_list = (
+                self.result.hit_k_accuracy_list[:min_len]
+                + test_result.hit_k_accuracy_list[:min_len]
+            )
+
     def _divide(self, k):
         super()._divide(k)
         # self.result.hit_k_accuracy_list /= k
@@ -299,3 +313,4 @@ class BGCCrossValidationResult(CrossValidationResult):
         self.result.hit_k_accuracy_b = self.result.hit_k_accuracy_b / (
             self.result.hit_k_accuracy_b_counter + 1e-6
         )
+        self.result.hit_k_accuracy_list = self.result.hit_k_accuracy_list / (k + 1e-6)
