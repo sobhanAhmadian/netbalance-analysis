@@ -15,7 +15,7 @@ logger = prj_logger.getLogger(__name__)
 model_name = "weighted_mean_degree_ratio"  # Parameter
 dataset = "hmdad"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
-analyse = "hit_k"  # Parameter
+analyse = "start_hit_k"  # Parameter
 num_cross_validation = 5  # Parameter
 num_negative_sampling = 1  # Parameter
 
