@@ -19,6 +19,20 @@ def cluster_barplot(
     y_offset: float = 0.1,
     per_page_length: float = 14,
 ):
+    """This function plots a bar plot for each node in the cluster.
+
+    Args:
+        arr (np.ndarray): Array of values to plot.
+        node_names (list): List of node names.
+        figs_folder (str): Folder to save the figure.
+        figure_name (str): Name of the figure.
+        cluster_name (str): Name of the cluster.
+        per_page_num (int, optional): Number of nodes to plot per page. Defaults to 50.
+        sorted (bool, optional): If True, the nodes are sorted by the values. Defaults to False.
+        color (str, optional): Color of the bars. Defaults to "red".
+        y_offset (float, optional): Offset for the y-axis. Defaults to 0.1.
+        per_page_length (float, optional): Length of the figure. Defaults to 14.
+    """
     num_pages = math.ceil(len(arr) / per_page_num)
     fig, axs = plt.subplots(num_pages, 1, figsize=(per_page_length, 5 * num_pages))
 
@@ -74,6 +88,17 @@ def plot_per_group_associations(
     c_pos: str,
     c_neg: str,
 ) -> None:
+    """This function plots the number of positive and negative associations per each node in the cluster.
+
+    Args:
+        figs_folder (Union[str]): Folder to save the figure.
+        node_names (list): List of node names.
+        cluster_name (str): Name of the cluster.
+        num_list (list): List of number of associations. (len(node_names) * 1)
+        num_pos_list (list): List of number of positive associations. (len(node_names) * 1)
+        c_pos (str): Color for the positive associations.
+        c_neg (str): Color for the negative associations.
+    """
     per_page_num = 50
     num_pages = math.ceil(len(num_list) / per_page_num)
     fig, axs = plt.subplots(num_pages, 1, figsize=(14, 5 * num_pages))
@@ -151,6 +176,26 @@ def plot_x_vs_y_dist(
     fig_height: float = 8,
     violon_width: float = 0.03,
 ):
+    """This function plots a line and its distribution in x_list using violin plot.
+
+    Args:
+        y_list (Union[List[float], np.ndarray]): List of y values.
+        y_list_list (Union[List[List[float]], np.ndarray]): (len = len(x_list) * p) List of lists of y values. Each list will be plotted as a violin plot.
+        x_list (Union[List[float], np.ndarray]): List of x values.
+        figs_folder (str): Folder to save the figure.
+        cold_color (str): Color for the lines.
+        warm_color (str): Color for the violin plot.
+        x_name (str, optional): x-axis label. Defaults to "Entropy".
+        y_name (str, optional): y-axis label. Defaults to "AUC".
+        title (str, optional): Title of the plot. Defaults to "".
+        xlim_left (float, optional): Left limit of x-axis. Defaults to -0.1.
+        xlim_right (float, optional): Right limit of x-axis. Defaults to 1.1.
+        ylim_up (float, optional): Upper limit of y-axis. Defaults to 1.0.
+        ylim_down (float, optional): Lower limit of y-axis. Defaults to 0.4.
+        fig_width (float, optional): Width of the figure. Defaults to 10.
+        fig_height (float, optional): Height of the figure. Defaults to 8.
+        violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
+    """
     fig, axe = plt.subplots(figsize=(fig_width, fig_height))
     axe.plot(x_list, y_list, color=cold_color, marker="o")
 
@@ -208,6 +253,27 @@ def plot_xs_vs_y_dist(
     violon_width: float = 0.03,
     seed: int = 42,
 ):
+    """This function plots different lines which are in y_list_list and their distribution in x_list using violin plot.
+
+    Args:
+        y_list_list (Union[List[List[float]], np.ndarray]): (len = p * len(x_list))List of lists of y values. Each list is a line.
+        x_list (Union[List[float], np.ndarray]): List of x values.
+        figs_folder (str): Folder to save the figure.
+        cold_color (str): Color for the lines.
+        warm_color (str): Color for the violin plot.
+        max_y_plot (Union[None, int], optional): Maximum number of lines to plot. Defaults to None. If None, all lines are plotted.
+        x_name (str, optional): x-axis label. Defaults to "Entropy".
+        y_name (str, optional): y-axis label. Defaults to "AUC".
+        title (str, optional): Title of the plot. Defaults to "".
+        xlim_left (float, optional): Left limit of x-axis. Defaults to -0.1.
+        xlim_right (float, optional): Right limit of x-axis. Defaults to 1.1.
+        ylim_up (float, optional): Upper limit of y-axis. Defaults to 1.0.
+        ylim_down (float, optional): Lower limit of y-axis. Defaults to 0.4.
+        fig_width (float, optional): Width of the figure. Defaults to 10.
+        fig_height (float, optional): Height of the figure. Defaults to 8.
+        violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
+        seed (int, optional): Seed for random sampling. Defaults to 42.
+    """
     if max_y_plot is None:
         max_y_plot = len(y_list_list)
 
