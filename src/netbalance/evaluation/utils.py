@@ -57,7 +57,7 @@ def evaluate_binary_classification(
     _calc_hit_k_scores(data, y_predict, result)
     node_a_sorted_indices = _calc_avg_rank(data, y_predict, result)
     result.sorted_edges = data.associations[node_a_sorted_indices]
-    _calc_edge_related(data, result)
+    # _calc_edge_related(data, result)
     _calc_strat_avg_rank(data, y_predict, result)
     _calc_strat_hit_k(data, y_predict, result)
 

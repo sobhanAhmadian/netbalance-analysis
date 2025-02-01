@@ -175,6 +175,7 @@ def plot_x_vs_y_dist(
     fig_width: float = 10,
     fig_height: float = 8,
     violon_width: float = 0.03,
+    max_k: Union[None, int] = None,
 ):
     """This function plots a line and its distribution in x_list using violin plot.
 
@@ -195,13 +196,17 @@ def plot_x_vs_y_dist(
         fig_width (float, optional): Width of the figure. Defaults to 10.
         fig_height (float, optional): Height of the figure. Defaults to 8.
         violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
+        max_k (Union[None, int], optional): Maximum number of points to plot. Defaults to None. If None, all k points are plotted.
     """
+    if max_k is None:
+        max_k = len(x_list)
+
     fig, axe = plt.subplots(figsize=(fig_width, fig_height))
-    axe.plot(x_list, y_list, color=cold_color, marker="o")
+    axe.plot(x_list[:max_k], y_list[:max_k], color=cold_color, marker="o")
 
     violins = axe.violinplot(
-        y_list_list,
-        positions=x_list,
+        y_list_list[:max_k],
+        positions=x_list[:max_k],
         widths=violon_width,
         showmeans=False,
         showextrema=True,
@@ -251,6 +256,7 @@ def plot_xs_vs_y_dist(
     fig_width: float = 10,
     fig_height: float = 8,
     violon_width: float = 0.03,
+    max_k: Union[None, int] = None,
     seed: int = 42,
 ):
     """This function plots different lines which are in y_list_list and their distribution in x_list using violin plot.
@@ -273,7 +279,14 @@ def plot_xs_vs_y_dist(
         fig_height (float, optional): Height of the figure. Defaults to 8.
         violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
         seed (int, optional): Seed for random sampling. Defaults to 42.
+        max_k (Union[None, int], optional): Maximum number of points to plot. Defaults to None. If None, all k points are plotted.
     """
+    if max_k is None:
+        max_k = len(x_list)
+
+    x_list = x_list[:max_k]
+    y_list_list = [y_list[:max_k] for y_list in y_list_list]
+
     if max_y_plot is None:
         max_y_plot = len(y_list_list)
 
