@@ -1,4 +1,5 @@
 import os
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -6,6 +7,7 @@ from scipy import stats
 
 from netbalance.configs import RESULTS_DIR_DICT
 from netbalance.configs.common import RESULTS_DIR
+from netbalance.evaluation.result import BGCCrossValidationResult
 
 from .logger import logging as prj_logger
 
@@ -20,7 +22,20 @@ def _prepare_result(result, model_name):
     return pd.DataFrame(new_result)
 
 
-def save_results(
+def _get_aucs_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    aucs_results_dir = f"{base_dir}/aucs/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        aucs_results_dir += f"_{key}_{value}"
+    return aucs_results_dir
+
+
+def _process_results_temp(
     cv_result, model_name, dataset, expr_serie, analyse_name, negative_ratio=None
 ):
 
@@ -48,30 +63,31 @@ def save_results(
         result_df.to_csv(file_path, index=False)
 
 
-def save_auc_of_cv_folds(cv_result, dir_path, filename):
-    auc_list = [result.auc for result in cv_result.fold_results]
+def _save_auc_of_cv_folds(
+    results: BGCCrossValidationResult, dir_path: str, filename: str
+):
+    auc_list = [result.auc for result in results.fold_results]
     auc_arr = np.array(auc_list)
     np.savetxt(f"{dir_path}/{filename}", auc_arr, delimiter=",")
+    print(f"\nSaved auc list to {dir_path}/{filename}")
 
 
 def get_auc_of_cv_folds(
-    model_name,
+    result_dir,
     dataset,
-    expr_serie,
-    analysis_name="5_fold",
-    num_neg=100,
-    num_cv=10,
-    negative_ratio=None,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
 ):
-    dir_path = RESULTS_DIR_DICT[model_name]
-    file_name = (
-        f"list_auc_{analysis_name}_num_neg_{num_neg}_num_cv_{num_cv}_nr_{negative_ratio}.csv"
-        if negative_ratio
-        else f"list_auc_{analysis_name}_num_neg_{num_neg}_num_cv_{num_cv}.csv"
+    dir_path = _get_aucs_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
     )
-    auc_arr = np.loadtxt(
-        f"{dir_path}/{dataset}/{expr_serie}/{file_name}", delimiter=","
-    )
+    file_name = f"{dir_path}/aucs.txt"
+    auc_arr = np.loadtxt(file_name, delimiter=",")
     return auc_arr
 
 
@@ -142,7 +158,6 @@ def save_all_results_for_expr(
     num_cross_validation,
     negative_ratio=None,
 ):
-
     model_figs_folder = f"result_figs/{model_name}"
     auc_result_folder = f"{model_result_dir}/{dataset}/{expr_serie}"
 
@@ -160,13 +175,13 @@ def save_all_results_for_expr(
         if negative_ratio
         else f"list_auc_{analyse_name}_num_neg_{num_negative_sampling}_num_cv_{num_cross_validation}.csv"
     )
-    save_auc_of_cv_folds(
+    _save_auc_of_cv_folds(
         general_cv_result,
         auc_result_folder,
         file_name,
     )
 
-    save_results(
+    _process_results_temp(
         cv_result=general_cv_result,
         model_name=model_name,
         dataset=dataset,
@@ -174,3 +189,27 @@ def save_all_results_for_expr(
         analyse_name=analyse_name,
         negative_ratio=negative_ratio,
     )
+
+
+def process_results(
+    results: BGCCrossValidationResult,
+    result_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: str,
+):
+    # Print Average Results
+    print("\nAverage Results:")
+    print(results.result.get_result())
+
+    # Save Fold AUCs
+    aucs_results_dir = _get_aucs_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    os.makedirs(aucs_results_dir, exist_ok=True)
+    _save_auc_of_cv_folds(results, aucs_results_dir, filename="aucs.txt")
