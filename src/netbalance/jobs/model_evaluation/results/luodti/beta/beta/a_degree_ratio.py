@@ -6,6 +6,7 @@ from netbalance.configs.a_degree_ratio import (
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
+from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
@@ -45,5 +46,11 @@ results = get_result_of_rcv(
     dataset_name=dataset,
 )
 
-# TODO
-print(results.result.get_result())
+process_results(
+    results=results,
+    result_dir=RESULTS_DIR,
+    dataset=dataset,
+    train_balance_method=train_neg_samp_method,
+    test_balance_method=test_balance_method,
+    test_balance_kwargs=test_balance_kwargs,
+)

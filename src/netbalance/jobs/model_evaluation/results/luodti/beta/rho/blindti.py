@@ -1,8 +1,6 @@
 import os
 
-from netbalance.configs.weighted_mean_degree_ratio import (
-    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,
-)  # Parameter
+from netbalance.configs.blindti import BLINDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
@@ -10,7 +8,7 @@ from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
-model_name = "weighted_mean_degree_ratio"  # Parameter
+model_name = "blindti"  # Parameter
 dataset = "luodti"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 

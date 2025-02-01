@@ -1,11 +1,10 @@
 import os
 
-from netbalance.configs.bmlpdti import (
-    BMLPDTI_RESULTS_DIR as RESULTS_DIR,
-)  # Parameter
+from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
+from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
@@ -24,7 +23,7 @@ test_balance_kwargs = {
 }  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 num_negative_sampling = 5  # Parameter
 
 model_result_dir = os.path.join(
@@ -35,7 +34,7 @@ model_result_dir = os.path.join(
 )
 
 logger.info(
-    f">>>>>>>>>>>>>>>>> Job: Model Evaluation - Results - {dataset} - {model_name} - {train_neg_samp_method} - {test_balance_method}"
+    f">>>>>>>>>>>>>>>>> Job: Model Evaluation - Results - {dataset} - {model_name} - {train_neg_samp_method}"
 )
 
 ds = Dataset()
@@ -52,5 +51,11 @@ results = get_result_of_rcv(
     dataset_name=dataset,
 )
 
-# TODO
-print(results.result.get_result())
+process_results(
+    results=results,
+    result_dir=RESULTS_DIR,
+    dataset=dataset,
+    train_balance_method=train_neg_samp_method,
+    test_balance_method=test_balance_method,
+    test_balance_kwargs=test_balance_kwargs,
+)
