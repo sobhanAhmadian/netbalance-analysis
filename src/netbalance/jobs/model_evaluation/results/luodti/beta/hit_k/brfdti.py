@@ -57,7 +57,7 @@ results = get_result_of_rcv(
 
 hit_k_list = results.result.hit_k_list
 hit_k_accuracy_list = results.result.hit_k_accuracy_list
-max_k = min(len(hit_k_list), 100)
+max_k = min(len(hit_k_list), 30)
 hit_k_accuracy_list_list = []
 for i in range(len(hit_k_list)):
     temp = []
@@ -73,12 +73,10 @@ plot_x_vs_y_dist(
     figs_folder=figs_folder,
     cold_color=cold_color2,
     warm_color=warm_color1,
-    xlim_left=-1,
-    xlim_right=max_k + 1,
     ylim_down=-0.1,
     ylim_up=1.1,
-    fig_width=40,
-    violon_width=0.5,
+    fig_width=20,
+    fig_height=6,
     x_name="K",
     y_name="Hit@K Accuracy",
     title=f"{model_name.upper()} Hit@K Accuracy Distribution",
@@ -92,15 +90,13 @@ plot_xs_vs_y_dist(
     figs_folder=figs_folder,
     cold_color=cold_color2,
     warm_color=warm_color1,
-    xlim_left=-1,
-    xlim_right=max_k + 1,
     ylim_down=-0.1,
     ylim_up=1.1,
-    fig_width=40,
-    violon_width=0.5,
+    fig_width=20,
+    fig_height=6,
     x_name="K",
     y_name="Hit@K Accuracy",
     title=f"{model_name.upper()} Hit@K Accuracy Distribution",
     max_k=max_k,
-    seed=49,
+    seed=0,
 )

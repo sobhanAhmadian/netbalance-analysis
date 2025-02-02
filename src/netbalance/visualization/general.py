@@ -185,13 +185,13 @@ def plot_x_vs_y_dist(
     x_name: str = "Entropy",
     y_name: str = "AUC",
     title: str = "",
-    xlim_left: float = -0.1,
-    xlim_right: float = 1.1,
+    xlim_left: Union[float, None] = None,
+    xlim_right: Union[float, None] = None,
     ylim_up: float = 1.0,
     ylim_down: float = 0.4,
     fig_width: float = 10,
     fig_height: float = 8,
-    violon_width: float = 0.03,
+    violon_width: Union[float, None] = None,
     max_k: Union[None, int] = None,
 ):
     """This function plots a line and its distribution in x_list using violin plot.
@@ -206,24 +206,51 @@ def plot_x_vs_y_dist(
         x_name (str, optional): x-axis label. Defaults to "Entropy".
         y_name (str, optional): y-axis label. Defaults to "AUC".
         title (str, optional): Title of the plot. Defaults to "".
-        xlim_left (float, optional): Left limit of x-axis. Defaults to -0.1.
-        xlim_right (float, optional): Right limit of x-axis. Defaults to 1.1.
+        xlim_left (Union[float, None], optional): Left limit of x-axis. Defaults to None.
+            If None, the first element of x_list is used.
+        xlim_right (Union[float, None], optional): Right limit of x-axis. Defaults to None.
+            If None, the last element of x_list is used.
         ylim_up (float, optional): Upper limit of y-axis. Defaults to 1.0.
         ylim_down (float, optional): Lower limit of y-axis. Defaults to 0.4.
         fig_width (float, optional): Width of the figure. Defaults to 10.
         fig_height (float, optional): Height of the figure. Defaults to 8.
-        violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
+        violon_width (Union[float, None], optional): Width of the violin plot. Defaults to None.
+            If None, it is calculated based on the number of points.
         max_k (Union[None, int], optional): Maximum number of points to plot. Defaults to None. If None, all k points are plotted.
     """
     if max_k is None:
         max_k = len(x_list)
 
+    y_list_temp = []
+    x_list_temp = []
+    y_list_list_temp = []
+    gap = int(len(x_list) / max_k)
+    if gap == 0:
+        gap = 1
+
+    if violon_width is None:
+        violon_width = gap / 2
+
+    for i in range(max_k):
+        x_list_temp.append(x_list[gap * i])
+        y_list_temp.append(y_list[gap * i])
+        y_list_list_temp.append(y_list_list[gap * i])
+
+    x_list = x_list_temp
+    y_list = y_list_temp
+    y_list_list = y_list_list_temp
+
+    if xlim_left is None:
+        xlim_left = x_list[0] - gap
+    if xlim_right is None:
+        xlim_right = x_list[-1] + gap
+
     fig, axe = plt.subplots(figsize=(fig_width, fig_height))
-    axe.plot(x_list[:max_k], y_list[:max_k], color=cold_color, marker="o")
+    axe.plot(x_list, y_list, color=cold_color, marker="o")
 
     violins = axe.violinplot(
-        y_list_list[:max_k],
-        positions=x_list[:max_k],
+        y_list_list,
+        positions=x_list,
         widths=violon_width,
         showmeans=False,
         showextrema=True,
@@ -240,11 +267,13 @@ def plot_x_vs_y_dist(
     violins["cmaxes"].set_color(cold_color)
 
     # Set plot properties
-    axe.set_xlabel(x_name)
-    axe.set_ylabel(y_name)
-    axe.set_title(title)
+    axe.set_xlabel(x_name, fontweight="bold")
+    axe.set_ylabel(y_name, fontweight="bold")
+    axe.set_title(title, fontweight="bold")
     axe.set_xlim([xlim_left, xlim_right])
     axe.set_ylim([ylim_down, ylim_up])
+    axe.set_xticks(x_list)
+    axe.set_xticklabels(x_list)
 
     # Add grid and legend
     axe.grid(axis="y", linestyle="--", alpha=0.7)
@@ -266,13 +295,13 @@ def plot_xs_vs_y_dist(
     x_name: str = "Entropy",
     y_name: str = "AUC",
     title: str = "",
-    xlim_left: float = -0.1,
-    xlim_right: float = 1.1,
+    xlim_left: Union[float, None] = None,
+    xlim_right: Union[float, None] = None,
     ylim_up: float = 1.0,
     ylim_down: float = 0.4,
     fig_width: float = 10,
     fig_height: float = 8,
-    violon_width: float = 0.03,
+    violon_width: Union[float, None] = None,
     max_k: Union[None, int] = None,
     seed: int = 42,
 ):
@@ -288,24 +317,47 @@ def plot_xs_vs_y_dist(
         x_name (str, optional): x-axis label. Defaults to "Entropy".
         y_name (str, optional): y-axis label. Defaults to "AUC".
         title (str, optional): Title of the plot. Defaults to "".
-        xlim_left (float, optional): Left limit of x-axis. Defaults to -0.1.
-        xlim_right (float, optional): Right limit of x-axis. Defaults to 1.1.
+        xlim_left (Union[float, None], optional): Left limit of x-axis. Defaults to None.
+            If None, the first element of x_list is used.
+        xlim_right  (Union[float, None], optional): Right limit of x-axis. Defaults to None.
+            If None, the last element of x_list is used.
         ylim_up (float, optional): Upper limit of y-axis. Defaults to 1.0.
         ylim_down (float, optional): Lower limit of y-axis. Defaults to 0.4.
         fig_width (float, optional): Width of the figure. Defaults to 10.
         fig_height (float, optional): Height of the figure. Defaults to 8.
-        violon_width (float, optional): Width of the violin plot. Defaults to 0.03.
+        violon_width (Union[float, None], optional): Width of the violin plot. Defaults to None.
+            If None, it is calculated based on the number of points.
         seed (int, optional): Seed for random sampling. Defaults to 42.
         max_k (Union[None, int], optional): Maximum number of points to plot. Defaults to None. If None, all k points are plotted.
     """
     if max_k is None:
         max_k = len(x_list)
 
-    x_list = x_list[:max_k]
-    y_list_list = [y_list[:max_k] for y_list in y_list_list]
+    x_list_temp = []
+    y_list_list_temp = []
+    gap = int(len(x_list) / max_k)
+    if gap == 0:
+        gap = 1
+
+    if violon_width is None:
+        violon_width = gap / 2
+
+    for i in range(max_k):
+        x_list_temp.append(x_list[gap * i])
+        for y_list in y_list_list:
+            y_list_temp = [y_list[gap * k] for k in range(max_k)]
+            y_list_list_temp.append(y_list_temp)
+
+    x_list = x_list_temp
+    y_list_list = y_list_list_temp
 
     if max_y_plot is None:
         max_y_plot = len(y_list_list)
+
+    if xlim_left is None:
+        xlim_left = x_list[0] - gap
+    if xlim_right is None:
+        xlim_right = x_list[-1] + gap
 
     fig, axe = plt.subplots(figsize=(fig_width, fig_height))
 
@@ -346,6 +398,8 @@ def plot_xs_vs_y_dist(
     axe.set_title(title, fontweight="bold")
     axe.set_xlim([xlim_left, xlim_right])
     axe.set_ylim([ylim_down, ylim_up])
+    axe.set_xticks(x_list)
+    axe.set_xticklabels(x_list)
 
     # Add grid and legend
     axe.grid(axis="y", linestyle="--", alpha=0.7)
