@@ -20,7 +20,7 @@ logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "irho"  # Parameter
+train_neg_samp_method = "ibeta"  # Parameter
 
 num_cross_validation = 1  # Parameter
 
@@ -52,15 +52,8 @@ model_config.input_dim = len(ds.get_cluster_a_node_names()) + len(
 model_config.hidden_dim = 64
 
 optimizer_config = OptimizerConfig()  # Parameter
-optimizer_config.i_balance_method = "rho"
-optimizer_config.i_balance_kwargs = {
-    "max_iter": 100000,
-    "delta": 0.1,
-    "cooling_rate": 0.99,
-    "initial_temp": 40.0,
-    "ent_desired": 1.0,
-    "shrinkage": 1.0,
-}
+optimizer_config.i_balance_method = "beta"
+optimizer_config.i_balance_kwargs = {}
 optimizer_config.i_negative_ratio = 1.0
 optimizer_config.fair = True
 optimizer_config.n_epoch = 600

@@ -24,6 +24,7 @@ def hash_numpy_array(arr):
     hash_obj = hashlib.sha256(arr_bytes)  # Compute hash
     return hash_obj.hexdigest()  # Return as hexadecimal string
 
+
 logger = prj_logger.getLogger(__name__)
 
 
@@ -89,18 +90,20 @@ class BalanceBMLPDTITrainer(Trainer):
         e_config.n_epoch = 1
 
         for e in range(config.n_epoch):
-            num_bal = e % 3
-            save_name = f"irho_bmlpdti/{hash_associations}_{num_bal}"
-            
+            num_bal = e % 30
+            save_name = (
+                f"i{config.i_balance_method}_bmlpdti/{hash_associations}_{num_bal}"
+            )
+
             e_data = copy.deepcopy(data)
             e_data.balance_data(
-                balance_method=config.irho_balance_method,
-                negative_ratio=config.irho_negative_ratio,
-                seed=e,
+                balance_method=config.i_balance_method,
+                negative_ratio=config.i_negative_ratio,
+                seed=num_bal,
                 save_name=save_name,
-                **config.irho_balance_kwargs,
+                **config.i_balance_kwargs,
             )
-            logger.info(f"balanced data with {config.irho_balance_method} in epoch {e}")
+            logger.info(f"balanced data with {config.i_balance_method} in epoch {e}")
 
             associations = e_data.associations
             dp_embed = model_handler.fe.extract_features(
@@ -117,9 +120,13 @@ class BalanceBMLPDTITrainer(Trainer):
 
         ###########################################################
 
-        preds = model_handler.predict(
-            a_nodes=data.associations[:, 0], b_nodes=data.associations[:, 1]
-        )
+        test_batch_size = 1000
+        preds = np.zeros(data.associations.shape[0])
+        for j in range(0, data.associations.shape[0], test_batch_size):
+            preds[j : j + test_batch_size] = model_handler.predict(
+                a_nodes=data.associations[j : j + test_batch_size, 0],
+                b_nodes=data.associations[j : j + test_batch_size, 1],
+            )
         result = evaluate_binary_classification_simple(
             data.associations[:, 2], preds.reshape(-1), config.threshold
         )
