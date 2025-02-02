@@ -27,6 +27,7 @@ def analyse_datasest(
     test_balance_negative_ratio: float = 1.0,
     c_pos: str = "#a2d2ff",
     c_neg: str = "#ffafcc",
+    summary_size: int = 40,
 ) -> None:
     """Analyse the dataset.
     This function will print and plot the statistics of the dataset including entropy, pairwise average similarity, and per node stats.
@@ -43,6 +44,7 @@ def analyse_datasest(
         test_balance_negative_ratio (float, optional): The negative ratio. Defaults to 1.0.
         c_pos (str, optional): Color for positive edges. Defaults to "#a2d2ff".
         c_neg (str, optional): Color for negative edges. Defaults to "#ffafcc".
+        summary_size (int, optional): The number of nodes to show in the summary plot. Defaults to 40.
     """
     if not os.path.exists(figs_folder):
         os.makedirs(figs_folder, exist_ok=True)
@@ -102,6 +104,30 @@ def analyse_datasest(
         num_pos_list=test_stats["b"]["num_pos"],
         c_pos=c_pos,
         c_neg=c_neg,
+    )
+
+    print("\n>> Cluster A Per Node Stats (Summary)")
+    plot_per_group_associations(
+        figs_folder=figs_folder,
+        node_names=dataset.get_cluster_a_node_names(),
+        cluster_name=dataset.cluster_a_name,
+        num_list=test_stats["a"]["num"],
+        num_pos_list=test_stats["a"]["num_pos"],
+        c_pos=c_pos,
+        c_neg=c_neg,
+        max_k=summary_size,
+    )
+
+    print("\n>> Cluster B Per Node Stats")
+    plot_per_group_associations(
+        figs_folder=figs_folder,
+        node_names=dataset.get_cluster_b_node_names(),
+        cluster_name=dataset.cluster_b_name,
+        num_list=test_stats["b"]["num"],
+        num_pos_list=test_stats["b"]["num_pos"],
+        c_pos=c_pos,
+        c_neg=c_neg,
+        max_k=summary_size,
     )
 
 

@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
+plt.rcParams["font.weight"] = "bold"
+
 
 def cluster_barplot(
     arr: np.ndarray,
@@ -87,6 +89,7 @@ def plot_per_group_associations(
     num_pos_list: list,
     c_pos: str,
     c_neg: str,
+    max_k: Union[None, int] = None,
 ) -> None:
     """This function plots the number of positive and negative associations per each node in the cluster.
 
@@ -98,9 +101,12 @@ def plot_per_group_associations(
         num_pos_list (list): List of number of positive associations. (len(node_names) * 1)
         c_pos (str): Color for the positive associations.
         c_neg (str): Color for the negative associations.
+        max_k (Union[None, int], optional): Maximum number of nodes to plot. Defaults to None. If None, all nodes are plotted.
     """
     per_page_num = 50
-    num_pages = math.ceil(len(num_list) / per_page_num)
+    if max_k is None or max_k > len(num_list):
+        max_k = len(num_list)
+    num_pages = math.ceil(max_k / per_page_num)
     fig, axs = plt.subplots(num_pages, 1, figsize=(14, 5 * num_pages))
 
     if num_pages == 1:
@@ -110,6 +116,17 @@ def plot_per_group_associations(
     sorted_num = np.array(num_list)[sorted_indices]
     sorted_num_pos = np.array(num_pos_list)[sorted_indices]
     sorted_names = np.array(node_names)[sorted_indices]
+
+    gap = int(len(sorted_num) / max_k)
+    if gap == 0:
+        gap = 1
+
+    s_indecies = []
+    for i in range(max_k):
+        s_indecies.append(gap * i)
+    sorted_num = sorted_num[s_indecies]
+    sorted_num_pos = sorted_num_pos[s_indecies]
+    sorted_names = sorted_names[s_indecies]
 
     for page in range(num_pages):
         l = per_page_num * page
@@ -145,17 +162,17 @@ def plot_per_group_associations(
         axs[page].set_ylim(top=max(sorted_num) + 5)
 
         axs[page].set_title(
-            f"Per-{cluster_name.lower()} Number of Associations [{l + 1} - {u}]"
+            f"Per-{cluster_name.lower()} Number of Associations [{l + 1} - {u}]",
+            fontweight="bold",
         )
-        axs[page].set_xlabel(f"{cluster_name.capitalize()} Name")
-        axs[page].set_ylabel("# Associations")
+        axs[page].set_xlabel(f"{cluster_name.capitalize()} Name", fontweight="bold")
+        axs[page].set_ylabel("# Associations", fontweight="bold")
 
     fig.tight_layout()
 
-    plt.savefig(f"{figs_folder}/per_{cluster_name.lower()}_num_associations.pdf")
-    print(
-        f"Figure Saved: {figs_folder}/per_{cluster_name.lower()}_num_associations.pdf"
-    )
+    file_name = f"{figs_folder}/per_{cluster_name.lower()}_num_associations_{max_k}.pdf"
+    plt.savefig(file_name)
+    print(file_name)
 
 
 def plot_x_vs_y_dist(
@@ -324,9 +341,9 @@ def plot_xs_vs_y_dist(
     violins["cmaxes"].set_color(cold_color)
 
     # Set plot properties
-    axe.set_xlabel(x_name)
-    axe.set_ylabel(y_name)
-    axe.set_title(title)
+    axe.set_xlabel(x_name, fontweight="bold")
+    axe.set_ylabel(y_name, fontweight="bold")
+    axe.set_title(title, fontweight="bold")
     axe.set_xlim([xlim_left, xlim_right])
     axe.set_ylim([ylim_down, ylim_up])
 
