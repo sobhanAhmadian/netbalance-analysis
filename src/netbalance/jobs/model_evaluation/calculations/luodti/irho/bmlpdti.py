@@ -49,9 +49,9 @@ model_config.protein_num = len(ds.get_cluster_b_node_names())
 model_config.input_dim = len(ds.get_cluster_a_node_names()) + len(
     ds.get_cluster_b_node_names()
 )
+model_config.hidden_dim = 64
 
 optimizer_config = OptimizerConfig()  # Parameter
-optimizer_config.fair = True
 optimizer_config.irho_balance_method = "rho"
 optimizer_config.irho_balance_kwargs = {
     "max_iter": 100000,
@@ -62,7 +62,9 @@ optimizer_config.irho_balance_kwargs = {
     "shrinkage": 1.0,
 }
 optimizer_config.irho_negative_ratio = 1.0
-optimizer_config.n_epoch = 1
+optimizer_config.fair = True
+optimizer_config.n_epoch = 600
+optimizer_config.lr = 0.001
 
 
 def get_data():

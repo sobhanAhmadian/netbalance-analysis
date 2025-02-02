@@ -1,4 +1,6 @@
 import copy
+import hashlib
+import time
 
 import numpy as np
 import torch
@@ -14,6 +16,13 @@ from netbalance.optimization.simple_pytorch import PytorchTrainer
 from netbalance.utils import get_header_format, prj_logger
 
 from .interface import Trainer
+
+
+def hash_numpy_array(arr):
+    """Hashes a NumPy array using SHA256."""
+    arr_bytes = arr.tobytes()  # Convert to bytes
+    hash_obj = hashlib.sha256(arr_bytes)  # Compute hash
+    return hash_obj.hexdigest()  # Return as hexadecimal string
 
 logger = prj_logger.getLogger(__name__)
 
@@ -73,16 +82,22 @@ class BalanceBMLPDTITrainer(Trainer):
             model_handler.fe.build()
 
         ###########################################################
+        hash_associations = hash_numpy_array(data.associations)
+        logger.info(f"hash of associations: {hash_associations}")
 
         e_config = copy.deepcopy(config)
         e_config.n_epoch = 1
 
         for e in range(config.n_epoch):
+            num_bal = e % 3
+            save_name = f"irho_bmlpdti/{hash_associations}_{num_bal}"
+            
             e_data = copy.deepcopy(data)
             e_data.balance_data(
                 balance_method=config.irho_balance_method,
                 negative_ratio=config.irho_negative_ratio,
                 seed=e,
+                save_name=save_name,
                 **config.irho_balance_kwargs,
             )
             logger.info(f"balanced data with {config.irho_balance_method} in epoch {e}")
