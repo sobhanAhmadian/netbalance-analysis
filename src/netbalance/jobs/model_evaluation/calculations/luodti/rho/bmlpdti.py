@@ -28,7 +28,7 @@ trin_neg_samp_kwargs = {
     "shrinkage": 1.0,
 }  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 
 splitter_kwargs = {
     "k": 5,

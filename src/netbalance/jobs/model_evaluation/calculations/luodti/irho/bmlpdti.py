@@ -22,7 +22,7 @@ model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
 train_neg_samp_method = "irho"  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 
 splitter_kwargs = {
     "k": 5,
@@ -54,7 +54,7 @@ model_config.hidden_dim = 64
 optimizer_config = OptimizerConfig()  # Parameter
 optimizer_config.i_balance_method = "rho"
 optimizer_config.i_balance_kwargs = {
-    "max_iter": 100000,
+    "max_iter": 40000,
     "delta": 0.1,
     "cooling_rate": 0.99,
     "initial_temp": 40.0,
