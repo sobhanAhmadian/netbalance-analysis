@@ -15,6 +15,7 @@ from netbalance.models.bmlpdti import BMLPDTIModelHandler
 from netbalance.optimization.simple_pytorch import PytorchTrainer
 from netbalance.utils import get_header_format, prj_logger
 
+from concurrent.futures import ThreadPoolExecutor
 from .interface import Trainer
 
 
@@ -88,9 +89,29 @@ class BalanceBMLPDTITrainer(Trainer):
 
         e_config = copy.deepcopy(config)
         e_config.n_epoch = 1
+        
+        def task(num_bal):
+            save_name = (
+                f"i{config.i_balance_method}_bmlpdti/{hash_associations}_{num_bal}"
+            )
+            logger.info(f"Parallel balancing data with {config.i_balance_method} in epoch {num_bal}")
+            e_data = copy.deepcopy(data)
+            e_data.balance_data(
+                balance_method=config.i_balance_method,
+                negative_ratio=config.i_negative_ratio,
+                seed=num_bal,
+                save_name=save_name,
+                **config.i_balance_kwargs,
+            )
+            logger.info(f"balanced data with {config.i_balance_method} in epoch {e}")
+
+        # Multi thread run tasks for num_bal in range 1 to 20
+        with ThreadPoolExecutor(max_workers=30) as executor:
+            executor.map(task, range(0, 20))
+            
 
         for e in range(config.n_epoch):
-            num_bal = e % 30
+            num_bal = e % 20
             save_name = (
                 f"i{config.i_balance_method}_bmlpdti/{hash_associations}_{num_bal}"
             )
