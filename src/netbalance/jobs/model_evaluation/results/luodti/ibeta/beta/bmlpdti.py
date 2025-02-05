@@ -17,7 +17,7 @@ test_balance_method = "beta"  # Parameter
 test_balance_kwargs = {}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 num_negative_sampling = 5  # Parameter
 
 model_result_dir = os.path.join(
@@ -47,4 +47,3 @@ results = get_result_of_rcv(
 
 # TODO
 print(results.result.get_result())
-print([r.auc for r in results.fold_results])

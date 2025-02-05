@@ -11,7 +11,7 @@ logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "ibeta"  # Parameter
+train_neg_samp_method = "rho"  # Parameter
 
 test_balance_method = "rho"  # Parameter
 test_balance_kwargs = {
