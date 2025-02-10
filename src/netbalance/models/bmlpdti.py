@@ -12,6 +12,7 @@ from netbalance.configs.midti import MIDTI_PROCESSED_DATA_DIR
 from netbalance.methods import FeatureExtractor
 from netbalance.models.modules.simple_mlp import SimpleMLP
 from netbalance.utils import prj_logger
+from torch import sigmoid
 
 from .interface import BGCModelHandler, HandlerFactory
 
@@ -236,7 +237,7 @@ class BMLPDTIModelHandler(BGCModelHandler):
     ):
         dp_embedd = self.fe.extract_features(a_nodes, b_nodes).numpy()
         dp_embedd = torch.tensor(dp_embedd).to(self.model_config.device)
-        preds = self.model(dp_embedd).flatten().cpu().detach().numpy()
+        preds = sigmoid(self.model(dp_embedd).flatten()).cpu().detach().numpy()
         return preds
 
     def summary(self):
