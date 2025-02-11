@@ -7,8 +7,7 @@ from netbalance.configs.bmlpdti import BMLPDTIModelConfig as ModelConfig  # Para
 from netbalance.configs.bmlpdti import (
     BMLPDTIOptimizerConfig as OptimizerConfig,
 )  # Parameter
-from netbalance.data.bipartite_graph_data import BGData, BGTrainTestSpliter
-from netbalance.evaluation import repeated_cross_validation
+from netbalance.data.bipartite_graph_data import BGData
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.bmlpdti import (
     BMLPDTIHandlerFactory as HandlerFactory,
@@ -22,15 +21,7 @@ logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "ibeta_complete"  # Parameter
-
-num_cross_validation = 1  # Parameter
-
-splitter_kwargs = {
-    "k": 5,
-    "train_balance": False,  # Parameter
-    "train_balance_kwargs": {},  # Parameter
-}
+train_neg_samp_method = "irho_complete"  # Parameter
 
 model_result_dir = os.path.join(
     RESULTS_DIR,
@@ -56,7 +47,7 @@ model_config.input_dim = len(ds.get_cluster_a_node_names()) + len(
 model_config.hidden_dim = 64
 
 optimizer_config = OptimizerConfig()  # Parameter
-optimizer_config.i_balance_method = "beta"
+optimizer_config.i_balance_method = "rho"
 optimizer_config.i_balance_kwargs = {
     "max_iter": 40000,
     "delta": 0.1,

@@ -11,7 +11,7 @@ logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "ibeta_complete"  # Parameter
+train_neg_samp_method = "irho_complete"  # Parameter
 
 analyse = "watch hit at k"  # Parameter
 
@@ -35,10 +35,13 @@ cluster_a_node_names = ds.get_cluster_a_node_names()
 cluster_b_node_names = ds.get_cluster_b_node_names()
 a_node_names = [cluster_a_node_names[i] for i in df.iloc[:, 0]]
 b_node_names = [cluster_b_node_names[i] for i in df.iloc[:, 1]]
-df['Drug'] = a_node_names
+df["Drug"] = a_node_names
 df["Target"] = b_node_names
 
 zero_df = df.loc[df.iloc[:, 2] == 0]
 zero_df = zero_df.sort_values(by=["Score"], ascending=False)
 
-print(zero_df.head(10))
+zero_df.to_csv(
+    "/Users/sobhan.ahmadian.moghadam/PycharmProjects/netbalance/src/netbalance/data_repository/results/zero_df.csv",
+    index=False,
+)
