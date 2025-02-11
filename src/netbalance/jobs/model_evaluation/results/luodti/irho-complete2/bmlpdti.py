@@ -6,12 +6,13 @@ from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR as RESULTS_DIR  # Par
 from netbalance.configs.common import RESULTS_DIR as COMMON_RESULTS_DIR
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
+import glob
 
 logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpdti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "irho_complete"  # Parameter
+train_neg_samp_method = "irho"  # Parameter
 
 analyse = "watch hit at k"  # Parameter
 
@@ -28,8 +29,11 @@ model_result_dir = os.path.join(
 
 ds = Dataset()
 
-preds_file = os.path.join(model_result_dir, f"preds.csv")
-df = pd.read_csv(preds_file)
+csv_files = glob.glob(f"{model_result_dir}/cv_1/*.csv")  # Replace with the actual path
+df = pd.concat((pd.read_csv(file) for file in csv_files), ignore_index=True)
+
+# preds_file = os.path.join(model_result_dir, f"preds.csv")
+# df = pd.read_csv(preds_file)
 
 cluster_a_node_names = ds.get_cluster_a_node_names()
 cluster_b_node_names = ds.get_cluster_b_node_names()
@@ -48,10 +52,10 @@ df["Protein_Pos"] = [counts.get(p, 0) for p in b_node_names]
 zero_df = df.loc[df.iloc[:, 2] == 0]
 zero_df = zero_df.sort_values(by=["Score"], ascending=False)
 
-# zero_df.to_csv(
-#     "/Users/sobhan.ahmadian.moghadam/PycharmProjects/netbalance/src/netbalance/data_repository/results/zero_df.csv",
-#     index=False,
-# )
+zero_df.to_csv(
+    "/Users/sobhan.ahmadian.moghadam/PycharmProjects/netbalance/src/netbalance/data_repository/results/zero_df_2.csv",
+    index=False,
+)
 
 # zero_df = zero_df.loc[zero_df.iloc[:, 4] == "DB00674"]
 
