@@ -106,7 +106,7 @@ class BalanceBMLPDTITrainer(Trainer):
             logger.info(f"balanced data with {config.i_balance_method} in epoch {e}")
 
         # Multi thread run tasks for num_bal in range 1 to 20
-        with ThreadPoolExecutor(max_workers=30) as executor:
+        with ThreadPoolExecutor(max_workers=5) as executor:
             executor.map(task, range(0, 20))
             
 
