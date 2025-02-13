@@ -273,7 +273,7 @@ def plot_x_vs_y_dist(
     axe.set_xlim([xlim_left, xlim_right])
     axe.set_ylim([ylim_down, ylim_up])
     axe.set_xticks(x_list)
-    axe.set_xticklabels(x_list)
+    axe.set_xticklabels([round(x, 2) for x in x_list])
 
     # Add grid and legend
     axe.grid(axis="y", linestyle="--", alpha=0.7)
