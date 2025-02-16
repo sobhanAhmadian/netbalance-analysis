@@ -1,7 +1,7 @@
 import os
 
 from netbalance.configs import cold_color2, warm_color1
-from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
+from netbalance.configs.fmidti import FMIDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.configs.common import RESULTS_DIR as COMMON_RESULTS_DIR
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.evaluation.utils import rho_hit_k_analyse
@@ -10,17 +10,28 @@ from netbalance.utils import prj_logger
 
 logger = prj_logger.getLogger(__name__)
 
-model_name = "bmlpdti"  # Parameter
+model_name = "fmidti"  # Parameter
 dataset = "luodti"  # Parameter
-train_neg_samp_method = "irho"  # Parameter
+train_neg_samp_method = "beta"  # Parameter
 
-test_balance_method = "beta"  # Parameter
-test_balance_kwargs = {}  # Parameter
+test_balance_method = "rho"  # Parameter
+test_balance_kwargs = {
+    "max_iter": 100000,
+    "delta": 0.1,
+    "cooling_rate": 0.99,
+    "initial_temp": 40.0,
+    "ent_desired": 1.0,
+    "shrinkage": 1.0,
+}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
 analyse = "rho_hit_k"  # Parameter
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 num_negative_sampling = 5  # Parameter
+
+logger.info(
+    f">>>>>>>>>>>>>>>>> Job: Model Evaluation - Results - {dataset} - {model_name} - {train_neg_samp_method} - {analyse}"
+)
 
 model_result_dir = os.path.join(
     RESULTS_DIR,
@@ -49,10 +60,6 @@ figs_folder = os.path.join(
 
 if not os.path.exists(figs_folder):
     os.makedirs(figs_folder, exist_ok=True)
-
-logger.info(
-    f">>>>>>>>>>>>>>>>> Job: Model Evaluation - Results - {dataset} - {model_name} - {train_neg_samp_method} - {test_balance_method}"
-)
 
 ds = Dataset()
 

@@ -4,9 +4,9 @@ from netbalance.configs import cold_color2, warm_color1
 from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.configs.common import RESULTS_DIR as COMMON_RESULTS_DIR
 from netbalance.evaluation.general import get_result_of_rcv
+from netbalance.evaluation.utils import rho_hit_k_analyse
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
-from netbalance.visualization import plot_x_vs_y_dist, plot_xs_vs_y_dist
 
 logger = prj_logger.getLogger(__name__)
 
@@ -35,6 +35,14 @@ model_result_dir = os.path.join(
     f"dataset_{dataset}",
     f"train_neg_samp_{train_neg_samp_method}",
 )
+
+save_rho_hit_k_dir = os.path.join(
+    RESULTS_DIR,
+    f"rho_hit_k",
+    f"dataset_{dataset}",
+    f"train_neg_samp_{train_neg_samp_method}",
+)
+os.makedirs(save_rho_hit_k_dir, exist_ok=True)
 
 figs_folder = os.path.join(
     COMMON_RESULTS_DIR,
@@ -67,48 +75,6 @@ results = get_result_of_rcv(
     dataset_name=dataset,
 )
 
-hit_k_list = results.result.hit_k_list
-hit_k_accuracy_list = results.result.hit_k_accuracy_list
-max_k = min(len(hit_k_list), 30)
-hit_k_accuracy_list_list = []
-for i in range(len(hit_k_list)):
-    temp = []
-    for r in results.fold_results:
-        temp.append(r.hit_k_accuracy_list[i])
-    hit_k_accuracy_list_list.append(temp)
-per_fold_hit_k_accuracy_list = [r.hit_k_accuracy_list for r in results.fold_results]
-
-plot_x_vs_y_dist(
-    x_list=hit_k_list,
-    y_list=hit_k_accuracy_list,
-    y_list_list=hit_k_accuracy_list_list,
-    figs_folder=figs_folder,
-    cold_color=cold_color2,
-    warm_color=warm_color1,
-    ylim_down=-0.1,
-    ylim_up=1.1,
-    fig_width=20,
-    fig_height=6,
-    x_name="K",
-    y_name="Hit@K Accuracy",
-    title=f"{model_name.upper()} Hit@K Accuracy Distribution",
-    max_k=max_k,
-)
-
-plot_xs_vs_y_dist(
-    x_list=hit_k_list,
-    y_list_list=per_fold_hit_k_accuracy_list,
-    max_y_plot=4,
-    figs_folder=figs_folder,
-    cold_color=cold_color2,
-    warm_color=warm_color1,
-    ylim_down=-0.1,
-    ylim_up=1.1,
-    fig_width=20,
-    fig_height=6,
-    x_name="K",
-    y_name="Hit@K Accuracy",
-    title=f"{model_name.upper()} Hit@K Accuracy Distribution",
-    max_k=max_k,
-    seed=0,
+rho_hit_k_analyse(
+    model_name, figs_folder, save_rho_hit_k_dir, results, cold_color2, warm_color1
 )

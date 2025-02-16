@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.interpolate as interp
 from sklearn.metrics import (
     accuracy_score,
     auc,
@@ -12,6 +13,7 @@ from sklearn.metrics import (
 
 from netbalance.data.bipartite_graph_data import BGData
 from netbalance.utils import prj_logger
+from netbalance.visualization import plot_x_vs_y_dist
 
 from .result import Result
 
@@ -249,3 +251,61 @@ def evaluate_binary_classification_simple(y_test, y_predict, threshold):
     result.tpr = tpr
 
     return result
+
+
+def rho_hit_k_analyse(
+    model_name, figs_folder, save_rho_hit_k_dir, results, cold_color, warm_color
+):
+    def average_functions(functions, x_common):
+        interpolated_ys = []
+        for x, y in functions:
+            f = interp.interp1d(
+                x, y, kind="linear", bounds_error=False, fill_value="extrapolate"
+            )
+            interpolated_ys.append(f(x_common))
+
+        avg_y = np.mean(interpolated_ys, axis=0)
+        return interpolated_ys, avg_y
+
+    functions = []
+    for r in results.fold_results:
+        temp_hit_k_list = np.array(r.hit_k_list)
+        temp_hit_k_accuracy_list = np.array(r.hit_k_accuracy_list)
+        temp_hit_k_list = temp_hit_k_list / temp_hit_k_list.max()
+        functions.append((temp_hit_k_list, temp_hit_k_accuracy_list))
+
+    x_common = np.linspace(0, 1, 30)
+    interpolated_ys, y_avg = average_functions(functions, x_common)
+
+    per_x_ys = []
+    for i in range(len(x_common)):
+        temp = []
+        for ys in interpolated_ys:
+            temp.append(ys[i])
+        per_x_ys.append(temp)
+
+    max_k = len(x_common)
+
+    plot_x_vs_y_dist(
+        x_list=x_common,
+        y_list=y_avg,
+        y_list_list=per_x_ys,
+        figs_folder=figs_folder,
+        cold_color=cold_color,
+        warm_color=warm_color,
+        ylim_down=-1,
+        ylim_up=2,
+        xlim_left=-0.05,
+        xlim_right=1.05,
+        fig_width=20,
+        fig_height=6,
+        violon_width=1 / max_k / 2,
+        x_name="K",
+        y_name="Hit@K Accuracy",
+        title=f"{model_name.upper()} Hit@K Accuracy Distribution",
+        max_k=max_k,
+    )
+
+    file_name = f"{save_rho_hit_k_dir}/rho_hit_k"
+    np.savetxt(file_name, y_avg, delimiter=",")
+    print(f"\nSaved auc list to {file_name}")
