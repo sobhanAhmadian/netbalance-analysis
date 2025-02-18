@@ -7,7 +7,7 @@ from netbalance.configs.fmidti import FMIDTIModelConfig as ModelConfig  # Parame
 from netbalance.configs.fmidti import (
     FMIDTIOptimizerConfig as OptimizerConfig,
 )  # Parameter
-from netbalance.data.bipartite_graph_data import BGData, BGTrainTestSpliter
+from netbalance.data.association_graph_data import BGData, BGTrainTestSpliter
 from netbalance.evaluation import repeated_cross_validation
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.midti import MIDTIHandlerFactory as HandlerFactory  # Parameter

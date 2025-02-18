@@ -1,7 +1,7 @@
 import numpy as np
 
 from netbalance.configs.bxgbdti import BXGBDTIOptimizerConfig
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_graph_data import BGData
 from netbalance.evaluation import Result
 from netbalance.evaluation.utils import evaluate_binary_classification_simple
 from netbalance.models.bxgbdti import BXGBDTIModelHandler

@@ -1,4 +1,4 @@
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_graph_data import BGData
 from netbalance.evaluation import Result
 from netbalance.evaluation.utils import evaluate_binary_classification_simple
 from netbalance.models.brandom import BRandomModelHandler

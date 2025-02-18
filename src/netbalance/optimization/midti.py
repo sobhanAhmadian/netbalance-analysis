@@ -6,7 +6,7 @@ from torch.nn.utils.clip_grad import clip_grad_norm_
 from torch.optim import SGD
 
 from netbalance.configs.midti import MIDTIOptimizerConfig
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_graph_data import BGData
 from netbalance.evaluation import Result
 from netbalance.evaluation.utils import evaluate_binary_classification_simple
 from netbalance.models.midti import MIDTIModelHandler

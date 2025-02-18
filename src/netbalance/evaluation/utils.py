@@ -11,7 +11,7 @@ from sklearn.metrics import (
     roc_curve,
 )
 
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_graph_data import BGData
 from netbalance.utils import prj_logger
 from netbalance.visualization import plot_x_vs_y_dist
 
