@@ -1,7 +1,7 @@
 import numpy as np
 
 from netbalance.configs.blindti import BLINDTIOptimizerConfig
-from netbalance.data.association_graph_data import BGData
+from netbalance.data.association_data import BGData
 from netbalance.evaluation import Result
 from netbalance.evaluation.utils import evaluate_binary_classification_simple
 from netbalance.models.blindti import BLINDTIModelHandler

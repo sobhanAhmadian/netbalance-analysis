@@ -7,7 +7,7 @@ from netbalance.configs.blindti import BLINDTIModelConfig as ModelConfig  # Para
 from netbalance.configs.blindti import (
     BLINDTIOptimizerConfig as OptimizerConfig,
 )  # Parameter
-from netbalance.data.association_graph_data import BGData, BGTrainTestSpliter
+from netbalance.data.association_data import BGData, BGTrainTestSpliter
 from netbalance.evaluation import repeated_cross_validation
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.blindti import (

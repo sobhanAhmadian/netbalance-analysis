@@ -2,7 +2,7 @@ import os
 
 from netbalance.configs import OptimizerConfig as OptimizerConfig  # Parameter
 from netbalance.configs.brandom import BRANDOM_RESULTS_DIR as RESULTS_DIR  # Parameter
-from netbalance.data.association_graph_data import BGData, BGTrainTestSpliter
+from netbalance.data.association_data import BGData, BGTrainTestSpliter
 from netbalance.evaluation import repeated_cross_validation
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.brandom import (

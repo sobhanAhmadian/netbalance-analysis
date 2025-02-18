@@ -6,7 +6,7 @@ from typing import Callable, List
 import numpy as np
 from tqdm import tqdm
 
-from netbalance.data.association_graph_data import BGData, BGTrainTestSpliter
+from netbalance.data.association_data import BGData, BGTrainTestSpliter
 from netbalance.features.bipartite_graph_dataset import BGDataset
 from netbalance.visualization import plot_per_group_associations
 

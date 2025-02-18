@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from netbalance.configs import OptimizerConfig
 from netbalance.data import TrainTestSplitter
-from netbalance.data.association_graph_data import BGData
+from netbalance.data.association_data import BGData
 from netbalance.models import HandlerFactory
 from netbalance.optimization.interface import Trainer
 from netbalance.utils import get_header_format, prj_logger
