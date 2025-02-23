@@ -1,33 +1,26 @@
 import random
 from abc import ABC, abstractmethod
+from itertools import product
 
 import numpy as np
+
 from netbalance.utils.logger import logging as prj_logger
 
 logger = prj_logger.getLogger(__name__)
 
 
-class BGDataset(ABC):
+class ADataset(ABC):
 
-    def __init__(self, cluster_a_name, cluster_b_name) -> None:
+    def __init__(self, cluster_names) -> None:
         super().__init__()
-        self.cluster_a_name = cluster_a_name
-        self.cluster_b_name = cluster_b_name
+        self.cluster_names = cluster_names
 
     @abstractmethod
-    def get_cluster_a_node_names(self):
+    def get_node_names(self) -> list[list[str]]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_cluster_b_node_names(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_dataset_dir(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_dataset_file_path(self):
+    def get_dataset_file_path(self) -> str:
         raise NotImplementedError
 
     def get_associations(
@@ -35,37 +28,32 @@ class BGDataset(ABC):
         with_negatives=False,
     ):
         """
-        Get all associations between cluster A nodes and cluster B nodes.
+        Get all associations between clusters.
 
         Args:
-            with_negatives (bool, optional): Whether to include negative associations. Defaults to False.
+            with_negatives (bool, optional): Whether to generate all possible negative samples. Default to False.
 
         Returns:
-            numpy.ndarray: Array of associations (n, 3), where columns are:
-                [Cluster A node index, Cluster B node index, 1 for positive/0 for negative].
+            numpy.ndarray: Array of associations (n, num_clusters + 1).
         """
 
         rng = random.Random(0)
 
         dataset_file_path = self.get_dataset_file_path()
-        associations = np.load(dataset_file_path)
-        row_num, col_num = associations.shape
-        logger.info(f"Cluster A and Cluster B sizes: {row_num}, {col_num}")
-        logger.info(f"Positive associations count: {np.sum(associations)}")
+        associations = np.loadtxt(dataset_file_path, delimiter=",", dtype=np.int32).tolist()
 
         # Extract positive samples
-        positive_samples = np.argwhere(associations == 1).tolist()
-        positive_samples = [[i, j, 1] for i, j in positive_samples]
+        positive_samples = [samp for samp in associations if samp[-1] == 1]
+        negative_samples = [samp for samp in associations if samp[-1] == 0]
 
-        if not with_negatives:
-            return np.array(positive_samples, dtype=np.int32)
-
-        negative_samples = [
-            [i, j, 0]
-            for i in range(row_num)
-            for j in range(col_num)
-            if associations[i, j] == 0
-        ]
+        if with_negatives:
+            ranges = [
+                range(len(cluster_node_names))
+                for cluster_node_names in self.get_node_names()
+            ]
+            negative_samples = [list(x) + [0] for x in product(*ranges)]
+            for samp in positive_samples:
+                negative_samples.remove(samp[:-1] + [0])
 
         samples = positive_samples + negative_samples
         rng.shuffle(samples)

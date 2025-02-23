@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 from netbalance.data.association_data import BGData, BGTrainTestSpliter
-from netbalance.features.bipartite_graph_dataset import BGDataset
+from netbalance.features.bipartite_graph_dataset import ADataset
 from netbalance.visualization import plot_per_group_associations
 
 from .logger import logging as prj_logger
@@ -15,8 +15,9 @@ from .logger import logging as prj_logger
 logger = prj_logger.getLogger(__name__)
 
 
+# TODO Generalize BGDataset
 def analyse_datasest(
-    dataset: BGDataset,
+    dataset: ADataset,
     dataset_name: str,
     figs_folder: str,
     num_cross_validation: int,

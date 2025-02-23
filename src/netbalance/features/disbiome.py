@@ -7,16 +7,14 @@ from netbalance.configs.disbiome import (
     DISBIOME_DATASET_FILE,
     DISBIOME_DISEASE_NAMES_FILE,
     DISBIOME_MICROBE_NAMES_FILE,
-    DISBIOME_PROCESSED_DATA_DIR,
     DISBIOME_RAW_DATA_DIR,
 )
-from netbalance.utils import data as data_utils
 from netbalance.utils import prj_logger
 from netbalance.utils.io import json_load
 
 logger = prj_logger.getLogger(__name__)
 
-from .bipartite_graph_dataset import BGDataset
+from netbalance.features.bipartite_graph_dataset import ADataset
 
 
 def _get_table(table_name):
@@ -91,10 +89,13 @@ def process():
     logger.info(f"Associations saved at {DISBIOME_DATASET_FILE}")
 
 
-class DisbiomDataset(BGDataset):
+class DisbiomDataset(ADataset):
 
     def __init__(self) -> None:
-        super().__init__("microbe", "disease")
+        super().__init__(["microbe", "disease"])
+
+    def get_node_names(self):
+        return [self.get_cluster_a_node_names(), self.get_cluster_b_node_names()]
 
     def get_cluster_a_node_names(self):
         names = pd.read_csv(DISBIOME_MICROBE_NAMES_FILE)
@@ -103,9 +104,6 @@ class DisbiomDataset(BGDataset):
     def get_cluster_b_node_names(self):
         names = pd.read_csv(DISBIOME_DISEASE_NAMES_FILE)
         return list(names.iloc[:, 1])
-
-    def get_dataset_dir(self):
-        return DISBIOME_PROCESSED_DATA_DIR
 
     def get_dataset_file_path(self):
         return DISBIOME_DATASET_FILE

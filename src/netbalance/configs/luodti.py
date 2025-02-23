@@ -10,7 +10,7 @@ LUODTI_RAW_PROTEIN_NAMES_FILE = os.path.join(LUODTI_RAW_DATA_DIR, "protein.txt")
 LUODTI_RAW_DRUG_NAMES_FILE = os.path.join(LUODTI_RAW_DATA_DIR, "drug.txt")
 
 LUODTI_DATASET_FILE = os.path.join(
-    LUODTI_PROCESSED_DATA_DIR, "luodti_drug_protein_associations.npy"
+    LUODTI_PROCESSED_DATA_DIR, "luodti_drug_protein_associations.txt"
 )
 LUODTI_PROTEIN_NAMES_FILE = os.path.join(LUODTI_PROCESSED_DATA_DIR, "protein_names.csv")
 LUODTI_DRUG_NAMES_FILE = os.path.join(LUODTI_PROCESSED_DATA_DIR, "drug_names.csv")
