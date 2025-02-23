@@ -1,31 +1,43 @@
 import math
 import os
-import random
-from typing import Union
+from typing import List, Union
 
 import numpy as np
 
 from netbalance.configs.common import RESULTS_DIR
+from netbalance.data.general import Data, TrainTestSplitter
 from netbalance.utils import get_header_format, prj_logger
-
-from .general import Data, TrainTestSplitter
 
 logger = prj_logger.getLogger(__name__)
 
 
-class BGData(Data):
+class AData(Data):
 
     def __init__(
         self,
         associations: np.ndarray,
-        cluster_a_node_names,
-        cluster_b_node_names,
+        node_names: List[List[str]],
         **kwargs,
     ) -> None:
+        """Initial AData
+
+        Args:
+            associations (np.ndarray): associations matrix with the shape num_associations x (num_clusters + 1)
+            node_names (List[List[str]]): list of list of node names. For each cluster there should be a list
+                containing node names in that cluster
+
+        Raises:
+            ValueError: associations.shape[1] - 1 should be equal to len(node_names)
+        """
         super().__init__(**kwargs)
         self.associations = associations
-        self.cluster_a_node_names = cluster_a_node_names
-        self.cluster_b_node_names = cluster_b_node_names
+        self.node_names = node_names
+
+        num_clusters = associations.shape[1] - 1
+        if num_clusters != len(node_names):
+            raise ValueError(
+                f"associations.shape[1] - 1 ({num_clusters}) should be equal to len(node_names) ({len(node_names)})"
+            )
 
     def __len__(self):
         return self.associations.shape[0]
@@ -52,23 +64,25 @@ class BGData(Data):
             kwargs (dict): Additional keyword arguments for specific balance methods.
         """
 
-        logger.info(
-            get_header_format(f"Getting Associations between Cluster A and Cluster B")
-        )
+        logger.info(get_header_format(f"Balancing associations data ..."))
         logger.info(f"Balance Method: {balance_method}")
 
         if save_name is not None and not force_calculation:
-            if os.path.exists(f"{RESULTS_DIR}/.cache/{save_name}.csv"):
-                self.load_associations(f"{RESULTS_DIR}/.cache/{save_name}.csv")
+            if os.path.exists(f"{RESULTS_DIR}/.cache/{save_name}.txt"):
+                self.load_associations(f"{RESULTS_DIR}/.cache/{save_name}.txt")
                 return
 
         rng = np.random.default_rng(seed)
 
-        pos_associations = [[i, j, 1] for i, j, k in self.associations if k == 1]
-        neg_associations = [[i, j, 0] for i, j, k in self.associations if k == 0]
+        pos_associations = [
+            asso.tolist() for asso in self.associations if asso[-1] == 1
+        ]
+        neg_associations = [
+            asso.tolist() for asso in self.associations if asso[-1] == 0
+        ]
 
         if balance_method is None:
-            return np.array(pos_associations, dtype=np.int32)
+            return
 
         # Select negative balance method
         samples = []
@@ -105,7 +119,7 @@ class BGData(Data):
 
         if save_name is not None:
             os.makedirs(f"{RESULTS_DIR}/.cache", exist_ok=True)
-            file = f"{RESULTS_DIR}/.cache/{save_name}.csv"
+            file = f"{RESULTS_DIR}/.cache/{save_name}.txt"
             self.save_associations(file)
 
     def save_associations(self, file: str):
@@ -115,13 +129,9 @@ class BGData(Data):
         Args:
             file (str): Path to the file.
         """
-        with open(file, "w") as f:
-            f.write("Node A,Node B,Association\n")
-            for i in range(len(self.associations)):
-                f.write(
-                    f"{self.associations[i, 0]},{self.associations[i, 1]},{self.associations[i, 2]}\n"
-                )
-            logger.info(f"Associations saved to {file}")
+        a_array = np.array(self.associations)
+        np.savetxt(file, a_array, delimiter=",", fmt="%d")
+        logger.info(f"Associations saved to {file}")
 
     def load_associations(self, file: str):
         """
@@ -130,13 +140,9 @@ class BGData(Data):
         Args:
             file (str): Path to the file.
         """
-        with open(file, "r") as f:
-            lines = f.readlines()[1:]
-            associations = []
-            for line in lines:
-                associations.append([int(x) for x in line.strip().split(",")])
-            self.associations = np.array(associations, dtype=np.int32)
-            logger.info(f"Associations loaded from {file}")
+        a_array = np.loadtxt(file, delimiter=",", dtype=np.int32)
+        self.associations = a_array
+        logger.info(f"Associations loaded from {file}")
 
     def _beta_neg_sampling(
         self,
@@ -210,8 +216,8 @@ class BGData(Data):
 
         for k in range(max_iter):
 
-            pos_edges = [edge for edge in current_graph if edge[2] == 1]
-            neg_edges = [edge for edge in current_graph if edge[2] == 0]
+            pos_edges = [edge for edge in current_graph if edge[-1] == 1]
+            neg_edges = [edge for edge in current_graph if edge[-1] == 0]
 
             temp = rng.random()
             if temp < 0.5:  # Add one positive and one negative edge
@@ -219,15 +225,15 @@ class BGData(Data):
                 if len(current_graph) <= initial_graph_len - 2:
 
                     while True:
-                        new_pos_edge = random.choice(pos_associations)
+                        new_pos_edge = rng.choice(pos_associations).tolist()
                         if new_pos_edge not in pos_edges:
-                            current_graph.append([new_pos_edge[0], new_pos_edge[1], 1])
+                            current_graph.append(new_pos_edge)
                             break
 
                     while True:
-                        new_neg_edge = random.choice(neg_associations)
+                        new_neg_edge = rng.choice(neg_associations).tolist()
                         if new_neg_edge not in neg_edges:
-                            current_graph.append([new_neg_edge[0], new_neg_edge[1], 0])
+                            current_graph.append(new_neg_edge)
                             break
 
             else:  # Remove one positive and one negative edge
@@ -297,16 +303,17 @@ class BGData(Data):
         """
         num_negative = int(len(pos_associations) * negative_ratio)
 
-        row_num, col_num = len(self.cluster_a_node_names), len(
-            self.cluster_b_node_names
-        )
+        dims = tuple([len(cluster) for cluster in self.node_names])
 
         # Initialize the weight matrix
-        weights = np.zeros((row_num, col_num), dtype=float)
-        for i, j, _ in neg_associations:
-            for k, l, _ in pos_associations:
-                if i == k or j == l:
-                    weights[i, j] += 1.0
+        weights = np.zeros(dims, dtype=float)
+
+        for neg_asso in neg_associations:
+            for pos_asso in pos_associations:
+                for i in range(len(dims)):
+                    if neg_asso[i] == pos_asso[i]:
+                        weights[tuple(neg_asso[:-1])] += 1.0
+                        break  # TODO remove break
 
         neg_samples = []
         for _ in range(num_negative):
@@ -321,13 +328,18 @@ class BGData(Data):
             indices = np.argwhere(weights > 0)
             probabilities = normalized_weights[weights > 0]
             selected_idx = rng.choice(len(indices), size=1, p=probabilities)[0]
-            i, j = indices[selected_idx]
-            neg_samples.append([i, j, 0])
+            s = indices[selected_idx].tolist() + [0]
+            neg_samples.append(s)
 
             # Update the weight matrix
-            weights[i, j] = 0  # Set the selected edge weight to 0
-            weights[i, :] -= (weights[i, :] > 0).astype(float)  # Penalize row i
-            weights[:, j] -= (weights[:, j] > 0).astype(float)  # Penalize column j
+            weights[tuple(s[:-1])] = 0  # Set the selected edge weight to 0
+
+            for r in range(len(dims)):
+                # penelize s[r] in all other dimensions
+                temp_range = tuple(
+                    [s[r] if i == r else slice(None) for i in range(len(dims))]
+                )
+                weights[temp_range] -= (weights[temp_range] > 0).astype(float)
 
         logger.info(f"Number of negative samples generated: {len(neg_samples)}")
 
@@ -336,20 +348,36 @@ class BGData(Data):
     def _calculate_graph_score(self, associations, initial_graph_len):
         """Calculate the score for the bipartite graph."""
         graph_len = len(associations)
-        interaction = self._generate_interaction_matrix(associations)
-        per_a_ent = self._calculate_cluster_score(interaction, axis=1)
-        per_b_ent = self._calculate_cluster_score(interaction, axis=0)
-        ent_score = (per_a_ent + per_b_ent) / 2
+        per_cluster_entorpies = np.zeros(len(self.node_names))
+        for cluster_id in range(len(self.node_names)):
+            per_cluster_entorpies[cluster_id] = self._calculate_cluster_score(
+                associations, cluster_id
+            )
+        ent_score = np.mean(per_cluster_entorpies).item()
         len_score = graph_len / initial_graph_len
 
         return ent_score, len_score
 
-    def _calculate_cluster_score(self, interaction: np.ndarray, axis: int):
-        """Calculate cluster score."""
-        num_neg = np.sum(interaction == 0, axis=axis)
-        num_pos = np.sum(interaction == 1, axis=axis)
-        total = num_neg + num_pos
-        return self.get_entropy(total + 1e-5, num_neg, num_pos)
+    def _calculate_cluster_score(self, associations, axis):
+
+        if len(associations) == 0:
+            return 1.0
+
+        per_node_num_neg = np.zeros(len(self.node_names[axis]))
+        per_node_num_pos = np.zeros(len(self.node_names[axis]))
+
+        arr = np.array(associations)[:, axis]
+        tar = np.array(associations)[:, -1]
+
+        for node_id in range(len(self.node_names[axis])):
+            per_node_num_neg[node_id] = np.sum((arr == node_id) & (tar == 0))
+            per_node_num_pos[node_id] = np.sum((arr == node_id) & (tar == 1))
+
+        return self.get_entropy(
+            per_node_num_neg + per_node_num_pos + 1e-5,
+            per_node_num_neg,
+            per_node_num_pos,
+        )
 
     def _combine_scores(self, ent_score, len_score, delta, ent_desired):
         """Combine entropy and length scores."""
@@ -366,13 +394,13 @@ class BGData(Data):
         """
         stats = self._initialize_stats()
 
-        interaction = self._generate_interaction_matrix(self.associations)
-        self._calculate_node_stats(interaction, stats["a"], axis=1)
-        self._calculate_node_stats(interaction, stats["b"], axis=0)
+        for i in range(len(self.node_names)):
+            self._calculate_node_stats(self.associations, stats[chr(i + 97)], i)
 
-        per_a_ent = stats["a"]["ent"].item()
-        per_b_ent = stats["b"]["ent"].item()
-        stats["ent"] = (per_a_ent + per_b_ent) / 2
+        ents = np.array(
+            [stats[chr(i + 97)]["ent"].item() for i in range(len(self.node_names))]
+        )
+        stats["ent"] = np.mean(ents).item()
 
         return stats
 
@@ -388,41 +416,44 @@ class BGData(Data):
                 "ent": np.zeros(1),
             }
 
-        cluster_a_size = len(self.cluster_a_node_names)
-        cluster_b_size = len(self.cluster_b_node_names)
-
         stats = {
             "ent": np.zeros(1),
-            "a": init_node_stats(cluster_a_size),
-            "b": init_node_stats(cluster_b_size),
         }
+
+        for i, cluster_node_names in enumerate(self.node_names):
+            # convert i to ith alphabetic letter for example 1 -> a, 2 -> b
+            cluster_name = chr(i + 97)
+            stats[cluster_name] = init_node_stats(len(cluster_node_names))
+
         return stats
 
-    def _generate_interaction_matrix(self, associations: np.ndarray) -> np.ndarray:
-        """Generate an interaction matrix from associations."""
-        interaction = np.full(
-            (
-                len(self.cluster_a_node_names),
-                len(self.cluster_b_node_names),
-            ),
-            np.nan,
+    def _calculate_node_stats(
+        self, associations: list[list[int]], stats: dict, axis: int
+    ):
+
+        if len(associations) == 0:
+            raise ValueError("Associations is empty")
+
+        per_node_num_neg = np.zeros(len(self.node_names[axis]))
+        per_node_num_pos = np.zeros(len(self.node_names[axis]))
+
+        arr = np.array(associations)[:, axis]
+        tar = np.array(associations)[:, -1]
+
+        for node_id in range(len(self.node_names[axis])):
+            per_node_num_neg[node_id] = np.sum((arr == node_id) & (tar == 0))
+            per_node_num_pos[node_id] = np.sum((arr == node_id) & (tar == 1))
+
+        per_node_total = per_node_num_neg + per_node_num_pos
+        per_node_r = (per_node_num_pos + 1e-5) / (per_node_total + 1e-5)
+        ent = self.get_entropy(
+            per_node_total + 1e-5, per_node_num_neg, per_node_num_pos
         )
-        for a, b, val in associations:
-            interaction[a, b] = val
-        return interaction
 
-    def _calculate_node_stats(self, interaction: np.ndarray, stats: dict, axis: int):
-        """Calculate node-specific statistics."""
-        num_neg = np.sum(interaction == 0, axis=axis)
-        num_pos = np.sum(interaction == 1, axis=axis)
-        total = num_neg + num_pos
-        r = (num_pos + 1e-5) / (total + 1e-5)
-        ent = self.get_entropy(total + 1e-5, num_neg, num_pos)
-
-        stats["num_neg"] += num_neg
-        stats["num_pos"] += num_pos
-        stats["num"] += total
-        stats["r"] += r
+        stats["num_neg"] += per_node_num_neg
+        stats["num_pos"] += per_node_num_pos
+        stats["num"] += per_node_total
+        stats["r"] += per_node_r
         stats["ent"] += np.array([ent])
 
     def get_entropy(
@@ -441,6 +472,48 @@ class BGData(Data):
 
         weights = total / total.sum()
         return np.dot(entropy, weights).item()
+
+
+class BGData(AData):
+
+    def __init__(
+        self,
+        associations: np.ndarray,
+        cluster_a_node_names,
+        cluster_b_node_names,
+        **kwargs,
+    ) -> None:
+        super().__init__(
+            associations=associations,
+            node_names=[cluster_a_node_names, cluster_b_node_names],
+            **kwargs,
+        )
+        self.cluster_a_node_names = cluster_a_node_names
+        self.cluster_b_node_names = cluster_b_node_names
+
+
+class TGData(AData):
+
+    def __init__(
+        self,
+        associations: np.ndarray,
+        cluster_a_node_names,
+        cluster_b_node_names,
+        cluster_c_node_names,
+        **kwargs,
+    ) -> None:
+        super().__init__(
+            associations=associations,
+            node_names=[
+                cluster_a_node_names,
+                cluster_b_node_names,
+                cluster_c_node_names,
+            ],
+            **kwargs,
+        )
+        self.cluster_a_node_names = cluster_a_node_names
+        self.cluster_b_node_names = cluster_b_node_names
+        self.cluster_c_node_names = cluster_c_node_names
 
 
 class BGTrainTestSpliter(TrainTestSplitter):
