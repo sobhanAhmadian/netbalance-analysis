@@ -516,12 +516,12 @@ class TGData(AData):
         self.cluster_c_node_names = cluster_c_node_names
 
 
-class BGTrainTestSpliter(TrainTestSplitter):
+class ATrainTestSpliter(TrainTestSplitter):
 
     def __init__(
         self,
         k: int,
-        data: BGData,
+        data: AData,
         seed=42,
         train_balance=False,
         train_balance_kwargs={},
@@ -536,13 +536,13 @@ class BGTrainTestSpliter(TrainTestSplitter):
         subsets = dict()
 
         subset_size = int(self.data_size / self.k)
-        subset_pos_size = int(self.data.associations[:, 2].sum() / self.k)
+        subset_pos_size = int(self.data.associations[:, -1].sum() / self.k)
         subset_neg_size = subset_size - subset_pos_size
         remain_positive = [
-            i for i in range(self.data_size) if self.data.associations[i, 2] == 1
+            i for i in range(self.data_size) if self.data.associations[i, -1] == 1
         ]
         remain_negative = [
-            i for i in range(self.data_size) if self.data.associations[i, 2] == 0
+            i for i in range(self.data_size) if self.data.associations[i, -1] == 0
         ]
 
         for i in range(self.k - 1):
@@ -560,15 +560,13 @@ class BGTrainTestSpliter(TrainTestSplitter):
         test_indices = list(self.subsets[i])
         train_indices = list(indices.difference(self.subsets[i]))
 
-        train_data = BGData(
+        train_data = AData(
             self.data.associations[train_indices],
-            self.data.cluster_a_node_names,
-            self.data.cluster_b_node_names,
+            self.data.node_names,
         )
-        test_data = BGData(
+        test_data = AData(
             self.data.associations[test_indices],
-            self.data.cluster_a_node_names,
-            self.data.cluster_b_node_names,
+            self.data.node_names,
         )
 
         if self.train_balance:
@@ -583,6 +581,46 @@ class BGTrainTestSpliter(TrainTestSplitter):
 
     def get_data_size(self):
         return len(self.data)
+
+
+class BGTrainTestSpliter(ATrainTestSpliter):
+
+    def split(self, i):
+        a_train_data, a_test_data = super().split(i)
+
+        train_data = BGData(
+            a_train_data.associations,
+            a_train_data.node_names[0],
+            a_train_data.node_names[1],
+        )
+        test_data = BGData(
+            a_test_data.associations,
+            a_test_data.node_names[0],
+            a_test_data.node_names[1],
+        )
+
+        return train_data, test_data
+
+
+class TBGTrainTestSpliter(ATrainTestSpliter):
+
+    def split(self, i):
+        a_train_data, a_test_data = super().split(i)
+
+        train_data = TGData(
+            a_train_data.associations,
+            a_train_data.node_names[0],
+            a_train_data.node_names[1],
+            a_train_data.node_names[2],
+        )
+        test_data = TGData(
+            a_test_data.associations,
+            a_test_data.node_names[0],
+            a_test_data.node_names[1],
+            a_test_data.node_names[2],
+        )
+
+        return train_data, test_data
 
 
 class AClusterCVTrainTestSpliter(TrainTestSplitter):
