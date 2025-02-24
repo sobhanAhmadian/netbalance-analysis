@@ -9,7 +9,7 @@ from .interface import BGCModelHandler, HandlerFactory
 logger = prj_logger.getLogger(__name__)
 
 
-class DegreeRatioModelHandler(BGCModelHandler):
+class BGDegreeRatioModelHandler(BGCModelHandler):
     """Baseline model which uses degree ratio of nodes to predict probability of association.
 
     Args:
@@ -136,7 +136,7 @@ class DegreeRatioModelHandler(BGCModelHandler):
         return None
 
 
-class DegreeRatioHandlerFactory(HandlerFactory):
+class BGDegreeRatioHandlerFactory(HandlerFactory):
     """Factory for baseline model which uses degree ratio of nodes to predict probability of association.
 
     Args:
@@ -168,7 +168,7 @@ class DegreeRatioHandlerFactory(HandlerFactory):
         self.use_b = use_b
         self.reduction = reduction
 
-    def create_handler(self) -> DegreeRatioModelHandler:
-        return DegreeRatioModelHandler(
+    def create_handler(self) -> BGDegreeRatioModelHandler:
+        return BGDegreeRatioModelHandler(
             self.a_node_ids, self.b_node_ids, self.use_a, self.use_b, self.reduction
         )

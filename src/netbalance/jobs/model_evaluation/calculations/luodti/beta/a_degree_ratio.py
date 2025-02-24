@@ -8,7 +8,7 @@ from netbalance.data.association_data import BGData, BGTrainTestSpliter
 from netbalance.evaluation import repeated_cross_validation
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.degree_ratio import (
-    DegreeRatioHandlerFactory as HandlerFactory,
+    BGDegreeRatioHandlerFactory as HandlerFactory,
 )  # Parameter
 from netbalance.optimization.degree_ratio import (
     DegreeRatioTrainer as Trainer,
