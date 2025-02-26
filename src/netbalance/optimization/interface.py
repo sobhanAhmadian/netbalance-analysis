@@ -3,7 +3,7 @@ import abc
 from netbalance.configs import OptimizerConfig
 from netbalance.data.association_data import BGData
 from netbalance.evaluation import Result
-from netbalance.models import BGCModelHandler
+from netbalance.models import AModelHandler
 from netbalance.utils import prj_logger
 
 logger = prj_logger.getLogger(__name__)
@@ -19,7 +19,7 @@ class Trainer(abc.ABC):
 
     @abc.abstractmethod
     def train(
-        self, model_handler: BGCModelHandler, data: BGData, config: OptimizerConfig
+        self, model_handler: AModelHandler, data: BGData, config: OptimizerConfig
     ) -> Result:
         """
         Train the model using the given dataset and configuration.

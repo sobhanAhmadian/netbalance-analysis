@@ -602,7 +602,7 @@ class BGTrainTestSpliter(ATrainTestSpliter):
         return train_data, test_data
 
 
-class TBGTrainTestSpliter(ATrainTestSpliter):
+class TGTrainTestSpliter(ATrainTestSpliter):
 
     def split(self, i):
         a_train_data, a_test_data = super().split(i)

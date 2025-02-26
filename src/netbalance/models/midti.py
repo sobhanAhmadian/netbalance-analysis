@@ -15,7 +15,7 @@ from netbalance.configs.midti import MIDTI_PROCESSED_DATA_DIR, MIDTIModelConfig
 from netbalance.methods import FeatureExtractor
 from netbalance.utils import get_header_format, prj_logger
 
-from .interface import BGCModelHandler, HandlerFactory
+from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
@@ -588,7 +588,7 @@ class MIDTIFeatureExtractor(FeatureExtractor):
         pass
 
 
-class MIDTIModelHandler(BGCModelHandler):
+class MIDTIModelHandler(AModelHandler):
 
     def __init__(self, model_config: MIDTIModelConfig) -> None:
         super().__init__(model_config)
@@ -597,11 +597,8 @@ class MIDTIModelHandler(BGCModelHandler):
         del self.model
         del self.fe
 
-    def predict_impl(
-        self,
-        a_nodes: Union[torch.Tensor, np.ndarray],
-        b_nodes: Union[torch.Tensor, np.ndarray],
-    ):
+    def predict_impl(self, node_lists: list[np.ndarray]):
+        a_nodes, b_nodes = node_lists
 
         if isinstance(a_nodes, np.ndarray):
             a_nodes = torch.tensor(a_nodes)

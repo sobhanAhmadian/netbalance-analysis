@@ -54,8 +54,7 @@ auc_list, auc_list_list, ent_list = get_ent_vs_auc(
     model_result_dir=model_result_dir,
     dataset_name=dataset,
     test_balance_kwargs=test_balance_kwargs,
-    cluster_a_node_names=ds.get_cluster_a_node_names(),
-    cluster_b_node_names=ds.get_cluster_b_node_names(),
+    node_names=ds.get_node_names(),
 )
 
 plot_x_vs_y_dist(

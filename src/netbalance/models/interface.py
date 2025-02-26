@@ -72,21 +72,24 @@ class HandlerFactory(abc.ABC):
         raise NotImplementedError
 
 
-class BGCModelHandler(ModelHandler, abc.ABC):
+class AModelHandler(ModelHandler, abc.ABC):
 
-    def predict(self, a_nodes, b_nodes):
-        if a_nodes.shape[0] != b_nodes.shape[0]:
-            raise ValueError(
-                "The number of samples in a_nodes and b_nodes should be equal."
-            )
-        scores = self.predict_impl(a_nodes, b_nodes)
+    def predict(self, node_lists: list[np.ndarray]):
+        num_samples = len(node_lists[0])
+        for i in range(1, len(node_lists)):
+            if len(node_lists[i]) != num_samples:
+                raise ValueError(
+                    "The number of samples in all node lists should be equal."
+                )
+
+        scores = self.predict_impl(node_lists)
 
         if not isinstance(scores, np.ndarray):
             raise ValueError(
                 "The return value of predict_impl should be a numpy array."
             )
 
-        if scores.shape != (a_nodes.shape[0],):
+        if scores.shape != (num_samples,):
             raise ValueError(
                 "The shape of the return value of predict_impl should be equal to the number of samples."
             )
@@ -94,5 +97,5 @@ class BGCModelHandler(ModelHandler, abc.ABC):
         return scores
 
     @abc.abstractmethod
-    def predict_impl(self, a_nodes, b_nodes):
+    def predict_impl(self, node_lists: list[np.ndarray]):
         raise NotImplementedError

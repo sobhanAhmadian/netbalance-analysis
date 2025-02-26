@@ -14,7 +14,7 @@ from netbalance.models.modules.simple_mlp import SimpleMLP
 from netbalance.utils import prj_logger
 from torch import sigmoid
 
-from .interface import BGCModelHandler, HandlerFactory
+from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
@@ -221,7 +221,7 @@ class BMLPDTIFeatureExtractor(FeatureExtractor):
         return features
 
 
-class BMLPDTIModelHandler(BGCModelHandler):
+class BMLPDTIModelHandler(AModelHandler):
 
     def __init__(self, model_config: BMLPDTIModelConfig) -> None:
         super().__init__(model_config)
@@ -230,11 +230,8 @@ class BMLPDTIModelHandler(BGCModelHandler):
         del self.model
         del self.fe
 
-    def predict_impl(
-        self,
-        a_nodes: np.ndarray,
-        b_nodes: np.ndarray,
-    ):
+    def predict_impl(self, node_lists: list[np.ndarray]):
+        a_nodes, b_nodes = node_lists
         dp_embedd = self.fe.extract_features(a_nodes, b_nodes).numpy()
         dp_embedd = torch.tensor(dp_embedd).to(self.model_config.device)
         preds = sigmoid(self.model(dp_embedd).flatten()).cpu().detach().numpy()

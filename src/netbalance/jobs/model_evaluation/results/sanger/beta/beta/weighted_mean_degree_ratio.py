@@ -1,26 +1,20 @@
 import os
 
-from netbalance.configs.blindti import BLINDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
+from netbalance.configs.weighted_mean_degree_ratio import (
+    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,
+)  # Parameter
 from netbalance.evaluation.general import get_result_of_rcv
-from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
+from netbalance.features.sanger import SangerDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
-from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
-model_name = "blindti"  # Parameter
-dataset = "luodti"  # Parameter
+model_name = "weighted_mean_degree_ratio"  # Parameter
+dataset = "sanger"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 
-test_balance_method = "rho"  # Parameter
-test_balance_kwargs = {
-    "max_iter": 100000,
-    "delta": 0.1,
-    "cooling_rate": 0.99,
-    "initial_temp": 40.0,
-    "ent_desired": 1.0,
-    "shrinkage": 1.0,
-}  # Parameter
+test_balance_method = "beta"  # Parameter
+test_balance_kwargs = {}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
 num_cross_validation = 5  # Parameter
@@ -50,11 +44,5 @@ results = get_result_of_rcv(
     dataset_name=dataset,
 )
 
-process_results(
-    results=results,
-    result_dir=RESULTS_DIR,
-    dataset=dataset,
-    train_balance_method=train_neg_samp_method,
-    test_balance_method=test_balance_method,
-    test_balance_kwargs=test_balance_kwargs,
-)
+# TODO
+print(results.result.get_result())

@@ -13,7 +13,7 @@ from netbalance.configs.midti import MIDTI_PROCESSED_DATA_DIR
 from netbalance.methods import FeatureExtractor
 from netbalance.utils import prj_logger
 
-from .interface import BGCModelHandler, HandlerFactory
+from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
@@ -220,7 +220,7 @@ class BXGBDTIFeatureExtractor(FeatureExtractor):
         return features
 
 
-class BXGBDTIModelHandler(BGCModelHandler):
+class BXGBDTIModelHandler(AModelHandler):
 
     def __init__(self, model_config: BXGBDTIModelConfig) -> None:
         super().__init__(model_config)
@@ -229,11 +229,8 @@ class BXGBDTIModelHandler(BGCModelHandler):
         del self.model
         del self.fe
 
-    def predict_impl(
-        self,
-        a_nodes: np.ndarray,
-        b_nodes: np.ndarray,
-    ):
+    def predict_impl(self, node_lists: list[np.ndarray]):
+        a_nodes, b_nodes = node_lists
         dp_embedd = self.fe.extract_features(a_nodes, b_nodes).numpy()
         return self.model.predict(dp_embedd)
 
