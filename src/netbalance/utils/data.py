@@ -3,7 +3,11 @@ import os
 from itertools import combinations
 from typing import Callable, List
 
+import dask
+import dask.distributed
 import numpy as np
+from dask import delayed
+from dask.distributed import Client, LocalCluster
 from tqdm import tqdm
 
 from netbalance.data.association_data import AData, ATrainTestSpliter
@@ -13,7 +17,6 @@ from netbalance.visualization import plot_per_group_associations
 from .logger import logging as prj_logger
 
 logger = prj_logger.getLogger(__name__)
-
 
 def analyse_datasest(
     dataset: ADataset,
@@ -140,10 +143,14 @@ def get_balanced_test_data_list(
         List[BGData]: A list of balanced test data.
     """
     data_list = []
-    with tqdm(
-        total=num_cross_validation * k * num_negative_sampling,
-        desc="Repeated Cross Validation",
-    ) as pbar:
+    tasks = []
+    with (
+        tqdm(
+            total=num_cross_validation * k * num_negative_sampling,
+            desc="Repeated Cross Validation",
+        ) as pbar,
+        Client(LocalCluster(n_workers=7, threads_per_worker=1)) as client,
+    ):
         for i in range(num_cross_validation):
             data = get_data()
             spliter = ATrainTestSpliter(k=k, data=data, seed=i)
@@ -157,15 +164,31 @@ def get_balanced_test_data_list(
                     for key, value in test_balance_kwargs.items():
                         save_name += f"_{key}_{value}"
                     temp_test_data = copy.deepcopy(test_data)
-                    temp_test_data.balance_data(
+
+                    def process_data(data, *args, **kwargs):
+                        data.balance_data(*args, **kwargs)
+                        return data
+
+                    # Define delayed task
+                    task = delayed(process_data)(
+                        temp_test_data,
                         balance_method=test_balance_method,
                         negative_ratio=test_balance_negative_ratio,
                         seed=l,
                         save_name=save_name,
                         **test_balance_kwargs,
                     )
-                    data_list.append(temp_test_data)
-                    pbar.update(1)
+                    tasks.append(task)
+
+        # Submit tasks to Dask
+        futures = client.compute(tasks)
+
+        # Track progress using as_completed
+        data_list = []
+        for future in dask.distributed.as_completed(futures):
+            data_list.append(future.result())
+            pbar.update(1)
+
     return data_list
 
 
