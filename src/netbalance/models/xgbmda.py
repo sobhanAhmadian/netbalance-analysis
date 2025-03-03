@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import torch
 import torch_geometric as tg
 from torch_geometric.nn import Node2Vec
@@ -11,7 +12,7 @@ from netbalance.methods import FeatureExtractor
 from netbalance.models.modules import SimpleMLP
 from netbalance.utils import get_header_format, prj_logger
 
-from .interface import BGCModelHandler, HandlerFactory
+from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
@@ -118,7 +119,7 @@ class XGBMDAFeatureExtractor(FeatureExtractor):
         return self.node2vec_model()[node_list].detach()
 
 
-class XGBMDAModelHandler(BGCModelHandler):
+class XGBMDAModelHandler(AModelHandler):
 
     def __init__(self, model_config: XGBMDAModelConfig) -> None:
         super().__init__(model_config)
@@ -127,7 +128,8 @@ class XGBMDAModelHandler(BGCModelHandler):
         del self.model
         del self.fe
 
-    def predict_impl(self, a_nodes, b_nodes):
+    def predict_impl(self, node_lists: list[np.ndarray]):
+        a_nodes, b_nodes = node_lists
         md_embedd = self.fe.extract_features(a_nodes, b_nodes).detach().numpy()
         return self.model.predict(md_embedd)
 

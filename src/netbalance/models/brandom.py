@@ -2,12 +2,12 @@ import numpy as np
 
 from netbalance.utils import prj_logger
 
-from .interface import BGCModelHandler, HandlerFactory
+from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
 
-class BRandomModelHandler(BGCModelHandler):
+class BRandomModelHandler(AModelHandler):
     """Baseline model which generates a random number between 0 and 1 as prediction."""
 
     def __init__(
@@ -18,7 +18,8 @@ class BRandomModelHandler(BGCModelHandler):
         self.rng = np.random.default_rng(0)
         logger.info("defult_rng created with seed 0")
 
-    def predict_impl(self, a_nodes, b_nodes):
+    def predict_impl(self, node_lists: list[np.ndarray]):
+        a_nodes, b_nodes = node_lists
         if a_nodes.shape[0] != b_nodes.shape[0]:
             raise ValueError(
                 "The number of samples in a_nodes and b_nodes should be equal."

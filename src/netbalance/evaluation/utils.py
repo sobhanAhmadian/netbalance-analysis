@@ -11,7 +11,7 @@ from sklearn.metrics import (
     roc_curve,
 )
 
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_data import AData
 from netbalance.utils import prj_logger
 from netbalance.visualization import plot_x_vs_y_dist
 
@@ -21,19 +21,19 @@ logger = prj_logger.getLogger(__name__)
 
 
 def evaluate_binary_classification(
-    data: BGData, y_predict: np.ndarray, threshold: float = 0.5
+    data: AData, y_predict: np.ndarray, threshold: float = 0.5
 ):
     """Evaluate binary classification predictions.
 
     Args:
-        data (BGData): The data object.
+        data (AData): The data object.
         y_predict (np.ndarray): The predicted scores.
         threshold (float): The threshold value for converting predicted probabilities to binary predictions.
 
     Returns:
         _type_: _description_
     """
-    y_test = data.associations[:, 2]
+    y_test = data.associations[:, -1]
     result = Result()
 
     # Entropy
@@ -57,8 +57,8 @@ def evaluate_binary_classification(
     _calc_max_f1_score(y_predict, y_test, result)
     _calc_roc_metrics(y_predict, y_test, result)
     _calc_hit_k_scores(data, y_predict, result)
-    node_a_sorted_indices = _calc_avg_rank(data, y_predict, result)
-    result.sorted_edges = data.associations[node_a_sorted_indices]
+    sorted_indices = _calc_avg_rank(data, y_predict, result)
+    result.sorted_edges = data.associations[sorted_indices]
     # _calc_edge_related(data, result)
     _calc_strat_avg_rank(data, y_predict, result)
     _calc_strat_hit_k(data, y_predict, result)
@@ -83,9 +83,9 @@ def _calc_roc_metrics(y_predict, y_test, result):
 
 def _calc_hit_k_scores(data, y_predict, result):
     """Compute Hit@K scores."""
-    max_k = int(data.associations[:, 2].sum())
+    max_k = int(data.associations[:, -1].sum())
     hit_k_accuracy_list = [
-        np.mean([data.associations[i, 2] for i in np.argsort(y_predict)[::-1][:k]])
+        np.mean([data.associations[i, -1] for i in np.argsort(y_predict)[::-1][:k]])
         for k in range(1, max_k + 1)
     ]
     result.hit_k_list = np.arange(1, max_k + 1)
@@ -100,11 +100,11 @@ def _calc_avg_rank(data, y_predict, result):
     positive_ranks = [
         i + 1
         for i in range(len(sorted_indices))
-        if data.associations[sorted_indices[i], 2] == 1
+        if data.associations[sorted_indices[i], -1] == 1
     ]
     result.avg_rank = np.mean(positive_ranks)
     result.norm_avg_rank = result.avg_rank / (
-        (data.associations[:, 2].sum() + 1) / 2 + 1e-6
+        (data.associations[:, -1].sum() + 1) / 2 + 1e-6
     )
     return sorted_indices
 
@@ -149,7 +149,7 @@ def _calc_edge_related(data, result):
         result.edge_scores.append(w_a * result.ratios_a[i] + w_b * result.ratios_b[i])
 
 
-def _calc_strat_hit_k(data, y_predict, result):
+def _calc_strat_hit_k(data: AData, y_predict, result):
     """Calculate stratified Hit@K for both node types."""
 
     def compute_strat_hit_k(cluster_names, associations, predictions, col):
@@ -163,25 +163,24 @@ def _calc_strat_hit_k(data, y_predict, result):
             sorted_indices = np.argsort(cluster_predictions)[::-1]
 
             # Determine the number of positive associations (k)
-            k = int(cluster_associations[:, 2].sum())
+            k = int(cluster_associations[:, -1].sum())
 
             # Calculate the hit@k accuracy for the cluster
-            temp = [cluster_associations[i, 2] for i in sorted_indices[:k]]
+            temp = [cluster_associations[i, -1] for i in sorted_indices[:k]]
             hit_k_accuracy = np.mean(temp if len(temp) > 0 else np.nan)
 
             results.append(hit_k_accuracy)
 
         return np.array(results)
 
-    result.hit_k_accuracy_a = compute_strat_hit_k(
-        data.cluster_a_node_names, data.associations, y_predict, 0
-    )
-    result.hit_k_accuracy_b = compute_strat_hit_k(
-        data.cluster_b_node_names, data.associations, y_predict, 1
-    )
+    result.hit_k_accuracy_c = {}
+    for i in range(len(data.node_names)):
+        result.hit_k_accuracy_c[i] = compute_strat_hit_k(
+            data.node_names[i], data.associations, y_predict, i
+        )
 
 
-def _calc_strat_avg_rank(data, y_predict, result):
+def _calc_strat_avg_rank(data: AData, y_predict, result):
     """Calculate stratified average rank for both node types."""
 
     def compute_avg_rank(cluster_names, associations, predictions, col):
@@ -193,7 +192,7 @@ def _calc_strat_avg_rank(data, y_predict, result):
             positive_ranks = [
                 rank + 1
                 for rank, assoc in enumerate(np.argsort(node_predictions)[::-1])
-                if node_associations[assoc, 2] == 1
+                if node_associations[assoc, -1] == 1
             ]
             avg_rank = np.mean(positive_ranks) if len(positive_ranks) > 0 else np.nan
             avg_ranks.append(avg_rank)
@@ -202,12 +201,12 @@ def _calc_strat_avg_rank(data, y_predict, result):
             )
         return np.array(avg_ranks), np.array(norm_avg_ranks)
 
-    result.avg_rank_a, result.norm_avg_rank_a = compute_avg_rank(
-        data.cluster_a_node_names, data.associations, y_predict, 0
-    )
-    result.avg_rank_b, result.norm_avg_rank_b = compute_avg_rank(
-        data.cluster_b_node_names, data.associations, y_predict, 1
-    )
+    result.avg_rank_c = {}
+    result.norm_avg_rank_c = {}
+    for i in range(len(data.node_names)):
+        result.avg_rank_c[i], result.norm_avg_rank_c[i] = compute_avg_rank(
+            data.node_names[i], data.associations, y_predict, i
+        )
 
 
 def evaluate_binary_classification_simple(y_test, y_predict, threshold):

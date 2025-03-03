@@ -7,7 +7,7 @@ from scipy import stats
 
 from netbalance.configs import RESULTS_DIR_DICT
 from netbalance.configs.common import RESULTS_DIR
-from netbalance.evaluation.result import BGCCrossValidationResult
+from netbalance.evaluation.result import ACrossValidationResult
 
 from .logger import logging as prj_logger
 
@@ -64,7 +64,7 @@ def _process_results_temp(
 
 
 def _save_auc_of_cv_folds(
-    results: BGCCrossValidationResult, dir_path: str, filename: str
+    results: ACrossValidationResult, dir_path: str, filename: str
 ):
     auc_list = [result.auc for result in results.fold_results]
     auc_arr = np.array(auc_list)
@@ -192,7 +192,7 @@ def save_all_results_for_expr(
 
 
 def process_results(
-    results: BGCCrossValidationResult,
+    results: ACrossValidationResult,
     result_dir: str,
     dataset: str,
     train_balance_method: str,

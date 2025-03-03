@@ -203,81 +203,20 @@ class CrossValidationResult:
         ax.legend(loc="lower right")
 
 
-class BGCCrossValidationResult(CrossValidationResult):
+class ACrossValidationResult(CrossValidationResult):
 
     def __init__(self):
         super().__init__()
-        # self.result.hit_k_list = None
-        # self.result.hit_k_accuracy_list = None
         self.result.avg_rank = 0
         self.result.norm_avg_rank = 0
-        self.result.avg_rank_a = None
-        self.result.norm_avg_rank_a = None
-        self.result.avg_rank_b = None
-        self.result.norm_avg_rank_b = None
-        self.result.hit_k_accuracy_a = None
-        self.result.hit_k_accuracy_b = None
-
-        self.result.avg_rank_a_counter = None
-        self.result.avg_rank_b_counter = None
-        self.result.norm_avg_rank_a_counter = None
-        self.result.norm_avg_rank_b_counter = None
-        self.result.hit_k_accuracy_a_counter = None
-        self.result.hit_k_accuracy_b_counter = None
-
         self.result.hit_k_list = None
         self.result.hit_k_accuracy_list = None
 
     def _accumulate(self, test_result):
         super()._accumulate(test_result)
 
-        # if self.result.hit_k_list is None:
-        #     self.result.hit_k_list = test_result.hit_k_list
-        #     self.result.hit_k_accuracy_list = test_result.hit_k_accuracy_list
-        # else:
-        #     self.result.hit_k_accuracy_list += test_result.hit_k_accuracy_list
-
         self.result.avg_rank += test_result.avg_rank
         self.result.norm_avg_rank += test_result.norm_avg_rank
-
-        if self.result.avg_rank_a is None:
-            self.avg_rank_a_counter = 1 - np.isnan(test_result.avg_rank_a)
-            self.avg_rank_b_counter = 1 - np.isnan(test_result.avg_rank_b)
-
-            self.result.avg_rank_a = np.nan_to_num(test_result.avg_rank_a)
-            self.result.norm_avg_rank_a = np.nan_to_num(test_result.norm_avg_rank_a)
-        else:
-            self.avg_rank_a_counter += 1 - np.isnan(test_result.avg_rank_a)
-            self.avg_rank_b_counter += 1 - np.isnan(test_result.avg_rank_b)
-
-            self.result.avg_rank_a += np.nan_to_num(test_result.avg_rank_a)
-            self.result.norm_avg_rank_a += np.nan_to_num(test_result.norm_avg_rank_a)
-
-        if self.result.avg_rank_b is None:
-            self.result.avg_rank_b = np.nan_to_num(test_result.avg_rank_b)
-            self.result.norm_avg_rank_b = np.nan_to_num(test_result.norm_avg_rank_b)
-        else:
-            self.result.avg_rank_b += np.nan_to_num(test_result.avg_rank_b)
-            self.result.norm_avg_rank_b += np.nan_to_num(test_result.norm_avg_rank_b)
-
-        if self.result.hit_k_accuracy_a is None:
-            self.result.hit_k_accuracy_a = np.nan_to_num(test_result.hit_k_accuracy_a)
-            self.result.hit_k_accuracy_b = np.nan_to_num(test_result.hit_k_accuracy_b)
-            self.result.hit_k_accuracy_a_counter = 1 - np.isnan(
-                test_result.hit_k_accuracy_a
-            )
-            self.result.hit_k_accuracy_b_counter = 1 - np.isnan(
-                test_result.hit_k_accuracy_b
-            )
-        else:
-            self.result.hit_k_accuracy_a += np.nan_to_num(test_result.hit_k_accuracy_a)
-            self.result.hit_k_accuracy_b += np.nan_to_num(test_result.hit_k_accuracy_b)
-            self.result.hit_k_accuracy_a_counter += 1 - np.isnan(
-                test_result.hit_k_accuracy_a
-            )
-            self.result.hit_k_accuracy_b_counter += 1 - np.isnan(
-                test_result.hit_k_accuracy_b
-            )
 
         if self.result.hit_k_list is None:
             self.result.hit_k_list = test_result.hit_k_list
@@ -292,25 +231,6 @@ class BGCCrossValidationResult(CrossValidationResult):
 
     def _divide(self, k):
         super()._divide(k)
-        # self.result.hit_k_accuracy_list /= k
         self.result.avg_rank /= k
         self.result.norm_avg_rank /= k
-        self.result.avg_rank_a = self.result.avg_rank_a / (
-            self.avg_rank_a_counter + 1e-6
-        )
-        self.result.norm_avg_rank_a = self.result.norm_avg_rank_a / (
-            self.avg_rank_a_counter + 1e-6
-        )
-        self.result.avg_rank_b = self.result.avg_rank_b / (
-            self.avg_rank_b_counter + 1e-6
-        )
-        self.result.norm_avg_rank_b = self.result.norm_avg_rank_b / (
-            self.avg_rank_b_counter + 1e-6
-        )
-        self.result.hit_k_accuracy_a = self.result.hit_k_accuracy_a / (
-            self.result.hit_k_accuracy_a_counter + 1e-6
-        )
-        self.result.hit_k_accuracy_b = self.result.hit_k_accuracy_b / (
-            self.result.hit_k_accuracy_b_counter + 1e-6
-        )
         self.result.hit_k_accuracy_list = self.result.hit_k_accuracy_list / (k + 1e-6)

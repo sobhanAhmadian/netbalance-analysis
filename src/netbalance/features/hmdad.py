@@ -14,7 +14,7 @@ from netbalance.utils import prj_logger
 
 logger = prj_logger.getLogger(__name__)
 
-from .bipartite_graph_dataset import BGDataset
+from netbalance.features.bipartite_graph_dataset import ADataset
 
 
 def get_hsdn_disease_symptom_similarity():
@@ -74,10 +74,15 @@ def get_mesh_disease_semantic_simialrity():
     return disease_sim_sematic
 
 
-class HMDADDataset(BGDataset):
+class HMDADDataset(ADataset):
 
     def __init__(self) -> None:
-        super().__init__("microbe", "disease")
+        super().__init__(["microbe", "disease"])
+
+    def get_node_names(self):
+        microbe_names = self.get_cluster_a_node_names()
+        disease_names = self.get_cluster_b_node_names()
+        return [microbe_names, disease_names]
 
     def get_cluster_a_node_names(self):
         names = pd.read_csv(HMDAD_MICROBE_NAMES_FILE)
@@ -86,9 +91,6 @@ class HMDADDataset(BGDataset):
     def get_cluster_b_node_names(self):
         names = pd.read_csv(HMDAD_DISEASE_NAMES_FILE)
         return list(names.iloc[:, 1])
-
-    def get_dataset_dir(self):
-        return HMDAD_PROCESSED_DATA_DIR
 
     def get_dataset_file_path(self):
         return HMDAD_DATASET_FILE

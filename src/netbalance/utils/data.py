@@ -3,20 +3,27 @@ import os
 from itertools import combinations
 from typing import Callable, List
 
+import dask
+import dask.distributed
 import numpy as np
+from dask import delayed
+from dask.distributed import Client, LocalCluster
+from dotenv import load_dotenv
 from tqdm import tqdm
 
-from netbalance.data.bipartite_graph_data import BGData, BGTrainTestSpliter
-from netbalance.features.bipartite_graph_dataset import BGDataset
+from netbalance.data.association_data import AData, ATrainTestSpliter
+from netbalance.features.bipartite_graph_dataset import ADataset
 from netbalance.visualization import plot_per_group_associations
 
 from .logger import logging as prj_logger
 
 logger = prj_logger.getLogger(__name__)
 
+load_dotenv()
+
 
 def analyse_datasest(
-    dataset: BGDataset,
+    dataset: ADataset,
     dataset_name: str,
     figs_folder: str,
     num_cross_validation: int,
@@ -28,12 +35,15 @@ def analyse_datasest(
     c_pos: str = "#a2d2ff",
     c_neg: str = "#ffafcc",
     summary_size: int = 40,
+    with_negatives: bool = True,
 ) -> None:
     """Analyse the dataset.
-    This function will print and plot the statistics of the dataset including entropy, pairwise average similarity, and per node stats.
 
-    Args:
-        dataset (BGDataset): The dataset to be analysed.
+    This function will print and plot the statistics of the dataset including entropy,
+        pairwise average similarity, and per node stattistics.
+
+    Args:7
+        dataset (ADataset): The dataset to be analysed.
         dataset_name (str): The name of the dataset.
         figs_folder (str): The path to the folder where the figures will be saved.
         num_cross_validation (int): The number of cross validations.
@@ -45,15 +55,15 @@ def analyse_datasest(
         c_pos (str, optional): Color for positive edges. Defaults to "#a2d2ff".
         c_neg (str, optional): Color for negative edges. Defaults to "#ffafcc".
         summary_size (int, optional): The number of nodes to show in the summary plot. Defaults to 40.
+        with_negatives (bool, optional): Whether to generate negative edges. Defaults to True.
     """
     if not os.path.exists(figs_folder):
         os.makedirs(figs_folder, exist_ok=True)
 
     def get_data():
-        return BGData(
-            associations=dataset.get_associations(with_negatives=True),
-            cluster_a_node_names=dataset.get_cluster_a_node_names(),
-            cluster_b_node_names=dataset.get_cluster_b_node_names(),
+        return AData(
+            associations=dataset.get_associations(with_negatives=with_negatives),
+            node_names=dataset.get_node_names(),
         )
 
     data_list = get_balanced_test_data_list(
@@ -69,13 +79,15 @@ def analyse_datasest(
 
     test_stats = get_ave_stats(
         data_list=data_list,
-        cluster_a_node_names=dataset.get_cluster_a_node_names(),
-        cluster_b_node_names=dataset.get_cluster_b_node_names(),
+        node_names=dataset.get_node_names(),
     )
 
     print("\n>> Entropy")
-    print(f"Cluster B ({dataset.cluster_b_name}) Entropy: {test_stats["b"]["ent"]}")
-    print(f"Cluster A ({dataset.cluster_a_name}) Entropy: {test_stats["a"]["ent"]}")
+    for i in range(len(dataset.cluster_names)):
+        symb = str(chr(97 + i))
+        print(
+            f"Cluster {symb.upper()} ({dataset.cluster_names[i]}) Entropy: {test_stats[symb]["ent"]}"
+        )
     print(f"Mean of Two Entropies: {test_stats["ent"]}")
 
     print("\n>> Pairwise Average Similarity")
@@ -84,51 +96,30 @@ def analyse_datasest(
     print(f"Pairwise Average Similarity (Neg Edges): {test_stats["pas_neg"]}")
     print(f"Average Graph Size: {test_stats['ave_graph_size']}")
 
-    print("\n>> Cluster A Per Node Stats")
-    plot_per_group_associations(
-        figs_folder=figs_folder,
-        node_names=dataset.get_cluster_a_node_names(),
-        cluster_name=dataset.cluster_a_name,
-        num_list=test_stats["a"]["num"],
-        num_pos_list=test_stats["a"]["num_pos"],
-        c_pos=c_pos,
-        c_neg=c_neg,
-    )
+    for i in range(len(dataset.cluster_names)):
+        symb = str(chr(97 + i))
+        print(f"\n>> Cluster {symb.upper()} Per Node Stats")
+        plot_per_group_associations(
+            figs_folder=figs_folder,
+            node_names=dataset.get_node_names()[i],
+            cluster_name=dataset.cluster_names[i],
+            num_list=test_stats[symb]["num"],
+            num_pos_list=test_stats[symb]["num_pos"],
+            c_pos=c_pos,
+            c_neg=c_neg,
+        )
 
-    print("\n>> Cluster B Per Node Stats")
-    plot_per_group_associations(
-        figs_folder=figs_folder,
-        node_names=dataset.get_cluster_b_node_names(),
-        cluster_name=dataset.cluster_b_name,
-        num_list=test_stats["b"]["num"],
-        num_pos_list=test_stats["b"]["num_pos"],
-        c_pos=c_pos,
-        c_neg=c_neg,
-    )
-
-    print("\n>> Cluster A Per Node Stats (Summary)")
-    plot_per_group_associations(
-        figs_folder=figs_folder,
-        node_names=dataset.get_cluster_a_node_names(),
-        cluster_name=dataset.cluster_a_name,
-        num_list=test_stats["a"]["num"],
-        num_pos_list=test_stats["a"]["num_pos"],
-        c_pos=c_pos,
-        c_neg=c_neg,
-        max_k=summary_size,
-    )
-
-    print("\n>> Cluster B Per Node Stats")
-    plot_per_group_associations(
-        figs_folder=figs_folder,
-        node_names=dataset.get_cluster_b_node_names(),
-        cluster_name=dataset.cluster_b_name,
-        num_list=test_stats["b"]["num"],
-        num_pos_list=test_stats["b"]["num_pos"],
-        c_pos=c_pos,
-        c_neg=c_neg,
-        max_k=summary_size,
-    )
+        print(f"\n>> Cluster {symb.upper()} Per Node Stats (Summary)")
+        plot_per_group_associations(
+            figs_folder=figs_folder,
+            node_names=dataset.get_node_names()[i],
+            cluster_name=dataset.cluster_names[i],
+            num_list=test_stats[symb]["num"],
+            num_pos_list=test_stats[symb]["num_pos"],
+            c_pos=c_pos,
+            c_neg=c_neg,
+            max_k=summary_size,
+        )
 
 
 def get_balanced_test_data_list(
@@ -140,7 +131,7 @@ def get_balanced_test_data_list(
     test_balance_method: str = "beta",
     test_balance_kwargs: dict = {},
     test_balance_negative_ratio: float = 1.0,
-) -> List[BGData]:
+) -> List[AData]:
     """Return a list of balanced test data by repeated cross validation.
 
     Args:
@@ -156,13 +147,22 @@ def get_balanced_test_data_list(
         List[BGData]: A list of balanced test data.
     """
     data_list = []
-    with tqdm(
-        total=num_cross_validation * k * num_negative_sampling,
-        desc="Repeated Cross Validation",
-    ) as pbar:
+    tasks = []
+    with (
+        tqdm(
+            total=num_cross_validation * k * num_negative_sampling,
+            desc="Repeated Cross Validation",
+        ) as pbar,
+        Client(
+            LocalCluster(
+                n_workers=int(os.getenv("NUM_WORKERS")),
+                threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+            )
+        ) as client,
+    ):
         for i in range(num_cross_validation):
             data = get_data()
-            spliter = BGTrainTestSpliter(k=k, data=data, seed=i)
+            spliter = ATrainTestSpliter(k=k, data=data, seed=i)
             for j in range(k):
                 _, test_data = spliter.split(j)
                 for l in range(num_negative_sampling):
@@ -173,28 +173,40 @@ def get_balanced_test_data_list(
                     for key, value in test_balance_kwargs.items():
                         save_name += f"_{key}_{value}"
                     temp_test_data = copy.deepcopy(test_data)
-                    temp_test_data.balance_data(
+
+                    def process_data(data, *args, **kwargs):
+                        data.balance_data(*args, **kwargs)
+                        return data
+
+                    # Define delayed task
+                    task = delayed(process_data)(
+                        temp_test_data,
                         balance_method=test_balance_method,
                         negative_ratio=test_balance_negative_ratio,
                         seed=l,
                         save_name=save_name,
                         **test_balance_kwargs,
                     )
-                    data_list.append(temp_test_data)
-                    pbar.update(1)
+                    tasks.append(task)
+
+        # Submit tasks to Dask
+        futures = client.compute(tasks)
+
+        # Track progress using as_completed
+        data_list = []
+        for future in dask.distributed.as_completed(futures):
+            data_list.append(future.result())
+            pbar.update(1)
+
     return data_list
 
 
-def get_ave_stats(
-    data_list: List[BGData],
-    cluster_a_node_names: list,
-    cluster_b_node_names: list,
-) -> dict:
+def get_ave_stats(data_list: List[AData], node_names: List[List[str]]) -> dict:
     """
     Calculate average statistics of n bipartite graph datasets.
 
     Args:
-        data_list (List[BGData]): A list of BGData objects.
+        data_list (List[AData]): A list of AData objects.
         cluster_a_node_names (list): A list of cluster A node names.
         cluster_b_node_names (list): A list of cluster B node names.
 
@@ -202,7 +214,7 @@ def get_ave_stats(
         dict: A nested dictionary of statistics for the dataset.
     """
 
-    stats = _initialize_stats(cluster_a_node_names, cluster_b_node_names)
+    stats = _initialize_stats(node_names)
 
     graph_list = [data.associations for data in data_list]
     stats_list = [data.get_stats() for data in data_list]
@@ -210,8 +222,8 @@ def get_ave_stats(
     _aggregate_stats(stats, stats_list)
 
     # Add Pairwise Average Similarity between bipartite graphs
-    pos_graph_list = [[e for e in g if e[2] == 1] for g in graph_list]
-    neg_graph_list = [[e for e in g if e[2] == 0] for g in graph_list]
+    pos_graph_list = [[e for e in g if e[-1] == 1] for g in graph_list]
+    neg_graph_list = [[e for e in g if e[-1] == 0] for g in graph_list]
     stats["pas"] = _pairwise_average_similarity(graph_list)
     stats["pas_pos"] = _pairwise_average_similarity(pos_graph_list)
     stats["pas_neg"] = _pairwise_average_similarity(neg_graph_list)
@@ -222,7 +234,7 @@ def get_ave_stats(
     return stats
 
 
-def _initialize_stats(cluster_a_node_names, cluster_b_node_names) -> dict:
+def _initialize_stats(node_names: List[List[str]]) -> dict:
     """Initialize the statistics structure for the dataset."""
 
     def init_node_stats(size: int):
@@ -234,22 +246,26 @@ def _initialize_stats(cluster_a_node_names, cluster_b_node_names) -> dict:
             "ent": np.zeros(1),
         }
 
-    cluster_a_size = len(cluster_a_node_names)
-    cluster_b_size = len(cluster_b_node_names)
-
     stats = {
         "ent": np.zeros(1),
-        "a": init_node_stats(cluster_a_size),
-        "b": init_node_stats(cluster_b_size),
     }
+
+    for i, cluster_node_names in enumerate(node_names):
+        # convert i to ith alphabetic letter for example 1 -> a, 2 -> b
+        cluster_name = chr(i + 97)
+        stats[cluster_name] = init_node_stats(len(cluster_node_names))
+
     return stats
 
 
-def _aggregate_stats(stats, stats_list):
+def _aggregate_stats(stats: dict, stats_list: List[dict]):
     """Aggregate the statistics from multiple datasets."""
+    node_types = list(stats.keys())
+    node_types.remove("ent")
+
     for s in stats_list:
         stats["ent"] += s["ent"]
-        for node_type in ["a", "b"]:
+        for node_type in node_types:
             stats[node_type]["num_neg"] += s[node_type]["num_neg"]
             stats[node_type]["num_pos"] += s[node_type]["num_pos"]
             stats[node_type]["num"] += s[node_type]["num"]
@@ -257,7 +273,7 @@ def _aggregate_stats(stats, stats_list):
             stats[node_type]["ent"] += s[node_type]["ent"]
 
     stats["ent"] /= len(stats_list)
-    for node_type in ["a", "b"]:
+    for node_type in node_types:
         stats[node_type]["num_neg"] /= len(stats_list)
         stats[node_type]["num_pos"] /= len(stats_list)
         stats[node_type]["num"] /= len(stats_list)
@@ -265,7 +281,7 @@ def _aggregate_stats(stats, stats_list):
         stats[node_type]["ent"] /= len(stats_list)
 
 
-def _pairwise_average_similarity(lists):
+def _pairwise_average_similarity(lists: List[List[int]]):
     """
     Calculate the pairwise average Jaccard similarity for a list of lists
     containing nested lists (e.g., 3-element lists).

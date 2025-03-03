@@ -6,7 +6,7 @@ HMDAD_RAW_DATA_DIR = os.path.join(RAW_DATA_DIR, "hmdad")
 HMDAD_PROCESSED_DATA_DIR = os.path.join(PROCESSED_DATA_DIR, "hmdad")
 
 HMDAD_DATASET_FILE = os.path.join(
-    HMDAD_PROCESSED_DATA_DIR, "hmdad_microbe_disease_associations.npy"
+    HMDAD_PROCESSED_DATA_DIR, "hmdad_microbe_disease_associations.txt"
 )
 HMDAD_DISEASE_NAMES_FILE = os.path.join(HMDAD_PROCESSED_DATA_DIR, "disease_names.csv")
 HMDAD_MICROBE_NAMES_FILE = os.path.join(HMDAD_PROCESSED_DATA_DIR, "microbe_names.csv")

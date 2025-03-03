@@ -41,8 +41,7 @@ ds = Dataset()
 
 results = get_result_of_rcv(
     save_preds_dir=model_result_dir,
-    cluster_a_node_names=ds.get_cluster_a_node_names(),
-    cluster_b_node_names=ds.get_cluster_b_node_names(),
+    node_names=ds.get_node_names(),
     num_cross_validation=num_cross_validation,
     num_negative_sampling=num_negative_sampling,
     test_balance_method=test_balance_method,

@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Union, List, Tuple
+from typing import Callable, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -8,12 +8,12 @@ from tqdm import tqdm
 
 from netbalance.configs import OptimizerConfig
 from netbalance.data import TrainTestSplitter
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_data import AData
 from netbalance.models import HandlerFactory
 from netbalance.optimization.interface import Trainer
 from netbalance.utils import get_header_format, prj_logger
 
-from .result import BGCCrossValidationResult
+from .result import ACrossValidationResult
 from .utils import evaluate_binary_classification
 
 logger = prj_logger.getLogger(__name__)
@@ -23,8 +23,7 @@ def get_ent_vs_auc(
     model_result_dir: str,
     dataset_name: str,
     test_balance_kwargs: dict,
-    cluster_a_node_names: List[str],
-    cluster_b_node_names: List[str],
+    node_names: list[list[int]],
     num_cross_validation: int = 2,
     num_negative_sampling: int = 2,
 ) -> Tuple[List[float], List[List[float]], List[float]]:
@@ -34,8 +33,7 @@ def get_ent_vs_auc(
         model_result_dir (str): The directory containing the prediction files.
         dataset_name (str): The name of the dataset.
         test_balance_kwargs (dict): The keyword arguments for balancing the test data using rho method.
-        cluster_a_node_names (List[str]): The names of the nodes in cluster A.
-        cluster_b_node_names (List[str]): The names of the nodes in cluster B.
+        node_names (list[list[int]]): The node names of the dataset.
         num_cross_validation (int, optional): The number of cross-validation (for each entropy). Defaults to 1.
         num_negative_sampling (int, optional): The number of negative samples (for each entropy). Defaults to 1.
 
@@ -54,8 +52,7 @@ def get_ent_vs_auc(
         )
         results = get_result_of_rcv(
             save_preds_dir=model_result_dir,
-            cluster_a_node_names=cluster_a_node_names,
-            cluster_b_node_names=cluster_b_node_names,
+            node_names=node_names,
             num_cross_validation=num_cross_validation,
             num_negative_sampling=num_negative_sampling,
             dataset_name=dataset_name,
@@ -162,8 +159,10 @@ def cross_validation(
         preds = np.zeros(test_data.associations.shape[0])
         for j in range(0, test_data.associations.shape[0], test_batch_size):
             preds[j : j + test_batch_size] = model_handler.predict(
-                a_nodes=test_data.associations[j : j + test_batch_size, 0],
-                b_nodes=test_data.associations[j : j + test_batch_size, 1],
+                [
+                    test_data.associations[j : j + test_batch_size, r]
+                    for r in range(test_data.associations.shape[1] - 1)
+                ],
             )
         logger.info("Predictions generated.")
 
@@ -185,18 +184,20 @@ def _save_predictions(predictions: np.ndarray, associations: np.ndarray, file: s
         file (str): _description_
     """
     with open(file, "w") as f:
-        f.write("Node A,Node B,Association,Score\n")
+        n = associations.shape[1] - 1
+        for i in range(n):
+            f.write(f"Node {str(chr(i + 97)).upper()},")
+        f.write("Association, Score\n")
         for i in range(len(associations)):
-            f.write(
-                f"{associations[i, 0]},{associations[i, 1]},{associations[i, 2]},{predictions[i]}\n"
-            )
+            for j in range(n):
+                f.write(f"{associations[i, j]},")
+            f.write(f"{associations[i, -1]},{predictions[i]}\n")
         logger.info(f"Predictions saved to {file}")
 
 
 def get_result_of_rcv(
     save_preds_dir: str,
-    cluster_a_node_names: list,
-    cluster_b_node_names: list,
+    node_names: list[list[str]],
     num_negative_sampling: int,
     num_cross_validation: int,
     test_balance_method: Union[str, None] = "beta",
@@ -205,7 +206,7 @@ def get_result_of_rcv(
     dataset_name: str = None,
 ):
     logger.info(get_header_format("Repeated Cross Validation From Prediction Files"))
-    general_cv_result = BGCCrossValidationResult()
+    general_cv_result = ACrossValidationResult()
 
     with tqdm(
         total=num_cross_validation * 5 * num_negative_sampling,
@@ -218,7 +219,7 @@ def get_result_of_rcv(
                 )
                 logger.info(f"Reading predictions from {preds_file}")
                 df = pd.read_csv(preds_file)
-                associations = df.iloc[:, :3].to_numpy()
+                associations = df.iloc[:, :-1].to_numpy()
 
                 for j in range(num_negative_sampling):
                     save_name = None
@@ -227,11 +228,7 @@ def get_result_of_rcv(
                         save_name += f"_met_{test_balance_method}_rat_{test_balance_negative_ratio}"
                         for key, value in test_balance_kwargs.items():
                             save_name += f"_{key}_{value}"
-                    data = BGData(
-                        associations=associations,
-                        cluster_a_node_names=cluster_a_node_names,
-                        cluster_b_node_names=cluster_b_node_names,
-                    )
+                    data = AData(associations=associations, node_names=node_names)
                     if test_balance_method is not None:
                         data.balance_data(
                             balance_method=test_balance_method,
@@ -240,17 +237,24 @@ def get_result_of_rcv(
                             save_name=save_name,
                             **test_balance_kwargs,
                         )
-                        reduced_preds = np.array(
-                            [
-                                df.loc[df.iloc[:, 0] == indi]
-                                .loc[df.iloc[:, 1] == indj]
-                                .iloc[:, 3]
-                                .item()
-                                for indi, indj, _ in data.associations
-                            ]
-                        ).flatten()
+                        temp_df = pd.DataFrame(
+                            data.associations[:, :-1], columns=df.columns[:-2].tolist()
+                        )
+                        reduced_df = df.merge(
+                            temp_df, on=df.columns[:-2].tolist(), how="right"
+                        )
+                        reduced_preds = reduced_df.iloc[:, -1].to_numpy().flatten()
+                        # reduced_preds = np.array(
+                        #     [
+                        #         df.loc[df.iloc[:, 0] == indi]
+                        #         .loc[df.iloc[:, 1] == indj]
+                        #         .iloc[:, 3]
+                        #         .item()
+                        #         for indi, indj, _ in data.associations
+                        #     ]
+                        # ).flatten()
                     else:
-                        reduced_preds = df.iloc[:, 3].to_numpy()
+                        reduced_preds = df.iloc[:, -1].to_numpy()
                     result = evaluate_binary_classification(
                         data, reduced_preds, threshold=0.5
                     )

@@ -7,7 +7,7 @@ from netbalance.configs.bmlpdti import BMLPDTIModelConfig as ModelConfig  # Para
 from netbalance.configs.bmlpdti import (
     BMLPDTIOptimizerConfig as OptimizerConfig,
 )  # Parameter
-from netbalance.data.bipartite_graph_data import BGData
+from netbalance.data.association_data import BGData
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.bmlpdti import (
     BMLPDTIHandlerFactory as HandlerFactory,

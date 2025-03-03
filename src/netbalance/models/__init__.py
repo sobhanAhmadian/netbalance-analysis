@@ -1,1 +1,1 @@
-from .interface import BGCModelHandler, HandlerFactory, ModelHandler
+from .interface import AModelHandler, HandlerFactory, ModelHandler
