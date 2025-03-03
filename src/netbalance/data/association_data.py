@@ -48,7 +48,7 @@ class AData(Data):
         negative_ratio: float = 1.0,
         seed: int = 42,
         save_name: Union[str, None] = None,
-        force_calculation: bool = True,
+        force_calculation: bool = False,
         **kwargs,
     ):
         """
@@ -313,7 +313,7 @@ class AData(Data):
                 for i in range(len(dims)):
                     if neg_asso[i] == pos_asso[i]:
                         weights[tuple(neg_asso[:-1])] += 1.0
-                        break  # TODO remove break
+                        # break  # TODO remove break
 
         neg_samples = []
         for _ in range(num_negative):

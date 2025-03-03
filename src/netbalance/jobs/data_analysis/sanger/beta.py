@@ -15,17 +15,18 @@ test_balance_kwargs = {}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 figs_folder = f"{RESULTS_DIR}/figs/data_analysis/{dataset}/{test_balance_method}"
 
-analyse_datasest(
-    dataset=Dataset(),
-    dataset_name=dataset,
-    figs_folder=figs_folder,
-    num_cross_validation=num_cross_validation,
-    num_negative_sampling=num_negative_sampling,
-    k=k,
-    test_balance_method=test_balance_method,
-    test_balance_kwargs=test_balance_kwargs,
-    test_balance_negative_ratio=test_balance_negative_ratio,
-    c_pos=c_pos,
-    c_neg=c_neg,
-    with_negatives=False,
-)
+if __name__ == "__main__":
+    analyse_datasest(
+        dataset=Dataset(),
+        dataset_name=dataset,
+        figs_folder=figs_folder,
+        num_cross_validation=num_cross_validation,
+        num_negative_sampling=num_negative_sampling,
+        k=k,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+        test_balance_negative_ratio=test_balance_negative_ratio,
+        c_pos=c_pos,
+        c_neg=c_neg,
+        with_negatives=False,
+    )

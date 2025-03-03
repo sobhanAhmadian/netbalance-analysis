@@ -8,6 +8,7 @@ import dask.distributed
 import numpy as np
 from dask import delayed
 from dask.distributed import Client, LocalCluster
+from dotenv import load_dotenv
 from tqdm import tqdm
 
 from netbalance.data.association_data import AData, ATrainTestSpliter
@@ -17,6 +18,9 @@ from netbalance.visualization import plot_per_group_associations
 from .logger import logging as prj_logger
 
 logger = prj_logger.getLogger(__name__)
+
+load_dotenv()
+
 
 def analyse_datasest(
     dataset: ADataset,
@@ -38,7 +42,7 @@ def analyse_datasest(
     This function will print and plot the statistics of the dataset including entropy,
         pairwise average similarity, and per node stattistics.
 
-    Args:
+    Args:7
         dataset (ADataset): The dataset to be analysed.
         dataset_name (str): The name of the dataset.
         figs_folder (str): The path to the folder where the figures will be saved.
@@ -149,7 +153,12 @@ def get_balanced_test_data_list(
             total=num_cross_validation * k * num_negative_sampling,
             desc="Repeated Cross Validation",
         ) as pbar,
-        Client(LocalCluster(n_workers=7, threads_per_worker=1)) as client,
+        Client(
+            LocalCluster(
+                n_workers=int(os.getenv("NUM_WORKERS")),
+                threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+            )
+        ) as client,
     ):
         for i in range(num_cross_validation):
             data = get_data()
