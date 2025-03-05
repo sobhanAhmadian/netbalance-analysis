@@ -48,7 +48,7 @@ class AData(Data):
         negative_ratio: float = 1.0,
         seed: int = 42,
         save_name: Union[str, None] = None,
-        force_calculation: bool = False,
+        force_calculation: bool = True,
         **kwargs,
     ):
         """
