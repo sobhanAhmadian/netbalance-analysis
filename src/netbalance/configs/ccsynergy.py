@@ -44,7 +44,7 @@ class CCSynergyOptimizerConfig(OptimizerConfig):
     def __init__(self) -> None:
         super().__init__()
         self.batch_size = 128
-        self.n_epoch = 2  # 1000
+        self.n_epoch = 1000
 
     def get_configuration(self):
         return super().get_configuration()
