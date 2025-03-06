@@ -84,7 +84,7 @@ class CCSynergyTrainer(Trainer):
         ) = statified_train_test_sampler(
             positive_associations.shape[0],
             negative_associations.shape[0],
-            train_ratio=0.9,
+            train_ratio=0.8,
             seed=0,
         )
         train_positive_associations = positive_associations[train_positive_indices]

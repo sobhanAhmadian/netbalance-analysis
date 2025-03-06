@@ -27,7 +27,7 @@ class CCSynergyModelConfig(ModelConfig):
         self.n3 = 500
         self.lr = 0.0001
         self.drug_feature_name = "C4"
-        self.cell_feature_name = "Cell3"
+        self.cell_feature_name = "Cell5"
 
     def get_configuration(self):
         return super().get_configuration()
