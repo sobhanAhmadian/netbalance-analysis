@@ -58,6 +58,7 @@ optimizer_config.device = device
 optimizer_config.es_patience = 50
 optimizer_config.fair = True
 
+
 def get_data():
     return BGData(
         associations=ds.get_associations(with_negatives=True),
@@ -71,14 +72,14 @@ associations = ds.get_associations(with_negatives=True)
 trainer = Trainer()
 factory = HandlerFactory(model_config=model_config)  # Parameter
 
-
-repeated_cross_validation(
-    get_data=get_data,
-    SplitterClass=BGTrainTestSpliter,
-    handler_factory=factory,
-    trainer=trainer,
-    optimizer_config=optimizer_config,
-    num_cross_validation=num_cross_validation,
-    save_preds_dir=model_result_dir,
-    splitter_kwargs=splitter_kwargs,
-)
+if __name__ == "__main__":
+    repeated_cross_validation(
+        get_data=get_data,
+        SplitterClass=BGTrainTestSpliter,
+        handler_factory=factory,
+        trainer=trainer,
+        optimizer_config=optimizer_config,
+        num_cross_validation=num_cross_validation,
+        save_preds_dir=model_result_dir,
+        splitter_kwargs=splitter_kwargs,
+    )
