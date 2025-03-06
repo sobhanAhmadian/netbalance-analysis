@@ -10,8 +10,13 @@ CCSYNERGY_PROCESSED_DATA_DIR = os.path.join(PROCESSED_DATA_DIR, "ccsynergy")
 CCSYNERGY_MODEL_SAVED_DIR = os.path.join(MODEL_SAVED_DIR, "ccsynergy")
 CCSYNERGY_RESULTS_DIR = os.path.join(CCSYNERGY_PROCESSED_DATA_DIR, "results")
 
-CCSYNERGY_CELL_FEATURES_DIR = os.path.join(CCSYNERGY_PROCESSED_DATA_DIR, "features/cells")
-CCSYNERGY_DRUG_FEATURES_DIR = os.path.join(CCSYNERGY_PROCESSED_DATA_DIR, "features/drugs")
+CCSYNERGY_CELL_FEATURES_DIR = os.path.join(
+    CCSYNERGY_PROCESSED_DATA_DIR, "features/cells"
+)
+CCSYNERGY_DRUG_FEATURES_DIR = os.path.join(
+    CCSYNERGY_PROCESSED_DATA_DIR, "features/drugs"
+)
+
 
 class CCSynergyModelConfig(ModelConfig):
     def __init__(self):
@@ -39,6 +44,7 @@ class CCSynergyOptimizerConfig(OptimizerConfig):
     def __init__(self) -> None:
         super().__init__()
         self.batch_size = 128
+        self.n_epoch = 2  # 1000
 
     def get_configuration(self):
         return super().get_configuration()

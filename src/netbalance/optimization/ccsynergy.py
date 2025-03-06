@@ -2,6 +2,9 @@ import numpy as np
 import tensorflow as tf
 from keras import callbacks
 
+from netbalance.configs.ccsynergy import (
+    CCSYNERGY_PROCESSED_DATA_DIR as PROCESSED_DATA_DIR,
+)
 from netbalance.data.association_data import TGData
 from netbalance.evaluation import Result
 from netbalance.evaluation.utils import evaluate_binary_classification_simple
@@ -14,7 +17,7 @@ from .interface import Trainer
 logger = prj_logger.getLogger(__name__)
 
 
-class DegreeRatioTrainer(Trainer):
+class CCSynergyTrainer(Trainer):
 
     def train(
         self,
@@ -27,16 +30,20 @@ class DegreeRatioTrainer(Trainer):
 
         train_data, val_data = self.split_train_dev(data)
         X_train = model_handler.fe.extract_features(
-            [train_data.associations[:, i] for i in range(3)]
+            train_data.associations[:, 0],
+            train_data.associations[:, 1],
+            train_data.associations[:, 2],
         )
         X_val = model_handler.fe.extract_features(
-            [val_data.associations[:, i] for i in range(3)]
+            val_data.associations[:, 0],
+            val_data.associations[:, 1],
+            val_data.associations[:, 2],
         )
         Y_train = train_data.associations[:, -1]
         Y_val = val_data.associations[:, -1]
 
         cb_check = callbacks.ModelCheckpoint(
-            ("something.keras"),
+            (f"{PROCESSED_DATA_DIR}/cache_model.keras"),
             verbose=1,
             monitor="val_loss",
             save_best_only=True,
@@ -46,7 +53,7 @@ class DegreeRatioTrainer(Trainer):
             x=X_train,
             y=Y_train,
             batch_size=config.batch_size,
-            epochs=1000,
+            epochs=config.n_epoch,
             shuffle=True,
             validation_data=(X_val, Y_val),
             callbacks=[
@@ -54,7 +61,9 @@ class DegreeRatioTrainer(Trainer):
                 cb_check,
             ],
         )
-        model_handler.model = tf.keras.models.load_model(("somthing.keras"))
+        model_handler.model = tf.keras.models.load_model(
+            (f"{PROCESSED_DATA_DIR}/cache_model.keras")
+        )
 
         preds = model_handler.predict(
             [data.associations[:, i] for i in range(data.associations.shape[1] - 1)]

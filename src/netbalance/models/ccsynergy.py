@@ -117,10 +117,11 @@ class CCSynergyModelHandler(AModelHandler):
     def predict_impl(self, node_lists: Union[list[int], np.ndarray]):
         a_nodes, b_nodes, c_nodes = node_lists
         features = self.fe.extract_features(a_nodes, b_nodes, c_nodes)
-        return self.model.predict(features)
+        return self.model.predict(features).reshape(-1)
 
     def destroy(self):
-        raise NotImplementedError
+        del self.model
+        del self.fe
 
     def summary(self):
         raise NotImplementedError
