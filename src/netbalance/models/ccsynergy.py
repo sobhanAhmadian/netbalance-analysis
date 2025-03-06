@@ -17,6 +17,12 @@ from .interface import AModelHandler, HandlerFactory
 
 logger = prj_logger.getLogger(__name__)
 
+import os
+
+# keras run on cpu
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
+
 DRUG_FEATURE_NAMES = Literal[
     "A1",
     "A2",

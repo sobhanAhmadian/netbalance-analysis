@@ -40,6 +40,7 @@ logger.info(
 )
 
 ds = Dataset()
+
 if __name__ == "__main__":
     results = get_result_of_rcv(
         save_preds_dir=model_result_dir,
