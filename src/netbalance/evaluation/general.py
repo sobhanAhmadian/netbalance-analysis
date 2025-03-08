@@ -81,6 +81,7 @@ def repeated_cross_validation(
     save_preds_dir: str,
     splitter_kwargs: dict = {},
     test_batch_size: int = 1000,
+    parallel: bool = True,
 ):
     """Perform repeated cross validation using the given components and configuration,
     and save the predictions for test data of each fold.
@@ -95,6 +96,7 @@ def repeated_cross_validation(
         save_preds_dir (str): _description_
         splitter_kwargs (dict, optional): _description_. Defaults to {}.
         test_batch_size (int, optional): _description_. Defaults to 1000.
+        parallel (bool, optional): Whether to run the cross validation in parallel. Defaults to True.
     """
     logger.info(get_header_format("Repeated Cross Validation"))
 
@@ -112,6 +114,7 @@ def repeated_cross_validation(
                 save_preds_dir=save_preds_dir_re,
                 test_batch_size=test_batch_size,
                 pbar=pbar,
+                parallel=parallel,
             )
 
 
@@ -123,6 +126,7 @@ def cross_validation(
     save_preds_dir: str,
     test_batch_size: int = 1000,
     pbar: tqdm = None,
+    parallel: bool = True,
 ):
     """
     Perform k-fold cross validation using the given components and configuration.
@@ -135,6 +139,7 @@ def cross_validation(
         config (OptimizerConfig): The optimizer configuration object.
         save_preds_dir (str): The directory to save the predictions.
         test_batch_size (int, optional): The batch size for test data. Defaults to 1000.
+        parallel (bool, optional): Whether to run the cross validation in parallel. Defaults to True.
     """
 
     k = train_test_spliter.k
@@ -147,7 +152,7 @@ def cross_validation(
 
         # Split the data
         train_data, test_data = train_test_spliter.split(i)
-
+        
         # Create model handler
         model_handler = handler_factory.create_handler()
 
@@ -176,8 +181,12 @@ def cross_validation(
         if pbar is not None:
             pbar.update(1)
 
-    tasks = [dask.delayed(task)(i) for i in range(k)]
-    dask.compute(tasks)
+    if parallel:
+        tasks = [dask.delayed(task)(i) for i in range(k)]
+        dask.compute(tasks)
+    else:
+        for i in range(k):
+            task(i)
 
 
 def _save_predictions(predictions: np.ndarray, associations: np.ndarray, file: str):
