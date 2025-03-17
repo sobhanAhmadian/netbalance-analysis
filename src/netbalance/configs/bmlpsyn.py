@@ -26,7 +26,7 @@ class BMLPSYNModelConfig(ModelConfig):
         self.dropout = 0.1
 
         self.drug_feature_name = "C4"
-        self.cell_feature_name = "Cell5"
+        self.cell_feature_name = "Cell2"
 
     def get_configuration(self):
         return super().get_configuration()
