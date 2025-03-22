@@ -1,9 +1,11 @@
 import os
 from typing import Callable, List, Tuple, Union
 
+import dask
 import numpy as np
 import pandas as pd
 import torch
+from dask.distributed import Client, LocalCluster
 from tqdm import tqdm
 
 from netbalance.configs import OptimizerConfig
@@ -79,6 +81,7 @@ def repeated_cross_validation(
     save_preds_dir: str,
     splitter_kwargs: dict = {},
     test_batch_size: int = 1000,
+    parallel: bool = True,
 ):
     """Perform repeated cross validation using the given components and configuration,
     and save the predictions for test data of each fold.
@@ -93,6 +96,7 @@ def repeated_cross_validation(
         save_preds_dir (str): _description_
         splitter_kwargs (dict, optional): _description_. Defaults to {}.
         test_batch_size (int, optional): _description_. Defaults to 1000.
+        parallel (bool, optional): Whether to run the cross validation in parallel. Defaults to True.
     """
     logger.info(get_header_format("Repeated Cross Validation"))
 
@@ -110,6 +114,7 @@ def repeated_cross_validation(
                 save_preds_dir=save_preds_dir_re,
                 test_batch_size=test_batch_size,
                 pbar=pbar,
+                parallel=parallel,
             )
 
 
@@ -121,6 +126,7 @@ def cross_validation(
     save_preds_dir: str,
     test_batch_size: int = 1000,
     pbar: tqdm = None,
+    parallel: bool = True,
 ):
     """
     Perform k-fold cross validation using the given components and configuration.
@@ -133,19 +139,20 @@ def cross_validation(
         config (OptimizerConfig): The optimizer configuration object.
         save_preds_dir (str): The directory to save the predictions.
         test_batch_size (int, optional): The batch size for test data. Defaults to 1000.
+        parallel (bool, optional): Whether to run the cross validation in parallel. Defaults to True.
     """
 
     k = train_test_spliter.k
     logger.info(f"Start {k}-fold Cross Validation with config: {config.exp_name}")
 
-    for i in range(k):
+    def task(i: int):
         logger.info("{:#^50}".format(f"   Fold {i + 1}   "))
         os.makedirs(save_preds_dir, exist_ok=True)
         save_preds_file = f"{save_preds_dir}/fold_{i + 1}.csv"
 
         # Split the data
         train_data, test_data = train_test_spliter.split(i)
-
+        
         # Create model handler
         model_handler = handler_factory.create_handler()
 
@@ -173,6 +180,13 @@ def cross_validation(
 
         if pbar is not None:
             pbar.update(1)
+
+    if parallel:
+        tasks = [dask.delayed(task)(i) for i in range(k)]
+        dask.compute(tasks)
+    else:
+        for i in range(k):
+            task(i)
 
 
 def _save_predictions(predictions: np.ndarray, associations: np.ndarray, file: str):
@@ -208,61 +222,62 @@ def get_result_of_rcv(
     logger.info(get_header_format("Repeated Cross Validation From Prediction Files"))
     general_cv_result = ACrossValidationResult()
 
-    with tqdm(
-        total=num_cross_validation * 5 * num_negative_sampling,
-        desc="Calc Result of RCV",
-    ) as pbar:
-        for i in range(num_cross_validation):
-            for k in range(5):
-                preds_file = os.path.join(
-                    save_preds_dir, f"cv_{i + 1}", f"fold_{k + 1}.csv"
-                )
-                logger.info(f"Reading predictions from {preds_file}")
-                df = pd.read_csv(preds_file)
-                associations = df.iloc[:, :-1].to_numpy()
+    def task(i: int, k: int, j: int, associations: np.ndarray, df: pd.DataFrame):
+        save_name = None
+        if dataset_name is not None and test_balance_method is not None:
+            save_name = (
+                f"dataset_{dataset_name}_{"test"}_cv_{i + 1}_fold_{k + 1}_neg_{j + 1}"
+            )
+            save_name += f"_met_{test_balance_method}_rat_{test_balance_negative_ratio}"
+            for key, value in test_balance_kwargs.items():
+                save_name += f"_{key}_{value}"
+        data = AData(associations=associations, node_names=node_names)
+        if test_balance_method is not None:
+            data.balance_data(
+                balance_method=test_balance_method,
+                negative_ratio=test_balance_negative_ratio,
+                seed=j,
+                save_name=save_name,
+                **test_balance_kwargs,
+            )
+            temp_df = pd.DataFrame(
+                data.associations[:, :-1], columns=df.columns[:-2].tolist()
+            )
+            reduced_df = df.merge(temp_df, on=df.columns[:-2].tolist(), how="right")
+            reduced_preds = reduced_df.iloc[:, -1].to_numpy().flatten()
+        else:
+            reduced_preds = df.iloc[:, -1].to_numpy()
+        result = evaluate_binary_classification(data, reduced_preds, threshold=0.5)
+        logger.info(
+            f"AUC Result of fold {k + 1} of cv {i + 1} of neg {j + 1} is {result.auc}"
+        )
+        # general_cv_result.add_fold_result(result)
+        return result
 
-                for j in range(num_negative_sampling):
-                    save_name = None
-                    if dataset_name is not None and test_balance_method is not None:
-                        save_name = f"dataset_{dataset_name}_{"test"}_cv_{i + 1}_fold_{k + 1}_neg_{j + 1}"
-                        save_name += f"_met_{test_balance_method}_rat_{test_balance_negative_ratio}"
-                        for key, value in test_balance_kwargs.items():
-                            save_name += f"_{key}_{value}"
-                    data = AData(associations=associations, node_names=node_names)
-                    if test_balance_method is not None:
-                        data.balance_data(
-                            balance_method=test_balance_method,
-                            negative_ratio=test_balance_negative_ratio,
-                            seed=j,
-                            save_name=save_name,
-                            **test_balance_kwargs,
-                        )
-                        temp_df = pd.DataFrame(
-                            data.associations[:, :-1], columns=df.columns[:-2].tolist()
-                        )
-                        reduced_df = df.merge(
-                            temp_df, on=df.columns[:-2].tolist(), how="right"
-                        )
-                        reduced_preds = reduced_df.iloc[:, -1].to_numpy().flatten()
-                        # reduced_preds = np.array(
-                        #     [
-                        #         df.loc[df.iloc[:, 0] == indi]
-                        #         .loc[df.iloc[:, 1] == indj]
-                        #         .iloc[:, 3]
-                        #         .item()
-                        #         for indi, indj, _ in data.associations
-                        #     ]
-                        # ).flatten()
-                    else:
-                        reduced_preds = df.iloc[:, -1].to_numpy()
-                    result = evaluate_binary_classification(
-                        data, reduced_preds, threshold=0.5
-                    )
-                    logger.info(
-                        f"AUC Result of fold {k + 1} of cv {i + 1} of neg {j + 1} is {result.auc}"
-                    )
-                    general_cv_result.add_fold_result(result)
-                    pbar.update(1)
+    tasks = []
+    for i in range(num_cross_validation):
+        for k in range(5):
+            preds_file = os.path.join(
+                save_preds_dir, f"cv_{i + 1}", f"fold_{k + 1}.csv"
+            )
+            logger.info(f"Reading predictions from {preds_file}")
+            df = pd.read_csv(preds_file)
+            associations = df.iloc[:, :-1].to_numpy()
+
+            for j in range(num_negative_sampling):
+                tasks.append(dask.delayed(task)(i, k, j, associations, df))
+
+    with Client(
+        LocalCluster(
+            n_workers=int(os.getenv("NUM_WORKERS")),
+            threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+        )
+    ) as client, tqdm(total=len(tasks), desc="Calc Result of RCV") as pbar:
+        futures = client.compute(tasks)
+
+        for future in dask.distributed.as_completed(futures):
+            pbar.update(1)
+            general_cv_result.add_fold_result(future.result())
 
     general_cv_result.calculate_cv_result()
     return general_cv_result
