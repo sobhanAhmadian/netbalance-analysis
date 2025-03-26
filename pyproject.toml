@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A Systematic Evaluation of X-Y Association Prediction Framework"
 authors = [{ name = "Sobhan Ahmadian Moghadam" }]
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "jupyter (>=1.1.1,<2.0.0)",
     "pandas (>=2.2.3,<3.0.0)",
