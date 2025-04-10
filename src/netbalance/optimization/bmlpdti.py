@@ -1,10 +1,15 @@
 import copy
 import hashlib
+import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 
+import dask
 import numpy as np
 import torch
+from dask.distributed import Client, LocalCluster
 from torch.utils.data import DataLoader, TensorDataset
+from tqdm import tqdm
 
 from netbalance.configs.bmlpdti import BMLPDTIOptimizerConfig
 from netbalance.data import PytorchData
@@ -15,8 +20,9 @@ from netbalance.models.bmlpdti import BMLPDTIModelHandler
 from netbalance.optimization.simple_pytorch import PytorchTrainer
 from netbalance.utils import get_header_format, prj_logger
 
-from concurrent.futures import ThreadPoolExecutor
 from .interface import Trainer
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def hash_numpy_array(arr):
@@ -89,31 +95,36 @@ class BalanceBMLPDTITrainer(Trainer):
 
         e_config = copy.deepcopy(config)
         e_config.n_epoch = 1
-        
-        def task(num_bal):
+
+        def task(num_bal, input_data):
             save_name = (
-                f"i{config.i_balance_method}_bmlpdti/{hash_associations}_{num_bal}"
+                f"i{config.i_balance_method}_bmlpdti_{hash_associations}_{num_bal}"
             )
-            logger.info(f"Parallel balancing data with {config.i_balance_method} in epoch {num_bal}")
-            e_data = copy.deepcopy(data)
-            e_data.balance_data(
+            logger.info(
+                f"Parallel balancing data with {config.i_balance_method} in epoch {num_bal}"
+            )
+            input_data.balance_data(
                 balance_method=config.i_balance_method,
                 negative_ratio=config.i_negative_ratio,
                 seed=num_bal,
                 save_name=save_name,
                 **config.i_balance_kwargs,
             )
-            logger.info(f"balanced data with {config.i_balance_method} in epoch {e}")
+            logger.info(
+                f"balanced data with {config.i_balance_method} in epoch {num_bal}"
+            )
 
-        # Multi thread run tasks for num_bal in range 1 to 20
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            executor.map(task, range(0, 20))
-            
+        tasks = [
+            dask.delayed(task)(num_bal, copy.deepcopy(data))
+            for num_bal in range(0, config.i_max_num_bal)
+        ]
+
+        dask.compute(*tasks)
 
         for e in range(config.n_epoch):
-            num_bal = e % 20
+            num_bal = e % config.i_max_num_bal
             save_name = (
-                f"i{config.i_balance_method}_bmlpdti/{hash_associations}_{num_bal}"
+                f"i{config.i_balance_method}_bmlpdti_{hash_associations}_{num_bal}"
             )
 
             e_data = copy.deepcopy(data)
@@ -132,8 +143,8 @@ class BalanceBMLPDTITrainer(Trainer):
             ).numpy()
             y = np.array(associations[:, 2].tolist(), dtype=np.float32).reshape(-1, 1)
             simple_data = PytorchData(
-                X=torch.tensor(dp_embed).to(config.device),
-                y=torch.tensor(y).to(config.device),
+                X=torch.tensor(dp_embed).to(device),
+                y=torch.tensor(y).to(device),
             )
 
             pytorch_trainer = PytorchTrainer()
@@ -145,8 +156,10 @@ class BalanceBMLPDTITrainer(Trainer):
         preds = np.zeros(data.associations.shape[0])
         for j in range(0, data.associations.shape[0], test_batch_size):
             preds[j : j + test_batch_size] = model_handler.predict(
-                a_nodes=data.associations[j : j + test_batch_size, 0],
-                b_nodes=data.associations[j : j + test_batch_size, 1],
+                [
+                    data.associations[j : j + test_batch_size, 0],
+                    data.associations[j : j + test_batch_size, 1],
+                ]
             )
         result = evaluate_binary_classification_simple(
             data.associations[:, 2], preds.reshape(-1), config.threshold
