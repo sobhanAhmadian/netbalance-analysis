@@ -55,6 +55,7 @@ optimizer_config = OptimizerConfig()  # Parameter
 optimizer_config.i_balance_method = "beta"
 optimizer_config.i_balance_kwargs = {}
 optimizer_config.i_negative_ratio = 1.0
+optimizer_config.i_max_num_bal = 30
 optimizer_config.fair = True
 optimizer_config.n_epoch = 600
 optimizer_config.lr = 0.001
