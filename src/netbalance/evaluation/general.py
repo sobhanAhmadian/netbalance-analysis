@@ -81,7 +81,7 @@ def repeated_cross_validation(
     save_preds_dir: str,
     splitter_kwargs: dict = {},
     test_batch_size: int = 1000,
-    parallel: bool = True,
+    parallel: bool = False,
 ):
     """Perform repeated cross validation using the given components and configuration,
     and save the predictions for test data of each fold.

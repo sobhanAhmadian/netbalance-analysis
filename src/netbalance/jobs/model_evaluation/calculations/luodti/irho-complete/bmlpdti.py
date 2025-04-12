@@ -5,16 +5,16 @@ import numpy as np
 from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.configs.bmlpdti import BMLPDTIModelConfig as ModelConfig  # Parameter
 from netbalance.configs.bmlpdti import (
-    BMLPDTIOptimizerConfig as OptimizerConfig,
-)  # Parameter
+    BMLPDTIOptimizerConfig as OptimizerConfig,  # Parameter
+)
 from netbalance.data.association_data import BGData
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.models.bmlpdti import (
-    BMLPDTIHandlerFactory as HandlerFactory,
-)  # Parameter
+    BMLPDTIHandlerFactory as HandlerFactory,  # Parameter
+)
 from netbalance.optimization.bmlpdti import (
-    BalanceBMLPDTITrainer as Trainer,
-)  # Parameter
+    BalanceBMLPDTITrainer as Trainer,  # Parameter
+)
 from netbalance.utils import prj_logger
 
 logger = prj_logger.getLogger(__name__)
@@ -81,8 +81,10 @@ batch_size = 1000
 preds = np.zeros(data.associations.shape[0])
 for j in range(0, data.associations.shape[0], batch_size):
     preds[j : j + batch_size] = model_handler.predict(
-        a_nodes=data.associations[j : j + batch_size, 0],
-        b_nodes=data.associations[j : j + batch_size, 1],
+        [
+            data.associations[j : j + batch_size, 0],
+            data.associations[j : j + batch_size, 1],
+        ]
     )
 logger.info("Predictions generated.")
 file = f"{model_result_dir}/preds.csv"

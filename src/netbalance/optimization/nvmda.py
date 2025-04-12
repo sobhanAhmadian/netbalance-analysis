@@ -41,7 +41,7 @@ class NVMDATrainer(Trainer):
         pytorch_trainer.train(model_handler, simple_data, config)
 
         preds = model_handler.predict(
-            a_nodes=data.associations[:, 0], b_nodes=data.associations[:, 1]
+            [data.associations[:, 0], data.associations[:, 1]]
         )
         result = evaluate_binary_classification_simple(
             data.associations[:, 2], preds.reshape(-1), config.threshold

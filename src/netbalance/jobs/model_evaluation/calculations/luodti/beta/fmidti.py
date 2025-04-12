@@ -80,4 +80,5 @@ if __name__ == "__main__":
         num_cross_validation=num_cross_validation,
         save_preds_dir=model_result_dir,
         splitter_kwargs=splitter_kwargs,
+        parallel=False,
     )

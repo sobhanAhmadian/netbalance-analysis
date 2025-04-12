@@ -176,8 +176,7 @@ class MIDTITrainer(Trainer):
 
             # validation
             val_preds = model_handler.predict(
-                a_nodes=val_data.associations[:, 0],
-                b_nodes=val_data.associations[:, 1],
+                [val_data.associations[:, 0], val_data.associations[:, 1]]
             )
             val_result = evaluate_binary_classification_simple(
                 val_data.associations[:, 2], val_preds.reshape(-1), config.threshold
@@ -200,7 +199,7 @@ class MIDTITrainer(Trainer):
         model_handler.load_model()
 
         preds = model_handler.predict(
-            a_nodes=data.associations[:, 0], b_nodes=data.associations[:, 1]
+            [data.associations[:, 0], data.associations[:, 1]]
         )
         result = evaluate_binary_classification_simple(
             data.associations[:, 2], preds.reshape(-1), config.threshold
