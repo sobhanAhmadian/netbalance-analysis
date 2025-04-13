@@ -35,6 +35,19 @@ def _get_aucs_dir_name(
     return aucs_results_dir
 
 
+def _get_max_f1_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    aucs_results_dir = f"{base_dir}/max_f1/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        aucs_results_dir += f"_{key}_{value}"
+    return aucs_results_dir
+
+
 def _process_results_temp(
     cv_result, model_name, dataset, expr_serie, analyse_name, negative_ratio=None
 ):
@@ -70,6 +83,15 @@ def _save_auc_of_cv_folds(
     auc_arr = np.array(auc_list)
     np.savetxt(f"{dir_path}/{filename}", auc_arr, delimiter=",")
     print(f"\nSaved auc list to {dir_path}/{filename}")
+
+
+def _save_max_f1_of_cv_folds(
+    results: ACrossValidationResult, dir_path: str, filename: str
+):
+    max_f1_list = [result.max_f1 for result in results.fold_results]
+    max_f1_arr = np.array(max_f1_list)
+    np.savetxt(f"{dir_path}/{filename}", max_f1_arr, delimiter=",")
+    print(f"\nSaved max f1 list to {dir_path}/{filename}")
 
 
 def get_auc_of_cv_folds(
@@ -211,5 +233,15 @@ def process_results(
         test_balance_method=test_balance_method,
         test_balance_kwargs=test_balance_kwargs,
     )
+    max_f1s_results_dir = _get_max_f1_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
     os.makedirs(aucs_results_dir, exist_ok=True)
     _save_auc_of_cv_folds(results, aucs_results_dir, filename="aucs.txt")
+
+    os.makedirs(max_f1s_results_dir, exist_ok=True)
+    _save_max_f1_of_cv_folds(results, max_f1s_results_dir, filename="max_f1s.txt")
