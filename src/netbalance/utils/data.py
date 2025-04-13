@@ -3,11 +3,7 @@ import os
 from itertools import combinations
 from typing import Callable, List
 
-import dask
-import dask.distributed
 import numpy as np
-from dask import delayed
-from dask.distributed import Client, LocalCluster
 from dotenv import load_dotenv
 from tqdm import tqdm
 
@@ -32,8 +28,8 @@ def analyse_datasest(
     test_balance_method: str = "beta",
     test_balance_kwargs: dict = {},
     test_balance_negative_ratio: float = 1.0,
-    c_pos: str = "#a2d2ff",
-    c_neg: str = "#ffafcc",
+    c_pos: str = "#66c2a5",
+    c_neg: str = "#d53e4f",
     summary_size: int = 40,
     with_negatives: bool = True,
 ) -> None:
@@ -147,18 +143,11 @@ def get_balanced_test_data_list(
         List[BGData]: A list of balanced test data.
     """
     data_list = []
-    tasks = []
     with (
         tqdm(
             total=num_cross_validation * k * num_negative_sampling,
             desc="Repeated Cross Validation",
         ) as pbar,
-        Client(
-            LocalCluster(
-                n_workers=int(os.getenv("NUM_WORKERS")),
-                threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
-            )
-        ) as client,
     ):
         for i in range(num_cross_validation):
             data = get_data()
@@ -178,25 +167,17 @@ def get_balanced_test_data_list(
                         data.balance_data(*args, **kwargs)
                         return data
 
-                    # Define delayed task
-                    task = delayed(process_data)(
-                        temp_test_data,
-                        balance_method=test_balance_method,
-                        negative_ratio=test_balance_negative_ratio,
-                        seed=l,
-                        save_name=save_name,
-                        **test_balance_kwargs,
+                    data_list.append(
+                        process_data(
+                            temp_test_data,
+                            balance_method=test_balance_method,
+                            negative_ratio=test_balance_negative_ratio,
+                            seed=l,
+                            save_name=save_name,
+                            **test_balance_kwargs,
+                        )
                     )
-                    tasks.append(task)
-
-        # Submit tasks to Dask
-        futures = client.compute(tasks)
-
-        # Track progress using as_completed
-        data_list = []
-        for future in dask.distributed.as_completed(futures):
-            data_list.append(future.result())
-            pbar.update(1)
+                    pbar.update(1)
 
     return data_list
 

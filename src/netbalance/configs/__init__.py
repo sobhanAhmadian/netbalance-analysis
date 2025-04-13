@@ -12,7 +12,7 @@ RESULTS_DIR_DICT = {
     "weighted_mean_degree_ratio": WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
 }
 
-warm_color1 = "#ffafcc"
+warm_color1 = "#d53e4f"
 warm_color2 = "#faa0c1"
-cold_color1 = "#a2d2ff"
+cold_color1 = "#66c2a5"
 cold_color2 = "#82c0fa"
