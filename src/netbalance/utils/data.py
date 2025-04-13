@@ -30,7 +30,7 @@ def analyse_datasest(
     test_balance_negative_ratio: float = 1.0,
     c_pos: str = "#66c2a5",
     c_neg: str = "#d53e4f",
-    summary_size: int = 40,
+    summary_size: int = 30,
     with_negatives: bool = True,
 ) -> None:
     """Analyse the dataset.

@@ -164,6 +164,6 @@ axe.legend(handles=[beta_patch, rho_patch], loc="upper right")
 os.makedirs(figs_folder, exist_ok=True)
 
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_aucs_beta_vs_rho.pdf"
+file_name = f"{figs_folder}/compare_aucs_beta_vs_rho.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

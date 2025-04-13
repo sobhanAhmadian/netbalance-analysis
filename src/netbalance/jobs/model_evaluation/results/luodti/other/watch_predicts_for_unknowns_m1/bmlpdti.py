@@ -89,6 +89,6 @@ for ax in axes.flat:
 
 fig.tight_layout()
 
-file_name = f"{figs_folder}/average_and_variance_scores.pdf"
+file_name = f"{figs_folder}/average_and_variance_scores.svg"
 fig.savefig(file_name)
 print(f"\nFigs of average and variance scores saved in {file_name}")

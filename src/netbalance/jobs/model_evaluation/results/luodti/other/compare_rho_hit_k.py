@@ -89,7 +89,7 @@ x_ticks = x_common
 
 for temp in per_model_rho_hit_k_accuracies:
     axe.plot(x_common, temp)
-    
+
 
 axe.set_xticks(x_ticks)
 axe.set_xticklabels([round(i, 2) for i in x_ticks])
@@ -103,6 +103,6 @@ axe.legend(model_names, loc="upper right")
 os.makedirs(figs_folder, exist_ok=True)
 
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_rho_hit_k.pdf"
+file_name = f"{figs_folder}/compare_rho_hit_k.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

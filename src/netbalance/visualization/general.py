@@ -76,7 +76,7 @@ def cluster_barplot(
 
     fig.tight_layout()
 
-    file_name = f"{figs_folder}/{figure_name.lower().replace(' ', '_')}_{cluster_name.lower()}.pdf"
+    file_name = f"{figs_folder}/{figure_name.lower().replace(' ', '_')}_{cluster_name.lower()}.svg"
     plt.savefig(file_name)
     print(f"Figure Saved: {file_name}")
 
@@ -170,7 +170,7 @@ def plot_per_group_associations(
 
     fig.tight_layout()
 
-    file_name = f"{figs_folder}/per_{cluster_name.lower()}_num_associations_{max_k}.pdf"
+    file_name = f"{figs_folder}/per_{cluster_name.lower()}_num_associations_{max_k}.svg"
     plt.savefig(file_name)
     print(file_name)
 
@@ -280,7 +280,7 @@ def plot_x_vs_y_dist(
 
     # Tight layout and save
     fig.tight_layout()
-    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_x_vs_y_dist.pdf"
+    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_x_vs_y_dist.svg"
     plt.savefig(file_name)
     print(f"\nFigure Saved: {file_name}")
 
@@ -406,6 +406,6 @@ def plot_xs_vs_y_dist(
 
     # Tight layout and save
     fig.tight_layout()
-    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_xs_vs_y_dist.pdf"
+    file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_xs_vs_y_dist.svg"
     plt.savefig(file_name)
     print(f"\nFigure Saved: {file_name}")

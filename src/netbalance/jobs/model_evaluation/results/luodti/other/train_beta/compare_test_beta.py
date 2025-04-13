@@ -82,7 +82,7 @@ axe.grid(axis="y", linestyle="--", alpha=0.4)
 os.makedirs(figs_folder, exist_ok=True)
 
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_aucs_beta.pdf"
+file_name = f"{figs_folder}/compare_aucs_beta.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
 
