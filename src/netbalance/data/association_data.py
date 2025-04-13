@@ -112,6 +112,8 @@ class AData(Data):
                 negative_ratio=negative_ratio,
                 rng=rng,
             )
+        elif balance_method == "eta":
+            samples = pos_associations + neg_associations
 
         # Combine and shuffle
         rng.shuffle(samples)
