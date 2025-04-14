@@ -3,7 +3,6 @@ import os
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
-from netbalance.configs import cold_color1, cold_color2, warm_color1, warm_color2
 from netbalance.configs.a_degree_ratio import A_DEGREE_RATIO_RESULTS_DIR
 from netbalance.configs.b_degree_ratio import B_DEGREE_RATIO_RESULTS_DIR
 from netbalance.configs.blindti import BLINDTI_RESULTS_DIR
@@ -17,28 +16,36 @@ from netbalance.configs.midti import MIDTI_RESULTS_DIR
 from netbalance.configs.weighted_mean_degree_ratio import (
     WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
 )
-from netbalance.utils.result import get_auc_of_cv_folds
+from netbalance.utils.result import get_auc_of_cv_folds, get_max_f1_of_cv_folds
+
+color11 = "#3288bd"
+color12 = "#3288bd"
+color21 = "#f46d43"
+color22 = "#f46d43"
+color31 = "#5e4fa2"
+color32 = "#5e4fa2"
+
+measure = "auc" # max_f1, auc
 
 dataset = "luodti"
-train_balance_method = "beta"
 
-figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other/train_beta"
+figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
-    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "DDRC"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "WDRC"),
     (MIDTI_RESULTS_DIR, "beta", "MIDTI"),
     (FMIDTI_RESULTS_DIR, "beta", "FMIDTI"),
     (BLINDTI_RESULTS_DIR, "beta", "BLINDTI"),
     (BXGBDTI_RESULTS_DIR, "beta", "BXGBDTI"),
     (BRFDTI_RESULTS_DIR, "beta", "BRFDTI"),
     (BMLPDTI_RESULTS_DIR, "beta", "BMLPDTI"),
-    (BRANDOM_RESULTS_DIR, "beta", "BRANDDTI"),
     (BMLPDTI_RESULTS_DIR, "ibeta", "BMLPDTI-I"),
     (BMLPDTI_RESULTS_DIR, "irho", "BMLPDTI-II"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "DDRC"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "TDRC"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "WDRC"),
+    (BRANDOM_RESULTS_DIR, "beta", "BRANDDTI"),
 ]
 model_names = [r[-1] for r in path_dict]
 
@@ -58,36 +65,45 @@ test_balance_kwargs_rho = {
     "shrinkage": 1.0,
 }
 
-beta_aucs = []
-eta_aucs = []
-rho_aucs = []
+beta_measures = []
+eta_measures = []
+rho_measures = []
+
+f = None
+if measure == "auc":
+    f = get_auc_of_cv_folds
+elif measure == "max_f1":
+    f = get_max_f1_of_cv_folds
+
 for model_dir, train_balance_method, _ in path_dict:
-    aucs = get_auc_of_cv_folds(
+
+    values = f(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_beta,
         test_balance_kwargs=test_balance_kwargs_beta,
     )
-    beta_aucs.append(aucs)
 
-    aucs = get_auc_of_cv_folds(
+    beta_measures.append(values)
+
+    values = f(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_eta,
         test_balance_kwargs=test_balance_kwargs_eta,
     )
-    eta_aucs.append(aucs)
+    eta_measures.append(values)
 
-    aucs = get_auc_of_cv_folds(
+    values = f(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_rho,
         test_balance_kwargs=test_balance_kwargs_rho,
     )
-    rho_aucs.append(aucs)
+    rho_measures.append(values)
 
 i = 1
 x_list_beta = []
@@ -95,17 +111,15 @@ x_list_eta = []
 x_list_rho = []
 x_ticks = []
 vertical_lines = []
-gap = 2
+gap = 3
 for j in range(len(path_dict)):
     x_list_beta.append(i)
-    i += 1
+    i += 2
+
     x_ticks.append(i)
-    i += 1
-    
+
     x_list_eta.append(i)
-    i += 1
-    x_ticks.append(i)
-    i += 1
+    i += 2
 
     x_list_rho.append(i)
     i += gap
@@ -114,12 +128,12 @@ for j in range(len(path_dict)):
 
 del vertical_lines[-1]
 
-fig, axe = plt.subplots(figsize=(12, 8))
+fig, axe = plt.subplots(figsize=(16, 8))
 
 ################################# Beta
 
 violins = axe.violinplot(
-    beta_aucs,
+    beta_measures,
     positions=x_list_beta,
     widths=1.2,
     showmeans=True,
@@ -129,19 +143,19 @@ violins = axe.violinplot(
 
 # Customize violin plot colors
 for pc in violins["bodies"]:
-    pc.set_facecolor(warm_color1)
-    pc.set_edgecolor(warm_color2)
+    pc.set_facecolor(color11)
+    pc.set_edgecolor(color12)
     pc.set_alpha(0.4)
 
-violins["cbars"].set_color(warm_color2)
-violins["cmins"].set_color(warm_color2)
-violins["cmaxes"].set_color(warm_color2)
-violins["cmeans"].set_color(warm_color2)
+violins["cbars"].set_color(color12)
+violins["cmins"].set_color(color12)
+violins["cmaxes"].set_color(color12)
+violins["cmeans"].set_color(color12)
 
 ################################# Eta
 
 violins = axe.violinplot(
-    eta_aucs,
+    eta_measures,
     positions=x_list_eta,
     widths=1.2,
     showmeans=True,
@@ -151,19 +165,19 @@ violins = axe.violinplot(
 
 # Customize violin plot colors
 for pc in violins["bodies"]:
-    pc.set_facecolor(warm_color1)
-    pc.set_edgecolor(warm_color2)
+    pc.set_facecolor(color21)
+    pc.set_edgecolor(color22)
     pc.set_alpha(0.4)
 
-violins["cbars"].set_color(warm_color2)
-violins["cmins"].set_color(warm_color2)
-violins["cmaxes"].set_color(warm_color2)
-violins["cmeans"].set_color(warm_color2)
+violins["cbars"].set_color(color22)
+violins["cmins"].set_color(color22)
+violins["cmaxes"].set_color(color22)
+violins["cmeans"].set_color(color22)
 
 ################################# Rho
 
 violins = axe.violinplot(
-    rho_aucs,
+    rho_measures,
     positions=x_list_rho,
     widths=1.2,
     showmeans=True,
@@ -173,20 +187,22 @@ violins = axe.violinplot(
 
 # Customize violin plot colors
 for pc in violins["bodies"]:
-    pc.set_facecolor(cold_color1)
-    pc.set_edgecolor(cold_color2)
+    pc.set_facecolor(color31)
+    pc.set_edgecolor(color32)
     pc.set_alpha(0.4)
 
-violins["cbars"].set_color(cold_color2)
-violins["cmins"].set_color(cold_color2)
-violins["cmaxes"].set_color(cold_color2)
-violins["cmeans"].set_color(cold_color2)
+violins["cbars"].set_color(color32)
+violins["cmins"].set_color(color32)
+violins["cmaxes"].set_color(color32)
+violins["cmeans"].set_color(color32)
 
 axe.set_xticks(x_ticks)
 axe.set_xticklabels(model_names, rotation=45, ha="right")
-axe.set_ylabel("AUC")
-axe.set_title("AUC Comparison of Beta vs Rho Evaluation Frameworks")
-axe.set_ylim(0.4, 1)
+axe.set_ylabel(measure.upper())
+axe.set_title(
+    f"{measure.upper().replace("_", " ")} Comparison in Different Evaluation Frameworks"
+)
+axe.set_ylim(0.0, 1)
 
 # Add vertical lines
 for v in vertical_lines:
@@ -195,13 +211,14 @@ for v in vertical_lines:
 axe.grid(axis="y", linestyle="--", alpha=0.4)
 
 # Add legend
-beta_patch = mpatches.Patch(color=warm_color1, label="Beta")
-rho_patch = mpatches.Patch(color=cold_color1, label="Rho")
-axe.legend(handles=[beta_patch, rho_patch], loc="upper right")
+beta_patch = mpatches.Patch(color=color11, label="Balanced")
+eta_patch = mpatches.Patch(color=color21, label="Full Test")
+rho_patch = mpatches.Patch(color=color31, label="Entity-Balanced")
+axe.legend(handles=[beta_patch, eta_patch, rho_patch], loc="lower right")
 
 os.makedirs(figs_folder, exist_ok=True)
 
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_aucs_beta_vs_rho.svg"
+file_name = f"{figs_folder}/compare_{measure}s.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

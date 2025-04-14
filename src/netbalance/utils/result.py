@@ -113,6 +113,25 @@ def get_auc_of_cv_folds(
     return auc_arr
 
 
+def get_max_f1_of_cv_folds(
+    result_dir,
+    dataset,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
+):
+    dir_path = _get_max_f1_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    file_name = f"{dir_path}/max_f1s.txt"
+    auc_arr = np.loadtxt(file_name, delimiter=",")
+    return auc_arr
+
+
 def pared_ttest_of_auc_of_cv_folds(
     first_model,
     second_model,
