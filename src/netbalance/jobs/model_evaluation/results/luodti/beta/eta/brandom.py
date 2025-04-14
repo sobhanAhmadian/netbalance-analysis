@@ -13,7 +13,7 @@ model_name = "brandom"  # Parameter
 dataset = "luodti"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 
-test_balance_method = "beta"  # Parameter
+test_balance_method = "eta"  # Parameter
 test_balance_kwargs = {}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 

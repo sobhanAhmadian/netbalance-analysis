@@ -8,6 +8,7 @@ from netbalance.configs.a_degree_ratio import A_DEGREE_RATIO_RESULTS_DIR
 from netbalance.configs.b_degree_ratio import B_DEGREE_RATIO_RESULTS_DIR
 from netbalance.configs.blindti import BLINDTI_RESULTS_DIR
 from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR
+from netbalance.configs.brandom import BRANDOM_RESULTS_DIR
 from netbalance.configs.brfdti import BRFDTI_RESULTS_DIR
 from netbalance.configs.bxgbdti import BXGBDTI_RESULTS_DIR
 from netbalance.configs.common import RESULTS_DIR
@@ -23,32 +24,29 @@ train_balance_method = "beta"
 
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other/train_beta"
 
-model_names = [
-    "A Degree Ratio",
-    "B Degree Ratio",
-    "W Degree Ratio",
-    "BLINDTI",
-    "BMLPDTI",
-    "BRFDTI",
-    "BXGBDTI",
-    "FMIDTI",
-    "MIDTI",
-]
 
-model_result_dirs = [
-    A_DEGREE_RATIO_RESULTS_DIR,
-    B_DEGREE_RATIO_RESULTS_DIR,
-    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
-    BLINDTI_RESULTS_DIR,
-    BMLPDTI_RESULTS_DIR,
-    BRFDTI_RESULTS_DIR,
-    BXGBDTI_RESULTS_DIR,
-    FMIDTI_RESULTS_DIR,
-    MIDTI_RESULTS_DIR,
+# (Model Result Dir, Train Method, Display Name)
+path_dict = [
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "DDRC"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "TDRC"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "WDRC"),
+    (MIDTI_RESULTS_DIR, "beta", "MIDTI"),
+    (FMIDTI_RESULTS_DIR, "beta", "FMIDTI"),
+    (BLINDTI_RESULTS_DIR, "beta", "BLINDTI"),
+    (BXGBDTI_RESULTS_DIR, "beta", "BXGBDTI"),
+    (BRFDTI_RESULTS_DIR, "beta", "BRFDTI"),
+    (BMLPDTI_RESULTS_DIR, "beta", "BMLPDTI"),
+    (BRANDOM_RESULTS_DIR, "beta", "BRANDDTI"),
+    (BMLPDTI_RESULTS_DIR, "ibeta", "BMLPDTI-I"),
+    (BMLPDTI_RESULTS_DIR, "irho", "BMLPDTI-II"),
 ]
+model_names = [r[-1] for r in path_dict]
 
 test_balance_method_beta = "beta"
 test_balance_kwargs_beta = {}
+
+test_balance_method_eta = "eta"
+test_balance_kwargs_eta = {}
 
 test_balance_method_rho = "rho"
 test_balance_kwargs_rho = {
@@ -61,10 +59,11 @@ test_balance_kwargs_rho = {
 }
 
 beta_aucs = []
+eta_aucs = []
 rho_aucs = []
-for r in model_result_dirs:
+for model_dir, train_balance_method, _ in path_dict:
     aucs = get_auc_of_cv_folds(
-        r,
+        model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_beta,
@@ -73,7 +72,16 @@ for r in model_result_dirs:
     beta_aucs.append(aucs)
 
     aucs = get_auc_of_cv_folds(
-        r,
+        model_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method_eta,
+        test_balance_kwargs=test_balance_kwargs_eta,
+    )
+    eta_aucs.append(aucs)
+
+    aucs = get_auc_of_cv_folds(
+        model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_rho,
@@ -83,26 +91,32 @@ for r in model_result_dirs:
 
 i = 1
 x_list_beta = []
+x_list_eta = []
 x_list_rho = []
 x_ticks = []
 vertical_lines = []
 gap = 2
-for j in range(len(model_names)):
+for j in range(len(path_dict)):
     x_list_beta.append(i)
     i += 1
-
+    x_ticks.append(i)
+    i += 1
+    
+    x_list_eta.append(i)
+    i += 1
     x_ticks.append(i)
     i += 1
 
     x_list_rho.append(i)
     i += gap
-
     vertical_lines.append(i)
     i += gap
 
 del vertical_lines[-1]
 
 fig, axe = plt.subplots(figsize=(12, 8))
+
+################################# Beta
 
 violins = axe.violinplot(
     beta_aucs,
@@ -123,6 +137,30 @@ violins["cbars"].set_color(warm_color2)
 violins["cmins"].set_color(warm_color2)
 violins["cmaxes"].set_color(warm_color2)
 violins["cmeans"].set_color(warm_color2)
+
+################################# Eta
+
+violins = axe.violinplot(
+    eta_aucs,
+    positions=x_list_eta,
+    widths=1.2,
+    showmeans=True,
+    showextrema=True,
+    showmedians=False,
+)
+
+# Customize violin plot colors
+for pc in violins["bodies"]:
+    pc.set_facecolor(warm_color1)
+    pc.set_edgecolor(warm_color2)
+    pc.set_alpha(0.4)
+
+violins["cbars"].set_color(warm_color2)
+violins["cmins"].set_color(warm_color2)
+violins["cmaxes"].set_color(warm_color2)
+violins["cmeans"].set_color(warm_color2)
+
+################################# Rho
 
 violins = axe.violinplot(
     rho_aucs,
