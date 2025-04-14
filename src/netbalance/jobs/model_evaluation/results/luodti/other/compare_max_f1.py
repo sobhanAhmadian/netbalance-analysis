@@ -128,7 +128,7 @@ for j in range(len(path_dict)):
 
 del vertical_lines[-1]
 
-fig, axe = plt.subplots(figsize=(16, 8))
+fig, axe = plt.subplots(figsize=(12, 6))
 
 ################################# Beta
 
