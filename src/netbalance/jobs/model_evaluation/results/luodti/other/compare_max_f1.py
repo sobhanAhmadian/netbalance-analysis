@@ -16,7 +16,11 @@ from netbalance.configs.midti import MIDTI_RESULTS_DIR
 from netbalance.configs.weighted_mean_degree_ratio import (
     WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
 )
-from netbalance.utils.result import get_auc_of_cv_folds, get_max_f1_of_cv_folds
+from netbalance.utils.result import (
+    get_auc_of_cv_folds,
+    get_aupr_of_cv_folds,
+    get_max_f1_of_cv_folds,
+)
 
 color11 = "#3288bd"
 color12 = "#3288bd"
@@ -25,7 +29,7 @@ color22 = "#f46d43"
 color31 = "#5e4fa2"
 color32 = "#5e4fa2"
 
-measure = "max_f1" # max_f1, auc
+measure = "max_f1"  # max_f1, auc, aupr
 
 dataset = "luodti"
 
@@ -74,6 +78,8 @@ if measure == "auc":
     f = get_auc_of_cv_folds
 elif measure == "max_f1":
     f = get_max_f1_of_cv_folds
+elif measure == "aupr":
+    f = get_aupr_of_cv_folds
 
 for model_dir, train_balance_method, _ in path_dict:
 

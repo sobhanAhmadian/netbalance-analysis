@@ -43,6 +43,8 @@ class Result:
         self.max_f1 = 0
         self.fpr = None
         self.tpr = None
+        self.precision_curve = None
+        self.recall_curve = None
         self.ent: float = 0.0
 
     def get_result(self):

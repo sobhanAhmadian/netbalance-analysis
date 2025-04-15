@@ -35,6 +35,19 @@ def _get_aucs_dir_name(
     return aucs_results_dir
 
 
+def _get_aupr_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    aupr_results_dir = f"{base_dir}/aupr/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        aupr_results_dir += f"_{key}_{value}"
+    return aupr_results_dir
+
+
 def _get_max_f1_dir_name(
     base_dir: str,
     dataset: str,
@@ -94,6 +107,15 @@ def _save_max_f1_of_cv_folds(
     print(f"\nSaved max f1 list to {dir_path}/{filename}")
 
 
+def _save_aupr_of_cv_folds(
+    results: ACrossValidationResult, dir_path: str, filename: str
+):
+    aupr_list = [result.aupr for result in results.fold_results]
+    aupr_arr = np.array(aupr_list)
+    np.savetxt(f"{dir_path}/{filename}", aupr_arr, delimiter=",")
+    print(f"\nSaved aupr list to {dir_path}/{filename}")
+
+
 def get_auc_of_cv_folds(
     result_dir,
     dataset,
@@ -111,6 +133,25 @@ def get_auc_of_cv_folds(
     file_name = f"{dir_path}/aucs.txt"
     auc_arr = np.loadtxt(file_name, delimiter=",")
     return auc_arr
+
+
+def get_aupr_of_cv_folds(
+    result_dir,
+    dataset,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
+):
+    dir_path = _get_aupr_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    file_name = f"{dir_path}/auprs.txt"
+    aupr_arr = np.loadtxt(file_name, delimiter=",")
+    return aupr_arr
 
 
 def get_max_f1_of_cv_folds(
@@ -259,8 +300,19 @@ def process_results(
         test_balance_method=test_balance_method,
         test_balance_kwargs=test_balance_kwargs,
     )
+    auprs_results_dir = _get_aupr_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+
     os.makedirs(aucs_results_dir, exist_ok=True)
     _save_auc_of_cv_folds(results, aucs_results_dir, filename="aucs.txt")
 
     os.makedirs(max_f1s_results_dir, exist_ok=True)
     _save_max_f1_of_cv_folds(results, max_f1s_results_dir, filename="max_f1s.txt")
+
+    os.makedirs(auprs_results_dir, exist_ok=True)
+    _save_aupr_of_cv_folds(results, auprs_results_dir, filename="auprs.txt")

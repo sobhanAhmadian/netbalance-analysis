@@ -29,7 +29,7 @@ color22 = "#f46d43"
 color31 = "#5e4fa2"
 color32 = "#5e4fa2"
 
-measure = "auc"  # max_f1, auc, aupr
+measure = "aupr"  # max_f1, auc, aupr
 
 dataset = "luodti"
 

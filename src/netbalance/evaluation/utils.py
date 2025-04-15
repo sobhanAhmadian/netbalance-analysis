@@ -55,6 +55,7 @@ def evaluate_binary_classification(
 
     # Advanced metrics
     _calc_max_f1_score(y_predict, y_test, result)
+    _calc_aupr_metrics(y_predict, y_test, result)
     _calc_roc_metrics(y_predict, y_test, result)
     _calc_hit_k_scores(data, y_predict, result)
     sorted_indices = _calc_avg_rank(data, y_predict, result)
@@ -64,6 +65,14 @@ def evaluate_binary_classification(
     _calc_strat_hit_k(data, y_predict, result)
 
     return result
+
+
+def _calc_aupr_metrics(y_predict, y_test, result):
+    """Calculate the maximum F1 score."""
+    precision, recall, _ = precision_recall_curve(y_test, y_predict)
+    result.precision_curve = precision
+    result.recall_curve = recall
+    result.aupr = auc(recall, precision).item()
 
 
 def _calc_max_f1_score(y_predict, y_test, result):
