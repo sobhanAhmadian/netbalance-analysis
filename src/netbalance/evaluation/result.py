@@ -169,7 +169,12 @@ class CrossValidationResult:
         aucs = np.array(auc_list)
 
         ax.plot(
-            [0, 1], [0, 1], linestyle="--", lw=2, color="r", label="Random", alpha=0.8
+            [0, 1],
+            [0, 1],
+            linestyle="--",
+            lw=1.2,
+            color="grey",
+            alpha=0.3,
         )  # Plotting the random line
 
         mean_tpr = np.mean(tprs, axis=0)
@@ -179,7 +184,7 @@ class CrossValidationResult:
         ax.plot(
             mean_fpr,
             mean_tpr,
-            color="b",
+            color="#3288bd",
             label=r"Mean ROC (AUC = %0.4f $\pm$ %0.4f)" % (mean_auc, std_auc),
             lw=2,
             alpha=0.8,
@@ -192,15 +197,15 @@ class CrossValidationResult:
             mean_fpr,
             tprs_lower,
             tprs_upper,
-            color="grey",
-            alpha=0.3,
+            color="#abdda4",
+            alpha=0.5,
             label=r"$\pm$ 1 std. dev.",
         )  # Plotting the standard deviation
 
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
-            title="Receiver operating characteristic",
+            title="ROC",
         )
         ax.legend(loc="lower right")
 
