@@ -35,6 +35,19 @@ def _get_roc_fig_dir_name(
     return roc_fig_dir
 
 
+def _get_pr_fig_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    roc_fig_dir = f"{base_dir}/pr_fig/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        roc_fig_dir += f"_{key}_{value}"
+    return roc_fig_dir
+
+
 def _get_aucs_dir_name(
     base_dir: str,
     dataset: str,
@@ -136,6 +149,15 @@ def _save_roc_fig_of_cv_folds(results: ACrossValidationResult, dir_path: str):
     file_name = f"{dir_path}/roc.svg"
     plt.savefig(file_name)
     print(f"\nROC Figure Saved: {file_name}")
+
+
+def _save_pr_fig_of_cv_folds(results: ACrossValidationResult, dir_path: str):
+    fig, axe = plt.subplots(figsize=(5, 5))
+    results.get_pr_curve(ax=axe)
+    fig.tight_layout()
+    file_name = f"{dir_path}/pr.svg"
+    plt.savefig(file_name)
+    print(f"\nPR Figure Saved: {file_name}")
 
 
 def get_auc_of_cv_folds(
@@ -336,6 +358,13 @@ def process_results(
         test_balance_method=test_balance_method,
         test_balance_kwargs=test_balance_kwargs,
     )
+    pr_fig_dir = _get_pr_fig_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
 
     os.makedirs(aucs_results_dir, exist_ok=True)
     _save_auc_of_cv_folds(results, aucs_results_dir, filename="aucs.txt")
@@ -348,3 +377,6 @@ def process_results(
 
     os.makedirs(roc_fig_dir, exist_ok=True)
     _save_roc_fig_of_cv_folds(results, roc_fig_dir)
+
+    os.makedirs(pr_fig_dir, exist_ok=True)
+    _save_pr_fig_of_cv_folds(results, pr_fig_dir)

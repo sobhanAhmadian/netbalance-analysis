@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from sklearn.metrics import RocCurveDisplay, auc
+from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay, auc
 
 from netbalance.utils import prj_logger
 
@@ -163,7 +163,7 @@ class CrossValidationResult:
             interp_tpr[0] = 0.0
 
             tpr_list.append(interp_tpr)
-            auc_list.append(viz.roc_auc)
+            auc_list.append(r.auc)
 
         tprs = np.array(tpr_list)
         aucs = np.array(auc_list)
@@ -179,7 +179,7 @@ class CrossValidationResult:
 
         mean_tpr = np.mean(tprs, axis=0)
         mean_tpr[-1] = 1.0
-        mean_auc = auc(mean_fpr, mean_tpr)
+        mean_auc = np.mean(aucs)
         std_auc = np.std(aucs)
         ax.plot(
             mean_fpr,
@@ -206,8 +206,77 @@ class CrossValidationResult:
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
             title="ROC",
+            xlabel="False Positive Rate",
+            ylabel="True Positive Rate",
         )
         ax.legend(loc="lower right")
+
+    def get_pr_curve(self, ax, mean_recall=np.linspace(0, 1, 100)):
+        """
+        Plots the Precision-Recall curve.
+
+        Args:
+            ax: The matplotlib axes object to plot on.
+            mean_recall (array-like, optional): List of mean recall rates for ROC curve interpolation.
+                Defaults to np.linspace(0, 1, 100).
+        """
+        if not self.is_result_calculated:
+            self.calculate_cv_result()
+
+        precision_list = []
+        aupr_list = []
+        for r in self.fold_results:
+            viz = PrecisionRecallDisplay(
+                precision=r.precision_curve, recall=r.recall_curve
+            )
+            interp_precision = np.interp(
+                mean_recall, viz.recall[::-1], viz.precision[::-1]
+            )  # Reverse recall for interp
+            interp_precision[-1] = 0.0  # Ensure the curve ends at 0 precision
+
+            precision_list.append(interp_precision)
+            aupr_list.append(r.aupr)
+
+        precision_curve = np.array(precision_list)
+        mean_precision_curve = np.mean(precision_curve, axis=0)
+        std_precision_curve = np.std(precision_curve, axis=0)
+
+        auprs = np.array(aupr_list)
+        mean_aupr = np.mean(auprs)
+        std_aupr = np.std(auprs)
+
+        ax.plot(
+            mean_recall,
+            mean_precision_curve,
+            color="#3288bd",
+            label=r"Mean PR (AUPR = %0.4f $\pm$ %0.4f)" % (mean_aupr, std_aupr),
+            lw=2,
+            alpha=0.8,
+        )  # Plotting the mean ROC curve
+
+        precision_curve_upper = np.minimum(
+            mean_precision_curve + std_precision_curve, 1
+        )
+        precision_curve_lower = np.maximum(
+            mean_precision_curve - std_precision_curve, 0
+        )
+        ax.fill_between(
+            mean_recall,
+            precision_curve_lower,
+            precision_curve_upper,
+            color="#abdda4",
+            alpha=0.5,
+            label=r"$\pm$ 1 std. dev.",
+        )  # Plotting the standard deviation
+
+        ax.set(
+            xlim=[-0.05, 1.05],
+            ylim=[-0.05, 1.05],
+            title="Precision-Recall Curve",
+            xlabel="Recall",
+            ylabel="Precision",
+        )
+        ax.legend(loc="lower left")
 
 
 class ACrossValidationResult(CrossValidationResult):
