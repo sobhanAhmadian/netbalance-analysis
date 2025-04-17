@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import stats
+from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from netbalance.configs import RESULTS_DIR_DICT
 from netbalance.configs.common import RESULTS_DIR
@@ -46,6 +47,32 @@ def _get_pr_fig_dir_name(
     for key, value in test_balance_kwargs.items():
         roc_fig_dir += f"_{key}_{value}"
     return roc_fig_dir
+
+
+def _get_mean_tprs_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    aucs_results_dir = f"{base_dir}/mean_tprs/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        aucs_results_dir += f"_{key}_{value}"
+    return aucs_results_dir
+
+
+def _get_mean_precisions_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    aucs_results_dir = f"{base_dir}/mean_precisions/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        aucs_results_dir += f"_{key}_{value}"
+    return aucs_results_dir
 
 
 def _get_aucs_dir_name(
@@ -142,7 +169,49 @@ def _save_aupr_of_cv_folds(
     print(f"\nSaved aupr list to {dir_path}/{filename}")
 
 
-def _save_roc_fig_of_cv_folds(results: ACrossValidationResult, dir_path: str):
+def _save_mean_tprs_of_cv_folds(
+    results: ACrossValidationResult,
+    dir_path: str,
+    filename: str,
+    mean_fpr=np.linspace(0, 1, 100),
+):
+    tpr_list = []
+    for r in results.fold_results:
+        viz = RocCurveDisplay(fpr=r.fpr, tpr=r.tpr, roc_auc=r.auc)
+        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        interp_tpr[0] = 0.0
+        tpr_list.append(interp_tpr)
+
+    tprs = np.array(tpr_list)
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[-1] = 1.0
+    np.savetxt(f"{dir_path}/{filename}", mean_tpr, delimiter=",")
+    print(f"\nSaved mean tprs list to {dir_path}/{filename}")
+
+
+def _save_mean_precisions_of_cv_folds(
+    results: ACrossValidationResult,
+    dir_path: str,
+    filename: str,
+    mean_recall=np.linspace(0, 1, 100),
+):
+    precision_list = []
+    for r in results.fold_results:
+        viz = PrecisionRecallDisplay(precision=r.precision_curve, recall=r.recall_curve)
+        interp_precision = np.interp(
+            mean_recall, viz.recall[::-1], viz.precision[::-1]
+        )  # Reverse recall for interp
+        interp_precision[-1] = 0.0  # Ensure the curve ends at 0 precision
+
+        precision_list.append(interp_precision)
+
+    precision_curve = np.array(precision_list)
+    mean_precision_curve = np.mean(precision_curve, axis=0)
+    np.savetxt(f"{dir_path}/{filename}", mean_precision_curve, delimiter=",")
+    print(f"\nSaved mean precisions list to {dir_path}/{filename}")
+
+
+def _save_roc_fig(results: ACrossValidationResult, dir_path: str):
     fig, axe = plt.subplots(figsize=(5, 5))
     results.get_roc_curve(ax=axe)
     fig.tight_layout()
@@ -151,13 +220,49 @@ def _save_roc_fig_of_cv_folds(results: ACrossValidationResult, dir_path: str):
     print(f"\nROC Figure Saved: {file_name}")
 
 
-def _save_pr_fig_of_cv_folds(results: ACrossValidationResult, dir_path: str):
+def _save_pr_fig(results: ACrossValidationResult, dir_path: str):
     fig, axe = plt.subplots(figsize=(5, 5))
     results.get_pr_curve(ax=axe)
     fig.tight_layout()
     file_name = f"{dir_path}/pr.svg"
     plt.savefig(file_name)
     print(f"\nPR Figure Saved: {file_name}")
+
+
+def get_mean_tpr_of_cv_folds(
+    result_dir,
+    dataset,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
+):
+    dir_path = _get_mean_tprs_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    file_name = f"{dir_path}/mean_tprs.txt"
+    return np.loadtxt(file_name, delimiter=",")
+
+
+def get_mean_precision_of_cv_folds(
+    result_dir,
+    dataset,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
+):
+    dir_path = _get_mean_precisions_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    file_name = f"{dir_path}/mean_precisions.txt"
+    return np.loadtxt(file_name, delimiter=",")
 
 
 def get_auc_of_cv_folds(
@@ -351,6 +456,20 @@ def process_results(
         test_balance_method=test_balance_method,
         test_balance_kwargs=test_balance_kwargs,
     )
+    mean_precisions_dir = _get_mean_precisions_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    mean_tprs_dir = _get_mean_tprs_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
     roc_fig_dir = _get_roc_fig_dir_name(
         base_dir=result_dir,
         dataset=dataset,
@@ -375,8 +494,16 @@ def process_results(
     os.makedirs(auprs_results_dir, exist_ok=True)
     _save_aupr_of_cv_folds(results, auprs_results_dir, filename="auprs.txt")
 
+    os.makedirs(mean_precisions_dir, exist_ok=True)
+    _save_mean_precisions_of_cv_folds(
+        results, mean_precisions_dir, filename="mean_precisions.txt"
+    )
+
+    os.makedirs(mean_tprs_dir, exist_ok=True)
+    _save_mean_tprs_of_cv_folds(results, mean_tprs_dir, filename="mean_tprs.txt")
+
     os.makedirs(roc_fig_dir, exist_ok=True)
-    _save_roc_fig_of_cv_folds(results, roc_fig_dir)
+    _save_roc_fig(results, roc_fig_dir)
 
     os.makedirs(pr_fig_dir, exist_ok=True)
-    _save_pr_fig_of_cv_folds(results, pr_fig_dir)
+    _save_pr_fig(results, pr_fig_dir)

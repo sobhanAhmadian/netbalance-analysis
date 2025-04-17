@@ -1,0 +1,142 @@
+import os
+
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
+import numpy as np
+
+from netbalance.configs.a_degree_ratio import A_DEGREE_RATIO_RESULTS_DIR
+from netbalance.configs.b_degree_ratio import B_DEGREE_RATIO_RESULTS_DIR
+from netbalance.configs.blindti import BLINDTI_RESULTS_DIR
+from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR
+from netbalance.configs.brandom import BRANDOM_RESULTS_DIR
+from netbalance.configs.brfdti import BRFDTI_RESULTS_DIR
+from netbalance.configs.bxgbdti import BXGBDTI_RESULTS_DIR
+from netbalance.configs.common import RESULTS_DIR
+from netbalance.configs.fmidti import FMIDTI_RESULTS_DIR
+from netbalance.configs.midti import MIDTI_RESULTS_DIR
+from netbalance.configs.weighted_mean_degree_ratio import (
+    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
+)
+from netbalance.utils.result import get_mean_tpr_of_cv_folds
+
+dataset = "luodti"
+
+figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
+
+# (Model Result Dir, Train Method, Display Name)
+path_dict = [
+    (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
+    (FMIDTI_RESULTS_DIR, "beta", "#d53e4f", "FMIDTI"),
+    (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
+    (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
+    (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
+    (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
+    (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
+    (BMLPDTI_RESULTS_DIR, "irho", "#66c2a5", "BMLPDTI-II"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#bf812d", "WDRC"),
+    (BRANDOM_RESULTS_DIR, "beta", "gray", "BRANDDTI"),
+]
+model_names = [r[-1] for r in path_dict]
+model_colors = [r[-2] for r in path_dict]
+
+test_balance_method_beta = "beta"
+test_balance_kwargs_beta = {}
+
+test_balance_method_eta = "eta"
+test_balance_kwargs_eta = {}
+
+test_balance_method_rho = "rho"
+test_balance_kwargs_rho = {
+    "max_iter": 100000,
+    "delta": 0.1,
+    "cooling_rate": 0.99,
+    "initial_temp": 40.0,
+    "ent_desired": 1.0,
+    "shrinkage": 1.0,
+}
+
+beta_tprs = []
+eta_tprs = []
+rho_tprs = []
+
+for model_dir, train_balance_method, _, _ in path_dict:
+
+    values = get_mean_tpr_of_cv_folds(
+        model_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method_beta,
+        test_balance_kwargs=test_balance_kwargs_beta,
+    )
+
+    beta_tprs.append(values)
+
+    values = get_mean_tpr_of_cv_folds(
+        model_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method_eta,
+        test_balance_kwargs=test_balance_kwargs_eta,
+    )
+    eta_tprs.append(values)
+
+    values = get_mean_tpr_of_cv_folds(
+        model_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method_rho,
+        test_balance_kwargs=test_balance_kwargs_rho,
+    )
+    rho_tprs.append(values)
+
+fprs = np.linspace(0, 1, 100)
+
+fig, axe = plt.subplots(1, 3, figsize=(14, 5), sharey=True)
+
+################################# Beta
+
+for idx, tpr in enumerate(beta_tprs):
+    axe[0].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
+axe[0].set_title("Balanced ROC")
+axe[0].set_xlabel("False Positive Rate")
+axe[0].set_ylabel("True Positive Rate")
+axe[0].grid(True)
+
+################################# Eta
+
+for idx, tpr in enumerate(eta_tprs):
+    axe[1].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
+axe[1].set_title("Full Test ROC")
+axe[1].set_xlabel("False Positive Rate")
+axe[1].set_ylabel("")
+axe[1].grid(True)
+
+################################# Rho
+
+for idx, tpr in enumerate(rho_tprs):
+    axe[2].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
+axe[2].set_title("Entity-Balanced ROC")
+axe[2].set_xlabel("False Positive Rate")
+axe[2].set_ylabel("")
+axe[2].grid(True)
+
+#################################
+
+# Shared legend
+handles, labels = axe[0].get_legend_handles_labels()
+fig.legend(
+    handles,
+    labels,
+    loc="lower left",
+    ncol=12,
+    fontsize="small",
+)
+
+os.makedirs(figs_folder, exist_ok=True)
+
+fig.tight_layout(rect=[0, 0.05, 1, 1])
+file_name = f"{figs_folder}/compare_rocs.svg"
+plt.savefig(file_name)
+print(f"\nFigure Saved: {file_name}")
