@@ -93,15 +93,15 @@ for model_dir, train_balance_method, _, _ in path_dict:
 
 recalls = np.linspace(0, 1, 100)
 
-fig, axe = plt.subplots(1, 3, figsize=(14, 5), sharey=True)
+fig, axe = plt.subplots(3, 1, figsize=(5, 14), sharey=True)
 
 ################################# Beta
 
 for idx, precision in enumerate(beta_precisions):
     axe[0].plot(recalls, precision, color=model_colors[idx], lw=2, label=model_names[idx])
 axe[0].set_title("Balanced PR Curve")
-axe[0].set_xlabel("False Positive Rate")
-axe[0].set_ylabel("True Positive Rate")
+axe[0].set_xlabel("")
+axe[0].set_ylabel("Precision")
 axe[0].grid(True)
 
 ################################# Eta
@@ -109,8 +109,8 @@ axe[0].grid(True)
 for idx, precision in enumerate(eta_precisions):
     axe[1].plot(recalls, precision, color=model_colors[idx], lw=2, label=model_names[idx])
 axe[1].set_title("Full Test PR Curve")
-axe[1].set_xlabel("False Positive Rate")
-axe[1].set_ylabel("")
+axe[1].set_xlabel("")
+axe[1].set_ylabel("Precision")
 axe[1].grid(True)
 
 ################################# Rho
@@ -118,8 +118,8 @@ axe[1].grid(True)
 for idx, precision in enumerate(rho_precisions):
     axe[2].plot(recalls, precision, color=model_colors[idx], lw=2, label=model_names[idx])
 axe[2].set_title("Entity-Balanced PR Curve")
-axe[2].set_xlabel("False Positive Rate")
-axe[2].set_ylabel("")
+axe[2].set_xlabel("Recall")
+axe[2].set_ylabel("Precision")
 axe[2].grid(True)
 
 #################################
@@ -129,8 +129,8 @@ handles, labels = axe[0].get_legend_handles_labels()
 fig.legend(
     handles,
     labels,
-    loc="lower left",
-    ncol=12,
+    loc="lower center",
+    ncol=4,
     fontsize="small",
 )
 
