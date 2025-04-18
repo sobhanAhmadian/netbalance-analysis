@@ -1,8 +1,10 @@
 import os
 
+import numpy as np  # New
+
 from netbalance.configs.a_degree_ratio import (
-    A_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,
-)  # Parameter
+    A_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,  # Parameter
+)
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.luodti import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
@@ -42,22 +44,28 @@ logger.info(
 ds = Dataset()
 
 if __name__ == "__main__":
-    results = get_result_of_rcv(
-        save_preds_dir=model_result_dir,
-        node_names=ds.get_node_names(),
-        num_cross_validation=num_cross_validation,
-        num_negative_sampling=num_negative_sampling,
-        test_balance_method=test_balance_method,
-        test_balance_kwargs=test_balance_kwargs,
-        test_balance_negative_ratio=test_balance_negative_ratio,
-        dataset_name=dataset,
-    )
+    desired_ent_list = np.arange(0.0, 1.05, 0.05).tolist()  # New
+    for i in desired_ent_list:
+        test_balance_kwargs["ent_desired"] = i
+        print(f"Desired Entropy: {i}")
 
-    process_results(
-        results=results,
-        result_dir=RESULTS_DIR,
-        dataset=dataset,
-        train_balance_method=train_neg_samp_method,
-        test_balance_method=test_balance_method,
-        test_balance_kwargs=test_balance_kwargs,
-    )
+        results = get_result_of_rcv(
+            save_preds_dir=model_result_dir,
+            node_names=ds.get_node_names(),
+            num_cross_validation=num_cross_validation,
+            num_negative_sampling=num_negative_sampling,
+            test_balance_method=test_balance_method,
+            test_balance_kwargs=test_balance_kwargs,
+            test_balance_negative_ratio=test_balance_negative_ratio,
+            dataset_name=dataset,
+        )
+
+        process_results(
+            results=results,
+            result_dir=RESULTS_DIR,
+            dataset=dataset,
+            train_balance_method=train_neg_samp_method,
+            test_balance_method=test_balance_method,
+            test_balance_kwargs=test_balance_kwargs,
+            save_figs=False if i != 1.0 else True,
+        )

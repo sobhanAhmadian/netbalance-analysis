@@ -429,6 +429,7 @@ def process_results(
     train_balance_method: str,
     test_balance_method: str,
     test_balance_kwargs: str,
+    save_figs: bool = True,
 ):
     # Print Average Results
     print("\nAverage Results:")
@@ -502,8 +503,9 @@ def process_results(
     os.makedirs(mean_tprs_dir, exist_ok=True)
     _save_mean_tprs_of_cv_folds(results, mean_tprs_dir, filename="mean_tprs.txt")
 
-    os.makedirs(roc_fig_dir, exist_ok=True)
-    _save_roc_fig(results, roc_fig_dir)
+    if save_figs:
+        os.makedirs(roc_fig_dir, exist_ok=True)
+        _save_roc_fig(results, roc_fig_dir)
 
-    os.makedirs(pr_fig_dir, exist_ok=True)
-    _save_pr_fig(results, pr_fig_dir)
+        os.makedirs(pr_fig_dir, exist_ok=True)
+        _save_pr_fig(results, pr_fig_dir)
