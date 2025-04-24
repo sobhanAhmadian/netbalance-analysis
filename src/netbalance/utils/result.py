@@ -3,12 +3,14 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.interpolate as interp
 from scipy import stats
 from sklearn.metrics import PrecisionRecallDisplay, RocCurveDisplay
 
 from netbalance.configs import RESULTS_DIR_DICT
 from netbalance.configs.common import RESULTS_DIR
 from netbalance.evaluation.result import ACrossValidationResult
+from netbalance.visualization import plot_x_vs_y_dist
 
 from .logger import logging as prj_logger
 
@@ -47,6 +49,19 @@ def _get_pr_fig_dir_name(
     for key, value in test_balance_kwargs.items():
         roc_fig_dir += f"_{key}_{value}"
     return roc_fig_dir
+
+
+def _get_hit_k_dir_name(
+    base_dir: str,
+    dataset: str,
+    train_balance_method: str,
+    test_balance_method: str,
+    test_balance_kwargs: dict,
+):
+    hit_at_k_dir = f"{base_dir}/hit_at_k/dataset_{dataset}/train_neg_samp_{train_balance_method}/test_neg_samp_{test_balance_method}"
+    for key, value in test_balance_kwargs.items():
+        hit_at_k_dir += f"_{key}_{value}"
+    return hit_at_k_dir
 
 
 def _get_mean_tprs_dir_name(
@@ -140,6 +155,76 @@ def _process_results_temp(
     else:
         logger.info(f"Creating new file {file_path}")
         result_df.to_csv(file_path, index=False)
+
+
+def _save_hit_k_of_cv_folds(
+    results: ACrossValidationResult,
+    dir_path: str,
+    filename: str,
+    x_common=np.linspace(0, 1, 30),
+    save_fig=True,
+):
+    def average_functions(functions, x_common):
+        interpolated_ys = []
+        for x, y in functions:
+            f = interp.interp1d(
+                x, y, kind="linear", bounds_error=False, fill_value="extrapolate"
+            )
+            interpolated_ys.append(f(x_common))
+
+        avg_y = np.mean(interpolated_ys, axis=0)
+        return interpolated_ys, avg_y
+
+    functions = []
+    for r in results.fold_results:
+        temp_hit_k_list = np.array(r.hit_k_list)
+        temp_hit_k_accuracy_list = np.array(r.hit_k_accuracy_list)
+        temp_hit_k_list = temp_hit_k_list / temp_hit_k_list.max()
+        functions.append((temp_hit_k_list, temp_hit_k_accuracy_list))
+
+    interpolated_ys, y_avg = average_functions(functions, x_common)
+    y_avg[0] = min(y_avg[0], 1.0)
+
+    np.savetxt(f"{dir_path}/{filename}", y_avg, delimiter=",")
+    print(f"\nSaved Hit@K list to {dir_path}/{filename}")
+
+    if save_fig:
+        interpolated_ys = np.array(interpolated_ys)
+        mean_ys = np.mean(interpolated_ys, axis=0)
+        std_ys = np.std(interpolated_ys, axis=0)
+        mean_ys[0] = min(mean_ys[0], 1.0)
+        
+        ys_upper = np.minimum(mean_ys + std_ys, 1)
+        ys_lower = np.maximum(mean_ys - std_ys, 0)
+
+        fig, axe = plt.subplots(figsize=(6, 5))
+
+        axe.plot(
+            x_common,
+            mean_ys,
+            color="#3288bd",
+            label=r"Mean Hit@K Accuracy",
+            lw=2,
+            alpha=0.8,
+        )  # Plotting the mean Hit@K curve
+        axe.fill_between(
+            x_common,
+            ys_lower,
+            ys_upper,
+            color="#abdda4",
+            alpha=0.5,
+            label=r"$\pm$ 1 std. dev.",
+        )  # Plotting the standard deviation
+
+        axe.set_xlabel("Normalized K")
+        axe.set_ylabel("Hit@K Accuracy")
+        axe.legend(loc="lower right")
+        axe.set_ylim([0.0, 1.1])
+
+        fig.tight_layout()
+        file_name = f"{dir_path}/hit_k.svg"
+        plt.savefig(file_name)
+        print(f"\nHit@K Figure Saved: {file_name}")
 
 
 def _save_auc_of_cv_folds(
@@ -263,6 +348,25 @@ def get_mean_precision_of_cv_folds(
     )
     file_name = f"{dir_path}/mean_precisions.txt"
     return np.loadtxt(file_name, delimiter=",")
+
+
+def get_hit_k_of_cv_folds(
+    result_dir,
+    dataset,
+    train_balance_method,
+    test_balance_method,
+    test_balance_kwargs,
+):
+    dir_path = _get_hit_k_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
+    file_name = f"{dir_path}/hit_k.txt"
+    hit_k = np.loadtxt(file_name, delimiter=",")
+    return hit_k
 
 
 def get_auc_of_cv_folds(
@@ -485,6 +589,13 @@ def process_results(
         test_balance_method=test_balance_method,
         test_balance_kwargs=test_balance_kwargs,
     )
+    hit_k_dir = _get_hit_k_dir_name(
+        base_dir=result_dir,
+        dataset=dataset,
+        train_balance_method=train_balance_method,
+        test_balance_method=test_balance_method,
+        test_balance_kwargs=test_balance_kwargs,
+    )
 
     os.makedirs(aucs_results_dir, exist_ok=True)
     _save_auc_of_cv_folds(results, aucs_results_dir, filename="aucs.txt")
@@ -502,6 +613,9 @@ def process_results(
 
     os.makedirs(mean_tprs_dir, exist_ok=True)
     _save_mean_tprs_of_cv_folds(results, mean_tprs_dir, filename="mean_tprs.txt")
+
+    os.makedirs(hit_k_dir, exist_ok=True)
+    _save_hit_k_of_cv_folds(results, hit_k_dir, filename="hit_k.txt", save_fig=save_figs)
 
     if save_figs:
         os.makedirs(roc_fig_dir, exist_ok=True)
