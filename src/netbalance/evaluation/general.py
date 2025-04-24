@@ -267,17 +267,20 @@ def get_result_of_rcv(
             for j in range(num_negative_sampling):
                 tasks.append(dask.delayed(task)(i, k, j, associations, df))
 
+    local_cluster = LocalCluster(
+        n_workers=int(os.getenv("NUM_WORKERS")),
+        threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+    )
     with Client(
-        LocalCluster(
-            n_workers=int(os.getenv("NUM_WORKERS")),
-            threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
-        )
+        local_cluster
     ) as client, tqdm(total=len(tasks), desc="Calc Result of RCV") as pbar:
         futures = client.compute(tasks)
 
         for future in dask.distributed.as_completed(futures):
             pbar.update(1)
             general_cv_result.add_fold_result(future.result())
+        
+        local_cluster.close()
 
     general_cv_result.calculate_cv_result()
     return general_cv_result
