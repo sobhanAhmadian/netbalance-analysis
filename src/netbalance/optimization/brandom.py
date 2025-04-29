@@ -18,9 +18,9 @@ class BRandomTrainer(Trainer):
         config,
     ) -> Result:
         preds = model_handler.predict(
-            [data.associations[:, 0], data.associations[:, 1]]
+            [data.associations[:, i] for i in range(data.associations.shape[1] - 1)]
         )
         result = evaluate_binary_classification_simple(
-            data.associations[:, 2], preds.reshape(-1), config.threshold
+            data.associations[:, -1], preds.reshape(-1), config.threshold
         )
         return result

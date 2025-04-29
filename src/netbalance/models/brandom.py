@@ -19,11 +19,7 @@ class BRandomModelHandler(AModelHandler):
         logger.info("defult_rng created with seed 0")
 
     def predict_impl(self, node_lists: list[np.ndarray]):
-        a_nodes, b_nodes = node_lists
-        if a_nodes.shape[0] != b_nodes.shape[0]:
-            raise ValueError(
-                "The number of samples in a_nodes and b_nodes should be equal."
-            )
+        a_nodes = node_lists[0]
         return self.rng.uniform(0, 1, size=(len(a_nodes),))
 
     def destroy(self):
