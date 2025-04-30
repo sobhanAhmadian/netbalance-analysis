@@ -14,15 +14,8 @@ model_name = "bmlpcyn"  # Parameter
 dataset = "sanger"  # Parameter
 train_neg_samp_method = "ibeta"  # Parameter
 
-test_balance_method = "rho"  # Parameter
-test_balance_kwargs = {
-    "max_iter": 20000,
-    "delta": 0.1,
-    "cooling_rate": 0.99,
-    "initial_temp": 40.0,
-    "ent_desired": 1.0,
-    "shrinkage": 1.0,
-}  # Parameter
+test_balance_method = "beta"  # Parameter
+test_balance_kwargs = {}  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
 num_cross_validation = 5  # Parameter

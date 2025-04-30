@@ -12,7 +12,7 @@ logger = prj_logger.getLogger(__name__)
 
 model_name = "bmlpcyn"  # Parameter
 dataset = "sanger"  # Parameter
-train_neg_samp_method = "beta"  # Parameter
+train_neg_samp_method = "ibeta"  # Parameter
 
 test_balance_method = "rho"  # Parameter
 test_balance_kwargs = {

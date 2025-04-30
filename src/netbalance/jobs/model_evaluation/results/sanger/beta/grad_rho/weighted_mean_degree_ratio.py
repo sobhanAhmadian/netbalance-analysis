@@ -2,7 +2,9 @@ import os
 
 import numpy as np
 
-from netbalance.configs.bmlpsyn import BMLPSYN_RESULTS_DIR as RESULTS_DIR  # Parameter
+from netbalance.configs.weighted_mean_degree_ratio import (
+    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,  # Parameter
+)
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.sanger import SangerDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
@@ -10,7 +12,7 @@ from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
-model_name = "bmlpcyn"  # Parameter
+model_name = "weighted_mean_degree_ratio"  # Parameter
 dataset = "sanger"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 

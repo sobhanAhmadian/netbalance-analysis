@@ -25,7 +25,7 @@ test_balance_kwargs = {
 }  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 num_negative_sampling = 5  # Parameter
 
 model_result_dir = os.path.join(
