@@ -232,7 +232,7 @@ class BXGBDTIModelHandler(AModelHandler):
     def predict_impl(self, node_lists: list[np.ndarray]):
         a_nodes, b_nodes = node_lists
         dp_embedd = self.fe.extract_features(a_nodes, b_nodes).numpy()
-        return self.model.predict(dp_embedd)
+        return self.model.predict_proba(dp_embedd)[:, 1]
 
     def summary(self):
         pass
