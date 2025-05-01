@@ -1,8 +1,6 @@
 import os
 
-from netbalance.configs.bmlpsyn import (
-    BMLPSYN_RESULTS_DIR as RESULTS_DIR,  # Parameter
-)
+from netbalance.configs.bmlpsyn import BMLPSYN_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.evaluation.general import get_result_of_rcv
 from netbalance.features.sanger import SangerDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger

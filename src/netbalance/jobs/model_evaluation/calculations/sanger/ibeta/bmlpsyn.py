@@ -24,7 +24,7 @@ model_name = "bmlpsyn"  # Parameter
 dataset = "sanger"  # Parameter
 train_neg_samp_method = "ibeta"  # Parameter
 
-num_cross_validation = 1  # Parameter
+num_cross_validation = 5  # Parameter
 
 splitter_kwargs = {
     "k": 5,
