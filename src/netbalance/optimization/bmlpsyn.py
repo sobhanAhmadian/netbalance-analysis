@@ -104,21 +104,21 @@ class BalanceBMLPSYNTrainer(Trainer):
         # Multi thread run tasks for num_bal in range 1 to 20
         tasks = [dask.delayed(task)(num_bal) for num_bal in range(0, config.i_max_num_bal)]
 
-        with (
-            tqdm(
-                total=config.i_max_num_bal,
-                desc="Sub-training datasets",
-            ) as pbar,
-            Client(
-                LocalCluster(
-                    n_workers=int(os.getenv("NUM_WORKERS")),
-                    threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
-                )
-            ) as client,
-        ):
-            futures = client.compute(tasks)
-            for future in dask.distributed.as_completed(futures):
-                pbar.update(1)
+        # with (
+        #     tqdm(
+        #         total=config.i_max_num_bal,
+        #         desc="Sub-training datasets",
+        #     ) as pbar,
+        #     Client(
+        #         LocalCluster(
+        #             n_workers=int(os.getenv("NUM_WORKERS")),
+        #             threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+        #         )
+        #     ) as client,
+        # ):
+        #     futures = client.compute(tasks)
+        #     for future in dask.distributed.as_completed(futures):
+        #         pbar.update(1)
         
         for e in range(config.n_epoch):
             num_bal = e % config.i_max_num_bal
