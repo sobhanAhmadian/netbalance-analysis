@@ -60,7 +60,6 @@ optimizer_config.i_max_num_bal = 30
 optimizer_config.n_epoch = 200
 
 model_config = ModelConfig()  # Parameter
-model_config.hidden_dim = 64
 
 def get_data():
     return TGData(
