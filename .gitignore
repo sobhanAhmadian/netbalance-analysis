@@ -172,3 +172,5 @@ notebooks/exploratory
 src/netbalance/data_repository
 
 playground
+
+.python-version
