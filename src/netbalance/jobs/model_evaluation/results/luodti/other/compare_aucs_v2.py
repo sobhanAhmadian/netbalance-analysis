@@ -48,17 +48,17 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
     # (MIDTI_RESULTS_DIR, "beta", "MIDTI"),
-    # (FMIDTI_RESULTS_DIR, "beta", "FMIDTI"),
+    (FMIDTI_RESULTS_DIR, "beta", "MIDTI"),
     # (BLINDTI_RESULTS_DIR, "beta", "Linear"),
     # (BXGBDTI_RESULTS_DIR, "beta", "XGBoost"),
     # (BRFDTI_RESULTS_DIR, "beta", "RF"),
-    (BMLPDTI_RESULTS_DIR, "beta", "MLP"),
-    (BMLPDTI_RESULTS_DIR, "ibeta", "MLP-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "MLP-II"),
-    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Drug"),
-    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Target"),
-    # (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Combo"),
-    # (BRANDOM_RESULTS_DIR, "beta", "Random"),
+    # (BMLPDTI_RESULTS_DIR, "beta", "MLP"),
+    # (BMLPDTI_RESULTS_DIR, "ibeta", "MLP-I"),
+    # (BMLPDTI_RESULTS_DIR, "irho", "MLP-II"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Drug"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Target"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Combo"),
+    (BRANDOM_RESULTS_DIR, "beta", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
 
