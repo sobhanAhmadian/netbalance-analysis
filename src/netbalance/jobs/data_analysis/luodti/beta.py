@@ -3,8 +3,8 @@ from netbalance.configs.common import RESULTS_DIR
 from netbalance.features import LuoDTIDataset as Dataset  # Parameter
 from netbalance.utils.data import analyse_datasest
 
-c_pos = cold_color1
-c_neg = warm_color1
+c_pos = "#66c2a5d3"
+c_neg = "#d53e50d5"
 save_figs = True  # Parameter
 dataset = "luodti"  # Parameter
 num_cross_validation = 5  # Parameter

@@ -28,8 +28,8 @@ def analyse_datasest(
     test_balance_method: str = "beta",
     test_balance_kwargs: dict = {},
     test_balance_negative_ratio: float = 1.0,
-    c_pos: str = "#66c2a5",
-    c_neg: str = "#d53e4f",
+    c_pos: str = "#66c2a5c5",
+    c_neg: str = "#d53e50b5",
     summary_size: int = 30,
     with_negatives: bool = True,
 ) -> None:

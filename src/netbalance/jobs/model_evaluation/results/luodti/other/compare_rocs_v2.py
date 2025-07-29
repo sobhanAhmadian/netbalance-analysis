@@ -110,11 +110,11 @@ fprs = np.linspace(0, 1, 100)
 fig, axe = plt.subplots(1, 1, figsize=(3, 2.8))
 
 
-axe.plot(fprs, mlp2_beta_tprs, color=c1, lw=1.1, label="MLP-II (beta)")
+# axe.plot(fprs, mlp2_beta_tprs, color=c1, lw=1.1, label="MLP-II (beta)")
 axe.plot(fprs, mlp2_rho_tprs, color=c1, lw=1.1, linestyle="--", label="MLP-II (rho)")
-axe.plot(fprs, fmidti_beta_tprs, color=c2, lw=1.1, label="FMI-DTI (beta)")
+# axe.plot(fprs, fmidti_beta_tprs, color=c2, lw=1.1, label="FMI-DTI (beta)")
 axe.plot(fprs, fmidti_rho_tprs, color=c2, lw=1.1, linestyle="--", label="FMI-DTI (rho)")
-axe.plot(fprs, wdrc_beta_tprs, color=c3, lw=1.1, label="WDRC (beta)")
+# axe.plot(fprs, wdrc_beta_tprs, color=c3, lw=1.1, label="WDRC (beta)")
 axe.plot(fprs, wdrc_rho_tprs, color=c3, lw=1.1, linestyle="--", label="WDRC (rho)")
 
 axe.set_xlabel("False Positive Rate")

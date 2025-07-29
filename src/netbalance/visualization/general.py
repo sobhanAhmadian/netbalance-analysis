@@ -2,11 +2,21 @@ import math
 from typing import Union, List
 
 import matplotlib.patches as mpatches
+from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 
-plt.rcParams["font.weight"] = "bold"
+plt.rcParams.update(
+    {
+        "font.weight": "normal",  # options: 'normal', 'light', 'regular'
+        "axes.labelsize": 9,
+        "xtick.labelsize": 7,
+        "ytick.labelsize": 8,
+        "axes.labelweight": "regular",
+        "axes.titleweight": "regular",
+    }
+)
 
 
 def cluster_barplot(
@@ -107,7 +117,7 @@ def plot_per_group_associations(
     if max_k is None or max_k > len(num_list):
         max_k = len(num_list)
     num_pages = math.ceil(max_k / per_page_num)
-    fig, axs = plt.subplots(num_pages, 1, figsize=(10, 3.5 * num_pages))
+    fig, axs = plt.subplots(num_pages, 1, figsize=(5.5, 2 * num_pages))
 
     if num_pages == 1:
         axs = [axs]
@@ -146,27 +156,28 @@ def plot_per_group_associations(
             color=c_pos,
         )
 
-        cluster_a_patch_train = mpatches.Patch(
-            color=c_pos, label="Positive Associations"
-        )
-        cluster_a_neg_patch_train = mpatches.Patch(
-            color=c_neg, label="Negative Associations"
-        )
-        axs[page].legend(handles=[cluster_a_patch_train, cluster_a_neg_patch_train])
+        # cluster_a_patch_train = mpatches.Patch(
+        #     color=c_pos, label="Positive Associations"
+        # )
+        # cluster_a_neg_patch_train = mpatches.Patch(
+        #     color=c_neg, label="Negative Associations"
+        # )
+        # axs[page].legend(handles=[cluster_a_patch_train, cluster_a_neg_patch_train])
 
         axs[page].set_xticks(range(u - l))
-        axs[page].set_xticklabels(
-            sorted_names[l:u], rotation=45, ha="right", fontsize=6
-        )
+        axs[page].set_xticklabels(sorted_names[l:u], rotation=90, ha="right")
 
-        axs[page].set_ylim(top=max(sorted_num) + 5)
+        axs[page].set_ylim(top=max(max(sorted_num) + 2, 10))
+        axs[page].spines["top"].set_visible(False)
+        axs[page].spines["right"].set_visible(False)
+        axs[page].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        axs[page].set_title(
-            f"Per-{cluster_name.lower()} Number of Associations [{l + 1} - {u}]",
-            fontweight="bold",
-        )
-        axs[page].set_xlabel(f"{cluster_name.capitalize()} Name", fontweight="bold")
-        axs[page].set_ylabel("# Associations", fontweight="bold")
+        # axs[page].set_title(
+        #     f"Per-{cluster_name.lower()} Number of Associations [{l + 1} - {u}]",
+        #     fontweight="bold",
+        # # )
+        # axs[page].set_xlabel(f"{cluster_name.capitalize()} Name", fontweight="bold")
+        # axs[page].set_ylabel("# Associations", fontweight="bold")
 
     fig.tight_layout()
 
