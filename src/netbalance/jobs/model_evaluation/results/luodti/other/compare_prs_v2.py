@@ -17,7 +17,7 @@ from netbalance.configs.midti import MIDTI_RESULTS_DIR
 from netbalance.configs.weighted_mean_degree_ratio import (
     WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
 )
-from netbalance.utils.result import get_hit_k_of_cv_folds
+from netbalance.utils.result import get_mean_precision_of_cv_folds
 
 plt.rcParams.update(
     {
@@ -33,7 +33,6 @@ plt.rcParams.update(
 dataset = "luodti"
 
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
-
 
 # (Model Result Dir, Train Method, Color, Display Name)
 path_dict = [
@@ -69,13 +68,13 @@ test_balance_kwargs_rho = {
     "shrinkage": 1.0,
 }
 
-beta_measures = []
-eta_measures = []
-rho_measures = []
+beta_precisions = []
+eta_precisions = []
+rho_precisions = []
 
 for model_dir, train_balance_method, _, _ in path_dict:
 
-    values = get_hit_k_of_cv_folds(
+    values = get_mean_precision_of_cv_folds(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
@@ -83,55 +82,55 @@ for model_dir, train_balance_method, _, _ in path_dict:
         test_balance_kwargs=test_balance_kwargs_beta,
     )
 
-    beta_measures.append(values)
+    beta_precisions.append(values)
 
-    values = get_hit_k_of_cv_folds(
+    values = get_mean_precision_of_cv_folds(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_eta,
         test_balance_kwargs=test_balance_kwargs_eta,
     )
-    eta_measures.append(values)
+    eta_precisions.append(values)
 
-    values = get_hit_k_of_cv_folds(
+    values = get_mean_precision_of_cv_folds(
         model_dir,
         dataset=dataset,
         train_balance_method=train_balance_method,
         test_balance_method=test_balance_method_rho,
         test_balance_kwargs=test_balance_kwargs_rho,
     )
-    rho_measures.append(values)
+    rho_precisions.append(values)
 
+recalls = np.linspace(0, 1, 100)
 
 fig, axe = plt.subplots(figsize=(3, 2.8))
 
-x_common = np.linspace(0, 1, 30)
-
-for idx, m_list in enumerate(beta_measures):
+for idx, m_list in enumerate(beta_precisions):
     axe.plot(
-        x_common,
-        m_list,
+        recalls[:-1],
+        m_list[:-1],
         color=model_colors[idx],
         lw=1.1,
         label=model_names[idx],
     )
 
-# for idx, m_list in enumerate(rho_measures):
+# for idx, m_list in enumerate(rho_precisions):
 #     axe.plot(
-#         x_common,
-#         m_list,
+#         recalls[:-1],
+#         m_list[:-1],
 #         color=model_colors[idx],
 #         lw=1.1,
 #         label=model_names[idx],
 #     )
 
-axe.set_ylabel("Hit@K Accuracy")
-axe.set_xlabel("Normalized K")
-axe.set_ylim(0.3, 1.02)
+axe.set_ylabel("Precision")
+axe.set_xlabel("Recall")
+axe.set_ylim(0.4, 1.02)
 
 os.makedirs(figs_folder, exist_ok=True)
+
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_hit_k.svg"
+file_name = f"{figs_folder}/compare_prs.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

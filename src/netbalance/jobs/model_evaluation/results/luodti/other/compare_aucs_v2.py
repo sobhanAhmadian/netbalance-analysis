@@ -27,16 +27,16 @@ plt.rcParams.update(
     {
         "font.weight": "normal",  # options: 'normal', 'light', 'regular'
         "axes.labelsize": 9,
-        "xtick.labelsize": 9,
+        "xtick.labelsize": 8,
         "ytick.labelsize": 8,
         "axes.labelweight": "regular",
         "axes.titleweight": "regular",
     }
 )
 
-color11 = "#fdd49e"
+color11 = "#fdae61"
 color21 = "#fc8d59"
-color31 = "#d7301f"
+color31 = "#d53e4f"
 
 measure = "auc"  # max_f1, auc, aupr
 
@@ -47,17 +47,17 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
+    (BMLPDTI_RESULTS_DIR, "irho", "UnbiasNet"),
+    (BRFDTI_RESULTS_DIR, "beta", "RF"),
+    (BXGBDTI_RESULTS_DIR, "beta", "XGBoost"),
     # (MIDTI_RESULTS_DIR, "beta", "MIDTI"),
     (FMIDTI_RESULTS_DIR, "beta", "MIDTI"),
-    # (BLINDTI_RESULTS_DIR, "beta", "Linear"),
-    # (BXGBDTI_RESULTS_DIR, "beta", "XGBoost"),
-    # (BRFDTI_RESULTS_DIR, "beta", "RF"),
+    (BLINDTI_RESULTS_DIR, "beta", "Linear"),
     # (BMLPDTI_RESULTS_DIR, "beta", "MLP"),
     # (BMLPDTI_RESULTS_DIR, "ibeta", "MLP-I"),
-    # (BMLPDTI_RESULTS_DIR, "irho", "MLP-II"),
-    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Drug"),
     (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Target"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Combo"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Both"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Drug"),
     (BRANDOM_RESULTS_DIR, "beta", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
@@ -134,13 +134,13 @@ rho_means_vals, rho_stds = get_mean_std(rho_measures)
 
 # X-axis setup
 x = np.arange(len(model_names))  # [0, 1, ..., N-1]
-bar_width = 0.25
+bar_width = 0.3
 
-fig, axe = plt.subplots(figsize=(len(path_dict) * 0.75, 2.5))
+fig, axe = plt.subplots(figsize=(len(path_dict) * 0.75, 2.1))
 
 # Plot bars
 bars_beta = axe.bar(
-    x - bar_width,
+    x - bar_width / 2,
     beta_means_vals,
     bar_width,
     yerr=beta_stds,
@@ -152,21 +152,21 @@ bars_beta = axe.bar(
     alpha=1.0,
 )
 
-bars_eta = axe.bar(
-    x,
-    eta_means_vals,
-    bar_width,
-    yerr=eta_stds,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    label="Full Test",
-    color=color21,
-    alpha=1,
-)
+# bars_eta = axe.bar(
+#     x,
+#     eta_means_vals,
+#     bar_width,
+#     yerr=eta_stds,
+#     capsize=1.0,
+#     ecolor="black",
+#     error_kw=dict(lw=1, alpha=0.7),
+#     label="Full Test",
+#     color=color21,
+#     alpha=1,
+# )
 
 bars_rho = axe.bar(
-    x + bar_width,
+    x + bar_width / 2,
     rho_means_vals,
     bar_width,
     yerr=rho_stds,
@@ -178,9 +178,18 @@ bars_rho = axe.bar(
     alpha=1,
 )
 
+# line at 0.5
+axe.axhline(
+    0.5,
+    color="#d53e4f",
+    linestyle="--",
+    linewidth=0.8,
+    label="Random",
+)
+
 # Labels and grid
 axe.set_xticks(x)
-axe.set_xticklabels(model_names, rotation=30, ha="right")
+axe.set_xticklabels(model_names)
 axe.set_ylabel(measure.upper())
 axe.set_ylim(0.4, 1)
 

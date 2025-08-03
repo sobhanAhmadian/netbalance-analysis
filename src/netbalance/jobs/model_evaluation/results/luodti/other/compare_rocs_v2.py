@@ -37,6 +37,7 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 c1 = "#9e0142"
 c2 = "#3288bd"
 c3 = "#f46d43"
+c4 = "gray"
 
 test_balance_method_beta = "beta"
 test_balance_kwargs_beta = {}
@@ -88,6 +89,21 @@ wdrc_rho_tprs = get_mean_tpr_of_cv_folds(
     test_balance_kwargs=test_balance_kwargs_rho,
 )
 
+random_beta_tprs = get_mean_tpr_of_cv_folds(
+    BRANDOM_RESULTS_DIR,
+    dataset=dataset,
+    train_balance_method="beta",
+    test_balance_method=test_balance_method_beta,
+    test_balance_kwargs=test_balance_kwargs_beta,
+)
+random_rho_tprs = get_mean_tpr_of_cv_folds(
+    BRANDOM_RESULTS_DIR,
+    dataset=dataset,
+    train_balance_method="beta",
+    test_balance_method=test_balance_method_rho,
+    test_balance_kwargs=test_balance_kwargs_rho,
+)
+
 
 mlp2_beta_tprs = get_mean_tpr_of_cv_folds(
     BMLPDTI_RESULTS_DIR,
@@ -110,12 +126,14 @@ fprs = np.linspace(0, 1, 100)
 fig, axe = plt.subplots(1, 1, figsize=(3, 2.8))
 
 
-# axe.plot(fprs, mlp2_beta_tprs, color=c1, lw=1.1, label="MLP-II (beta)")
-axe.plot(fprs, mlp2_rho_tprs, color=c1, lw=1.1, linestyle="--", label="MLP-II (rho)")
-# axe.plot(fprs, fmidti_beta_tprs, color=c2, lw=1.1, label="FMI-DTI (beta)")
-axe.plot(fprs, fmidti_rho_tprs, color=c2, lw=1.1, linestyle="--", label="FMI-DTI (rho)")
-# axe.plot(fprs, wdrc_beta_tprs, color=c3, lw=1.1, label="WDRC (beta)")
-axe.plot(fprs, wdrc_rho_tprs, color=c3, lw=1.1, linestyle="--", label="WDRC (rho)")
+axe.plot(fprs, mlp2_beta_tprs, color=c1, lw=1.1, label="MLP-II (beta)")
+# axe.plot(fprs, mlp2_rho_tprs, color=c1, lw=1.1, label="MLP-II (rho)")
+axe.plot(fprs, fmidti_beta_tprs, color=c2, lw=1.1, label="FMI-DTI (beta)")
+# axe.plot(fprs, fmidti_rho_tprs, color=c2, lw=1.1, label="FMI-DTI (rho)")
+axe.plot(fprs, wdrc_beta_tprs, color=c3, lw=1.1, label="WDRC (beta)")
+# axe.plot(fprs, wdrc_rho_tprs, color=c3, lw=1.1, label="WDRC (rho)")
+axe.plot(fprs, random_beta_tprs, color=c4, lw=1.1, label="Random (beta)")
+# axe.plot(fprs, random_rho_tprs, color=c4, lw=1.1, label="Random (rho)")
 
 axe.set_xlabel("False Positive Rate")
 axe.set_ylabel("True Positive Rate")
