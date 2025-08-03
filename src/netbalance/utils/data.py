@@ -6,6 +6,8 @@ from typing import Callable, List
 import numpy as np
 from dotenv import load_dotenv
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+from netbalance.configs.common import RESULTS_DIR
 
 from netbalance.data.association_data import AData, ATrainTestSpliter
 from netbalance.features.bipartite_graph_dataset import ADataset
@@ -116,6 +118,25 @@ def analyse_datasest(
             c_neg=c_neg,
             max_k=summary_size,
         )
+
+        ratios = (test_stats[symb]["num_pos"]) / (test_stats[symb]["num"])
+        dir_path = (
+            f"{RESULTS_DIR}/numeric/data_analysis/{dataset_name}/{test_balance_method}"
+        )
+        os.makedirs(dir_path, exist_ok=True)
+        filename = "ratios_" + dataset.cluster_names[i] + ".txt"
+        np.savetxt(f"{dir_path}/{filename}", ratios, delimiter=",")
+        print(f"\nSaved ratios list to {dir_path}/{filename}")
+
+        file_name = "num_pos_" + dataset.cluster_names[i] + ".txt"
+        np.savetxt(
+            f"{dir_path}/{file_name}", test_stats[symb]["num_pos"], delimiter=","
+        )
+        print(f"Saved num_pos list to {dir_path}/{file_name}")
+
+        file_name = "num_" + dataset.cluster_names[i] + ".txt"
+        np.savetxt(f"{dir_path}/{file_name}", test_stats[symb]["num"], delimiter=",")
+        print(f"Saved num list to {dir_path}/{file_name}")
 
 
 def get_balanced_test_data_list(
