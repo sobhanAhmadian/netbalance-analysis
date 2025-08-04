@@ -19,24 +19,34 @@ from netbalance.configs.weighted_mean_degree_ratio import (
 )
 from netbalance.utils.result import get_mean_tpr_of_cv_folds
 
+plt.rcParams.update(
+    {
+        "font.weight": "normal",  # options: 'normal', 'light', 'regular'
+        "axes.labelsize": 9,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "axes.labelweight": "regular",
+        "axes.titleweight": "regular",
+    }
+)
+
 dataset = "luodti"
 
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
-    (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
-    (FMIDTI_RESULTS_DIR, "beta", "#d53e4f", "FMIDTI"),
-    (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
-    (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
-    (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
-    (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
-    (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "#66c2a5", "BMLPDTI-II"),
-    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#bf812d", "WDRC"),
-    (BRANDOM_RESULTS_DIR, "beta", "gray", "BRANDDTI"),
+    (FMIDTI_RESULTS_DIR, "beta", "#3288bd", "MIDTI"),
+    # (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "Leaner"),
+    # (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "XGBoost"),
+    # (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "RF"),
+    # (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
+    # (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
+    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "UnbiasNet"),
+    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "Drug"),
+    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "Target"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Both"),
+    (BRANDOM_RESULTS_DIR, "beta", "gray", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
 model_colors = [r[-2] for r in path_dict]
@@ -93,50 +103,18 @@ for model_dir, train_balance_method, _, _ in path_dict:
 
 fprs = np.linspace(0, 1, 100)
 
-fig, axe = plt.subplots(1, 3, figsize=(14, 5), sharey=True)
+tprs_list = rho_tprs  # Parameter
 
-################################# Beta
+fig, ax = plt.subplots(1, 1, figsize=(3, 2.8))
 
-for idx, tpr in enumerate(beta_tprs):
-    axe[0].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
-axe[0].set_title("Balanced ROC")
-axe[0].set_xlabel("False Positive Rate")
-axe[0].set_ylabel("True Positive Rate")
-axe[0].grid(True)
-
-################################# Eta
-
-for idx, tpr in enumerate(eta_tprs):
-    axe[1].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
-axe[1].set_title("Full Test ROC")
-axe[1].set_xlabel("False Positive Rate")
-axe[1].set_ylabel("")
-axe[1].grid(True)
-
-################################# Rho
-
-for idx, tpr in enumerate(rho_tprs):
-    axe[2].plot(fprs, tpr, color=model_colors[idx], lw=2, label=model_names[idx])
-axe[2].set_title("Entity-Balanced ROC")
-axe[2].set_xlabel("False Positive Rate")
-axe[2].set_ylabel("")
-axe[2].grid(True)
-
-#################################
-
-# Shared legend
-handles, labels = axe[0].get_legend_handles_labels()
-fig.legend(
-    handles,
-    labels,
-    loc="lower left",
-    ncol=12,
-    fontsize="small",
-)
+for idx, tpr in enumerate(tprs_list):
+    ax.plot(fprs, tpr, color=model_colors[idx], lw=1.1, label=model_names[idx])
+ax.set_xlabel("False Positive Rate")
+ax.set_ylabel("True Positive Rate")
 
 os.makedirs(figs_folder, exist_ok=True)
 
-fig.tight_layout(rect=[0, 0.05, 1, 1])
+fig.tight_layout()
 file_name = f"{figs_folder}/compare_rocs.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

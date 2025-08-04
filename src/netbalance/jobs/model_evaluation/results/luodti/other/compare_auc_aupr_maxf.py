@@ -38,7 +38,7 @@ color11 = "#fdae61"
 color21 = "#fc8d59"
 color31 = "#d53e4f"
 
-measure = "auc"  # max_f1, auc, aupr
+measure = "max_f1"  # max_f1, auc, aupr
 
 dataset = "luodti"
 

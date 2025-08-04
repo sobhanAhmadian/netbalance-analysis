@@ -3,53 +3,40 @@ import os
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
-from netbalance.configs.a_degree_ratio import A_DEGREE_RATIO_RESULTS_DIR
-from netbalance.configs.b_degree_ratio import B_DEGREE_RATIO_RESULTS_DIR
-from netbalance.configs.blindti import BLINDTI_RESULTS_DIR
-from netbalance.configs.bmlpdti import BMLPDTI_RESULTS_DIR
-from netbalance.configs.brandom import BRANDOM_RESULTS_DIR
-from netbalance.configs.brfdti import BRFDTI_RESULTS_DIR
-from netbalance.configs.bxgbdti import BXGBDTI_RESULTS_DIR
+from netbalance.configs.bmlpsyn import BMLPSYN_RESULTS_DIR
 from netbalance.configs.common import RESULTS_DIR
-from netbalance.configs.fmidti import FMIDTI_RESULTS_DIR
-from netbalance.configs.midti import MIDTI_RESULTS_DIR
-from netbalance.configs.weighted_mean_degree_ratio import (
-    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
-)
 from netbalance.utils.result import (
     get_auc_of_cv_folds,
     get_aupr_of_cv_folds,
     get_max_f1_of_cv_folds,
 )
 
-color11 = "#3288bd"
-color12 = "#3288bd"
-color21 = "#f46d43"
-color22 = "#f46d43"
-color31 = "#5e4fa2"
-color32 = "#5e4fa2"
+color11 = "#fdae61"
+color12 = "#fdae61"
+color31 = "#d53e4f"
+color32 = "#d53e4f"
 
-measure = "aupr"  # max_f1, auc, aupr
+plt.rcParams.update(
+    {
+        "font.weight": "normal",  # options: 'normal', 'light', 'regular'
+        "axes.labelsize": 9,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "axes.labelweight": "regular",
+        "axes.titleweight": "regular",
+    }
+)
 
-dataset = "luodti"
-
+measure = "auc"  # max_f1, auc, aupr
+dataset = "sanger"
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
-
 
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
-    (MIDTI_RESULTS_DIR, "beta", "MIDTI"),
-    (FMIDTI_RESULTS_DIR, "beta", "FMIDTI"),
-    (BLINDTI_RESULTS_DIR, "beta", "BLINDTI"),
-    (BXGBDTI_RESULTS_DIR, "beta", "BXGBDTI"),
-    (BRFDTI_RESULTS_DIR, "beta", "BRFDTI"),
-    (BMLPDTI_RESULTS_DIR, "beta", "BMLPDTI"),
-    (BMLPDTI_RESULTS_DIR, "ibeta", "BMLPDTI-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "BMLPDTI-II"),
-    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "DDRC"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "WDRC"),
-    (BRANDOM_RESULTS_DIR, "beta", "BRANDDTI"),
+    (BMLPSYN_RESULTS_DIR, "beta", "One balanced train dataset"),
+    (BMLPSYN_RESULTS_DIR, "ibeta", "30 balanced train datasets"),
+    (BMLPSYN_RESULTS_DIR, "ibeta", "One entity-balanced train datasets"),
+    (BMLPSYN_RESULTS_DIR, "irho", "30 entity-balanced train datasets"),
 ]
 model_names = [r[-1] for r in path_dict]
 
@@ -61,13 +48,13 @@ test_balance_kwargs_eta = {}
 
 test_balance_method_rho = "rho"
 test_balance_kwargs_rho = {
-    "max_iter": 100000,
+    "max_iter": 20000,
     "delta": 0.1,
     "cooling_rate": 0.99,
     "initial_temp": 40.0,
     "ent_desired": 1.0,
     "shrinkage": 1.0,
-}
+}  # Parameter
 
 beta_measures = []
 eta_measures = []
@@ -113,38 +100,34 @@ for model_dir, train_balance_method, _ in path_dict:
 
 i = 1
 x_list_beta = []
-x_list_eta = []
 x_list_rho = []
 x_ticks = []
 vertical_lines = []
-gap = 3
+gap = 2.5
 for j in range(len(path_dict)):
     x_list_beta.append(i)
-    i += 2
+    i += 1
 
     x_ticks.append(i)
-
-    x_list_eta.append(i)
-    i += 2
+    
+    i += 1
 
     x_list_rho.append(i)
     i += gap
-    vertical_lines.append(i)
-    i += gap
 
-del vertical_lines[-1]
 
-fig, axe = plt.subplots(figsize=(12, 6))
+fig, axe = plt.subplots(figsize=(3, len(path_dict) * 0.7))
 
 ################################# Beta
 
 violins = axe.violinplot(
     beta_measures,
     positions=x_list_beta,
-    widths=1.2,
+    widths=1,
     showmeans=True,
     showextrema=True,
     showmedians=False,
+    orientation="horizontal",
 )
 
 # Customize violin plot colors
@@ -158,37 +141,16 @@ violins["cmins"].set_color(color12)
 violins["cmaxes"].set_color(color12)
 violins["cmeans"].set_color(color12)
 
-################################# Eta
-
-violins = axe.violinplot(
-    eta_measures,
-    positions=x_list_eta,
-    widths=1.2,
-    showmeans=True,
-    showextrema=True,
-    showmedians=False,
-)
-
-# Customize violin plot colors
-for pc in violins["bodies"]:
-    pc.set_facecolor(color21)
-    pc.set_edgecolor(color22)
-    pc.set_alpha(0.4)
-
-violins["cbars"].set_color(color22)
-violins["cmins"].set_color(color22)
-violins["cmaxes"].set_color(color22)
-violins["cmeans"].set_color(color22)
-
 ################################# Rho
 
 violins = axe.violinplot(
     rho_measures,
     positions=x_list_rho,
-    widths=1.2,
+    widths=1,
     showmeans=True,
     showextrema=True,
     showmedians=False,
+    orientation="horizontal",
 )
 
 # Customize violin plot colors
@@ -202,29 +164,20 @@ violins["cmins"].set_color(color32)
 violins["cmaxes"].set_color(color32)
 violins["cmeans"].set_color(color32)
 
-axe.set_xticks(x_ticks)
-axe.set_xticklabels(model_names, rotation=45, ha="right")
-axe.set_ylabel(measure.upper())
-axe.set_title(
-    f"{measure.upper().replace("_", " ")} Comparison in Different Evaluation Frameworks"
-)
-axe.set_ylim(0.0, 1)
+axe.set_yticks(x_ticks)
+axe.set_yticklabels(["" for _ in range(len(path_dict))])
+axe.set_xlabel(measure.upper())
 
-# Add vertical lines
-for v in vertical_lines:
-    axe.axvline(v, color="gray", linestyle="--", linewidth=0.5, alpha=0.7)
+# Remove top and right borders
+axe.spines["top"].set_visible(False)
+axe.spines["right"].set_visible(False)
 
-axe.grid(axis="y", linestyle="--", alpha=0.4)
+axe.set_xlim(0.69, 0.93)
 
-# Add legend
-beta_patch = mpatches.Patch(color=color11, label="Balanced")
-eta_patch = mpatches.Patch(color=color21, label="Full Test")
-rho_patch = mpatches.Patch(color=color31, label="Entity-Balanced")
-axe.legend(handles=[beta_patch, eta_patch, rho_patch], loc="lower right")
 
 os.makedirs(figs_folder, exist_ok=True)
 
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_{measure}s.svg"
+file_name = f"{figs_folder}/compare_{measure}s_ablation.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

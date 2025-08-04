@@ -19,6 +19,17 @@ from netbalance.configs.weighted_mean_degree_ratio import (
 )
 from netbalance.utils.result import get_hit_k_of_cv_folds
 
+plt.rcParams.update(
+    {
+        "font.weight": "normal",  # options: 'normal', 'light', 'regular'
+        "axes.labelsize": 9,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "axes.labelweight": "regular",
+        "axes.titleweight": "regular",
+    }
+)
+
 dataset = "luodti"
 
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
@@ -26,18 +37,18 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 # (Model Result Dir, Train Method, Color, Display Name)
 path_dict = [
-    (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
-    (FMIDTI_RESULTS_DIR, "beta", "#d53e4f", "FMIDTI"),
-    (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
-    (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
-    (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
-    (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
-    (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "#66c2a5", "BMLPDTI-II"),
-    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#bf812d", "WDRC"),
-    (BRANDOM_RESULTS_DIR, "beta", "gray", "BRANDDTI"),
+    # (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
+    (FMIDTI_RESULTS_DIR, "beta", "#3288bd", "MIDTI"),
+    # (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
+    # (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
+    # (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
+    # (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
+    # (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
+    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "MLP-II"),
+    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
+    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Combo"),
+    (BRANDOM_RESULTS_DIR, "beta", "gray", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
 model_colors = [r[-2] for r in path_dict]
@@ -93,33 +104,27 @@ for model_dir, train_balance_method, _, _ in path_dict:
     rho_measures.append(values)
 
 
-fig, axes = plt.subplots(3, 1, figsize=(6, 5 * 3 + 1))
+fig, axe = plt.subplots(figsize=(3, 2.8))
 
 x_common = np.linspace(0, 1, 30)
 
-f_list = [beta_measures, eta_measures, rho_measures]
-f_names = ["Balanced", "Full Test", "Entity-Balanced"]
-for i, axe in enumerate(axes):
-    for idx, m_list in enumerate(f_list[i]):
-        axe.plot(
-            x_common,
-            m_list,
-            color=model_colors[idx],
-            lw=2,
-            label=model_names[idx],
-        )
+measures = beta_measures
 
-    axe.set_ylabel("Hit@K Accuracy")
-    axe.set_xlabel("Normalized Hit@K")
-    axe.set_title(f"Hit@K in {f_names[i]} Framework")
-    axe.set_ylim(-0.1, 1.1)
+for idx, m_list in enumerate(measures):
+    axe.plot(
+        x_common,
+        m_list,
+        color=model_colors[idx],
+        lw=1.1,
+        label=model_names[idx],
+    )
 
-# Add legend
-handles = [mpatches.Patch(color=a[-2], label=a[-1]) for a in path_dict]
-fig.legend(handles=handles, loc="lower center", ncol=4, fontsize="small")
+axe.set_ylabel("Hit@K Accuracy")
+axe.set_xlabel("Normalized K")
+axe.set_ylim(0.3, 1.02)
 
 os.makedirs(figs_folder, exist_ok=True)
-fig.tight_layout(rect=[0, 0.05, 1, 1])
+fig.tight_layout()
 file_name = f"{figs_folder}/compare_hit_k.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

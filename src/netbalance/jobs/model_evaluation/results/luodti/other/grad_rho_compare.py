@@ -17,7 +17,11 @@ from netbalance.configs.midti import MIDTI_RESULTS_DIR
 from netbalance.configs.weighted_mean_degree_ratio import (
     WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR,
 )
-from netbalance.utils.result import get_hit_k_of_cv_folds
+from netbalance.utils.result import (
+    get_auc_of_cv_folds,
+    get_aupr_of_cv_folds,
+    get_max_f1_of_cv_folds,
+)
 
 plt.rcParams.update(
     {
@@ -30,10 +34,11 @@ plt.rcParams.update(
     }
 )
 
+measure = "aupr"  # max_f1, auc, aupr
+
 dataset = "luodti"
 
 figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
-
 
 # (Model Result Dir, Train Method, Color, Display Name)
 path_dict = [
@@ -53,12 +58,6 @@ path_dict = [
 model_names = [r[-1] for r in path_dict]
 model_colors = [r[-2] for r in path_dict]
 
-test_balance_method_beta = "beta"
-test_balance_kwargs_beta = {}
-
-test_balance_method_eta = "eta"
-test_balance_kwargs_eta = {}
-
 test_balance_method_rho = "rho"
 test_balance_kwargs_rho = {
     "max_iter": 100000,
@@ -68,70 +67,65 @@ test_balance_kwargs_rho = {
     "ent_desired": 1.0,
     "shrinkage": 1.0,
 }
+desired_ent_list = np.arange(0.0, 1.05, 0.1).tolist()
 
-beta_measures = []
-eta_measures = []
 rho_measures = []
 
+f = None
+if measure == "auc":
+    f = get_auc_of_cv_folds
+elif measure == "max_f1":
+    f = get_max_f1_of_cv_folds
+elif measure == "aupr":
+    f = get_aupr_of_cv_folds
+
 for model_dir, train_balance_method, _, _ in path_dict:
+    model_rho_means = []
+    model_rho_stds = []
 
-    values = get_hit_k_of_cv_folds(
-        model_dir,
-        dataset=dataset,
-        train_balance_method=train_balance_method,
-        test_balance_method=test_balance_method_beta,
-        test_balance_kwargs=test_balance_kwargs_beta,
-    )
+    for ent in desired_ent_list:
+        test_balance_kwargs_rho["ent_desired"] = ent
+        values = f(
+            model_dir,
+            dataset=dataset,
+            train_balance_method=train_balance_method,
+            test_balance_method=test_balance_method_rho,
+            test_balance_kwargs=test_balance_kwargs_rho,
+        )
+        model_rho_means.append(np.mean(values).item())
+        model_rho_stds.append(np.std(values).item())
 
-    beta_measures.append(values)
-
-    values = get_hit_k_of_cv_folds(
-        model_dir,
-        dataset=dataset,
-        train_balance_method=train_balance_method,
-        test_balance_method=test_balance_method_eta,
-        test_balance_kwargs=test_balance_kwargs_eta,
-    )
-    eta_measures.append(values)
-
-    values = get_hit_k_of_cv_folds(
-        model_dir,
-        dataset=dataset,
-        train_balance_method=train_balance_method,
-        test_balance_method=test_balance_method_rho,
-        test_balance_kwargs=test_balance_kwargs_rho,
-    )
-    rho_measures.append(values)
-
+    rho_measures.append((model_rho_means, model_rho_stds))
 
 fig, axe = plt.subplots(figsize=(3, 2.8))
 
-x_common = np.linspace(0, 1, 30)
-
-for idx, m_list in enumerate(beta_measures):
+for idx, (means, stds) in enumerate(rho_measures):
     axe.plot(
-        x_common,
-        m_list,
+        desired_ent_list,
+        means,
         color=model_colors[idx],
+        linestyle="-",
         lw=1.1,
         label=model_names[idx],
     )
+    axe.fill_between(
+        desired_ent_list,
+        np.array(means) - np.array(stds),
+        np.array(means) + np.array(stds),
+        color=model_colors[idx],
+        alpha=0.2,
+    )
 
-# for idx, m_list in enumerate(rho_measures):
-#     axe.plot(
-#         x_common,
-#         m_list,
-#         color=model_colors[idx],
-#         lw=1.1,
-#         label=model_names[idx],
-#     )
 
-axe.set_ylabel("Hit@K Accuracy")
-axe.set_xlabel("Normalized K")
-axe.set_ylim(0.3, 1.02)
+axe.set_ylabel(measure.upper())
+axe.set_xlabel("Entropy")
+
+axe.spines["top"].set_visible(False)
+axe.spines["right"].set_visible(False)
 
 os.makedirs(figs_folder, exist_ok=True)
+
 fig.tight_layout()
-file_name = f"{figs_folder}/compare_hit_k.svg"
+file_name = f"{figs_folder}/grad_rho_compare_{measure}s.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
