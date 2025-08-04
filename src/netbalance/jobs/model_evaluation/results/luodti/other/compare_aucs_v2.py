@@ -55,8 +55,8 @@ path_dict = [
     (BLINDTI_RESULTS_DIR, "beta", "Linear"),
     # (BMLPDTI_RESULTS_DIR, "beta", "MLP"),
     # (BMLPDTI_RESULTS_DIR, "ibeta", "MLP-I"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Target"),
     (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Both"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Target"),
     (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Drug"),
     (BRANDOM_RESULTS_DIR, "beta", "Random"),
 ]
@@ -175,7 +175,7 @@ bars_rho = axe.bar(
     error_kw=dict(lw=1, alpha=0.7),
     label="Entity-Balanced",
     color=color31,
-    alpha=1,
+    alpha=0.9,
 )
 
 # line at 0.5

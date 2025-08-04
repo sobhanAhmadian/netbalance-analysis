@@ -121,6 +121,9 @@ axe.set_ylabel(measure.upper())
 axe.set_xlabel("Entropy")
 # axe.set_ylim(0.45, 1.02)
 
+axe.spines["top"].set_visible(False)
+axe.spines["right"].set_visible(False)
+
 # Add legend
 # handles = [mpatches.Patch(color=a[-2], label=a[-1]) for a in path_dict]
 # axe.legend(handles=handles, loc="lower right", ncol=6, fontsize="small")

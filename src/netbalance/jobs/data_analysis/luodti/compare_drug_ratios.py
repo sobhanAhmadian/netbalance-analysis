@@ -40,7 +40,7 @@ rho_drug_ratios = rho_drug_ratios[~np.isnan(rho_drug_ratios)]
 rho_drug_ratios = rho_drug_ratios[rho_drug_ratios > 0]
 
 
-fig, ax = plt.subplots(figsize=(3, 2.5))
+fig, ax = plt.subplots(figsize=(3.2, 2.8))
 
 ax.hist(
     [beta_drug_ratios, rho_drug_ratios],
@@ -49,6 +49,9 @@ ax.hist(
     color=[color1, color2],
     density=True,
 )
+
+ax.set_xlabel("Degree Ratio")
+ax.set_ylabel("Frequency")
 
 # Remove top and right borders
 ax.spines["top"].set_visible(False)
@@ -63,7 +66,7 @@ print(f"\nFigure Saved: {file_name}")
 
 # Plotting the number of negatives for zero ratios
 
-fig, ax = plt.subplots(figsize=(3, 2.5))
+fig, ax = plt.subplots(figsize=(3.2, 2.8))
 
 ax.hist(
     [beta_drug_num_zero_pos, rho_drug_num_zero_pos],
@@ -72,6 +75,9 @@ ax.hist(
     color=[color1, color2],
     density=True,
 )
+
+ax.set_xlabel("Number of Negatives")
+ax.set_ylabel("Frequency")
 
 # Remove top and right borders
 ax.spines["top"].set_visible(False)
