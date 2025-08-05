@@ -35,10 +35,12 @@ plt.rcParams.update(
 )
 
 color11 = "#fdae61"
-color21 = "#fc8d59"
+color21 = "#8c6bb1"
 color31 = "#d53e4f"
 
-measure = "max_f1"  # max_f1, auc, aupr
+with_eta = True
+
+measure = "aupr"  # max_f1, auc, aupr
 
 dataset = "luodti"
 
@@ -134,13 +136,13 @@ rho_means_vals, rho_stds = get_mean_std(rho_measures)
 
 # X-axis setup
 x = np.arange(len(model_names))  # [0, 1, ..., N-1]
-bar_width = 0.3
+bar_width = 0.2 if with_eta else 0.3
 
 fig, axe = plt.subplots(figsize=(len(path_dict) * 0.75, 2.1))
 
 # Plot bars
 bars_beta = axe.bar(
-    x - bar_width / 2,
+    x - (bar_width if with_eta else bar_width / 2),
     beta_means_vals,
     bar_width,
     yerr=beta_stds,
@@ -152,21 +154,22 @@ bars_beta = axe.bar(
     alpha=1.0,
 )
 
-# bars_eta = axe.bar(
-#     x,
-#     eta_means_vals,
-#     bar_width,
-#     yerr=eta_stds,
-#     capsize=1.0,
-#     ecolor="black",
-#     error_kw=dict(lw=1, alpha=0.7),
-#     label="Full Test",
-#     color=color21,
-#     alpha=1,
-# )
+if with_eta:
+    bars_eta = axe.bar(
+        x,
+        eta_means_vals,
+        bar_width,
+        yerr=eta_stds,
+        capsize=1.0,
+        ecolor="black",
+        error_kw=dict(lw=1, alpha=0.7),
+        label="Full Test",
+        color=color21,
+        alpha=0.9,
+    )
 
 bars_rho = axe.bar(
-    x + bar_width / 2,
+    x + (bar_width if with_eta else bar_width / 2),
     rho_means_vals,
     bar_width,
     yerr=rho_stds,
@@ -191,7 +194,7 @@ axe.axhline(
 axe.set_xticks(x)
 axe.set_xticklabels(model_names)
 axe.set_ylabel(measure.upper())
-axe.set_ylim(0.4, 1)
+axe.set_ylim((0.0 if with_eta else 0.4), 1)
 
 # Remove top and right borders
 axe.spines["top"].set_visible(False)
