@@ -149,11 +149,13 @@ def plot_per_group_associations(
             [i for i in range(u - l)],
             sorted_num[l:u],
             color=c_neg,
+            alpha=0.9,
         )
         axs[page].bar(
             [i for i in range(u - l)],
             sorted_num_pos[l:u],
             color=c_pos,
+            alpha=0.9,
         )
 
         # cluster_a_patch_train = mpatches.Patch(
@@ -165,7 +167,10 @@ def plot_per_group_associations(
         # axs[page].legend(handles=[cluster_a_patch_train, cluster_a_neg_patch_train])
 
         axs[page].set_xticks(range(u - l))
-        axs[page].set_xticklabels(sorted_names[l:u], rotation=90, ha="right")
+        axs[page].set_xticklabels(
+            ["" for _ in range(len(sorted_names[l:u]))], rotation=90, ha="right"
+        )
+        # axs[page].set_xticklabels(sorted_names[l:u], rotation=90, ha="right")
 
         axs[page].set_ylim(top=max(max(sorted_num) + 2, 10))
         axs[page].spines["top"].set_visible(False)
