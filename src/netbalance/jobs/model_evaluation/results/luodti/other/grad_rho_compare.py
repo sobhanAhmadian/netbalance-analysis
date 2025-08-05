@@ -34,7 +34,7 @@ plt.rcParams.update(
     }
 )
 
-measure = "aupr"  # max_f1, auc, aupr
+measure = "max_f1"  # max_f1, auc, aupr
 
 dataset = "luodti"
 
@@ -42,17 +42,16 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 # (Model Result Dir, Train Method, Color, Display Name)
 path_dict = [
-    # (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
     (FMIDTI_RESULTS_DIR, "beta", "#3288bd", "MIDTI"),
-    # (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
-    # (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
-    # (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
+    (BLINDTI_RESULTS_DIR, "beta", "#66c2a5", "Leaner"),
+    (BXGBDTI_RESULTS_DIR, "beta", "#abdda4", "XGBoost"),
+    (BRFDTI_RESULTS_DIR, "beta", "#5e4fa2", "RF"),
     # (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
     # (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "MLP-II"),
-    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
-    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Combo"),
+    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "UnbiasNet"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#fee08b", "Drug"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#fdae61", "Target"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Both"),
     (BRANDOM_RESULTS_DIR, "beta", "gray", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
