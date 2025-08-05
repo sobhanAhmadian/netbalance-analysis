@@ -37,17 +37,16 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 
 # (Model Result Dir, Train Method, Color, Display Name)
 path_dict = [
-    # (MIDTI_RESULTS_DIR, "beta", "#9e0142", "MIDTI"),
     (FMIDTI_RESULTS_DIR, "beta", "#3288bd", "MIDTI"),
-    # (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "BLINDTI"),
-    # (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "BXGBDTI"),
-    # (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "BRFDTI"),
+    (BLINDTI_RESULTS_DIR, "beta", "#66c2a5", "Leaner"),
+    (BXGBDTI_RESULTS_DIR, "beta", "#abdda4", "XGBoost"),
+    (BRFDTI_RESULTS_DIR, "beta", "#5e4fa2", "RF"),
     # (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
     # (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
-    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "MLP-II"),
-    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "DDRC"),
-    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "TDRC"),
-    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Combo"),
+    (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "UnbiasNet"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#fee08b", "Drug"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#fdae61", "Target"),
+    (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Both"),
     (BRANDOM_RESULTS_DIR, "beta", "gray", "Random"),
 ]
 model_names = [r[-1] for r in path_dict]
@@ -108,7 +107,7 @@ fig, axe = plt.subplots(figsize=(3, 2.8))
 
 x_common = np.linspace(0, 1, 30)
 
-measures = beta_measures
+measures = rho_measures
 
 for idx, m_list in enumerate(measures):
     axe.plot(
@@ -121,7 +120,7 @@ for idx, m_list in enumerate(measures):
 
 axe.set_ylabel("Hit@K Accuracy")
 axe.set_xlabel("Normalized K")
-axe.set_ylim(0.3, 1.02)
+axe.set_ylim(0.2, 1.02)
 
 os.makedirs(figs_folder, exist_ok=True)
 fig.tight_layout()

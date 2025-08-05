@@ -36,14 +36,14 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
     (CCSYNERGY_RESULTS_DIR, "beta", "#3288bd", "CCSynergy"),
-    # (BLINSYN_RESULTS_DIR, "beta", "#d53e4f", "Linear"),
-    # (BXGBSYN_RESULTS_DIR, "beta", "#f46d43", "XGBoost"),
-    # (BRFSYN_RESULTS_DIR, "beta", "#fdae61", "RF"),
+    (BLINSYN_RESULTS_DIR, "beta", "#66c2a5", "Linear"),
+    (BXGBSYN_RESULTS_DIR, "beta", "#abdda4", "XGBoost"),
+    (BRFSYN_RESULTS_DIR, "beta", "#5e4fa2", "RF"),
     # (BMLPSYN_RESULTS_DIR, "beta", "#fee08b", "BMLPSYN"),
     # (BMLPSYN_RESULTS_DIR, "ibeta", "#e6f598", "BMLPSYN-I"),
     (BMLPSYN_RESULTS_DIR, "irho", "#9e0142", "UnbiasNet"),
-    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#66c2a5", "Drug"),
-    # (C_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "Cell Line"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#fee08b", "Drug"),
+    (C_DEGREE_RATIO_RESULTS_DIR, "beta", "#fdae61", "Cell Line"),
     (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Both"),
     (BRANDOM_RESULTS_DIR, "beta", "gray", "BRANDOM"),
 ]
@@ -103,7 +103,7 @@ for model_dir, train_balance_method, _, _ in path_dict:
 
 recalls = np.linspace(0, 1, 100)
 
-precisions_list = beta_precisions
+precisions_list = rho_precisions
 
 fig, ax = plt.subplots(figsize=(3, 2.8))
 

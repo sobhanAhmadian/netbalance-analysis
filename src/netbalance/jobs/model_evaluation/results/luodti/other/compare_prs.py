@@ -37,14 +37,14 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 # (Model Result Dir, Train Method, Display Name)
 path_dict = [
     (FMIDTI_RESULTS_DIR, "beta", "#3288bd", "MIDTI"),
-    # (BLINDTI_RESULTS_DIR, "beta", "#f46d43", "Leaner"),
-    # (BXGBDTI_RESULTS_DIR, "beta", "#fdae61", "XGBoost"),
-    # (BRFDTI_RESULTS_DIR, "beta", "#fee08b", "RF"),
+    (BLINDTI_RESULTS_DIR, "beta", "#66c2a5", "Leaner"),
+    (BXGBDTI_RESULTS_DIR, "beta", "#abdda4", "XGBoost"),
+    (BRFDTI_RESULTS_DIR, "beta", "#5e4fa2", "RF"),
     # (BMLPDTI_RESULTS_DIR, "beta", "#e6f598", "BMLPDTI"),
     # (BMLPDTI_RESULTS_DIR, "ibeta", "#abdda4", "BMLPDTI-I"),
     (BMLPDTI_RESULTS_DIR, "irho", "#9e0142", "UnbiasNet"),
-    # (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#3288bd", "Drug"),
-    # (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#5e4fa2", "Target"),
+    (A_DEGREE_RATIO_RESULTS_DIR, "beta", "#fee08b", "Drug"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "#fdae61", "Target"),
     (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "#f46d43", "Both"),
     (BRANDOM_RESULTS_DIR, "beta", "gray", "Random"),
 ]
@@ -103,11 +103,11 @@ for model_dir, train_balance_method, _, _ in path_dict:
 
 recalls = np.linspace(0, 1, 100)
 
-precisions_list = beta_precisions
+precisions_list = rho_precisions
 
 fig, ax = plt.subplots(figsize=(3, 2.8))
 
-for idx, precision in enumerate(beta_precisions):
+for idx, precision in enumerate(precisions_list):
     ax.plot(
         recalls[:-1],
         precision[:-1],
@@ -118,7 +118,7 @@ for idx, precision in enumerate(beta_precisions):
 
 ax.set_ylabel("Precision")
 ax.set_xlabel("Recall")
-ax.set_ylim(0.4, 1.02)
+ax.set_ylim(0.3, 1.02)
 
 os.makedirs(figs_folder, exist_ok=True)
 
