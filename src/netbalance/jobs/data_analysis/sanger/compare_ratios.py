@@ -19,44 +19,53 @@ plt.rcParams.update(
     }
 )
 
-dataset = "luodti"
+dataset = "sanger"
 
 ratios_folder = f"{RESULTS_DIR}/numeric/data_analysis/{dataset}/"
 
-beta_drug_ratios = np.loadtxt(f"{ratios_folder}/beta/ratios_drug.txt", delimiter=",")
-beta_drug_num = np.loadtxt(f"{ratios_folder}/beta/num_drug.txt", delimiter=",")
+beta_drug_ratios = np.loadtxt(f"{ratios_folder}/beta/ratios_drug1.txt", delimiter=",")
+beta_drug_num = np.loadtxt(f"{ratios_folder}/beta/num_drug1.txt", delimiter=",")
 
 beta_drug_num_zero_pos = beta_drug_num[beta_drug_ratios == 0]
 beta_drug_ratios = beta_drug_ratios[~np.isnan(beta_drug_ratios)]
 beta_drug_ratios = beta_drug_ratios[beta_drug_ratios > 0]
 
 
-rho_drug_ratios = np.loadtxt(f"{ratios_folder}/rho/ratios_drug.txt", delimiter=",")
-rho_drug_num = np.loadtxt(f"{ratios_folder}/rho/num_drug.txt", delimiter=",")
+rho_drug_ratios = np.loadtxt(f"{ratios_folder}/rho/ratios_drug1.txt", delimiter=",")
+rho_drug_num = np.loadtxt(f"{ratios_folder}/rho/num_drug1.txt", delimiter=",")
 
 rho_drug_num_zero_pos = rho_drug_num[rho_drug_ratios == 0]
 rho_drug_ratios = rho_drug_ratios[~np.isnan(rho_drug_ratios)]
 rho_drug_ratios = rho_drug_ratios[rho_drug_ratios > 0]
 
-beta_protein_ratios = np.loadtxt(f"{ratios_folder}/beta/ratios_protein.txt", delimiter=",")
-beta_protein_num = np.loadtxt(f"{ratios_folder}/beta/num_protein.txt", delimiter=",")
+beta_cell_line_ratios = np.loadtxt(
+    f"{ratios_folder}/beta/ratios_cell-line.txt", delimiter=","
+)
+beta_cell_line_num = np.loadtxt(
+    f"{ratios_folder}/beta/num_cell-line.txt", delimiter=","
+)
 
-beta_protein_num_zero_pos = beta_protein_num[beta_protein_ratios == 0]
-beta_protein_ratios = beta_protein_ratios[~np.isnan(beta_protein_ratios)]
-beta_protein_ratios = beta_protein_ratios[beta_protein_ratios > 0]
+beta_cell_line_num_zero_pos = beta_cell_line_num[beta_cell_line_ratios == 0]
+beta_cell_line_ratios = beta_cell_line_ratios[~np.isnan(beta_cell_line_ratios)]
+beta_cell_line_ratios = beta_cell_line_ratios[beta_cell_line_ratios > 0]
 
-rho_protein_ratios = np.loadtxt(f"{ratios_folder}/rho/ratios_protein.txt", delimiter=",")
-rho_protein_num = np.loadtxt(f"{ratios_folder}/rho/num_protein.txt", delimiter=",")
+rho_cell_line_ratios = np.loadtxt(
+    f"{ratios_folder}/rho/ratios_cell-line.txt", delimiter=","
+)
+rho_cell_line_num = np.loadtxt(f"{ratios_folder}/rho/num_cell-line.txt", delimiter=",")
 
-rho_protein_num_zero_pos = rho_protein_num[rho_protein_ratios == 0]
-rho_protein_ratios = rho_protein_ratios[~np.isnan(rho_protein_ratios)]
-rho_protein_ratios = rho_protein_ratios[rho_protein_ratios > 0]
+rho_cell_line_num_zero_pos = rho_cell_line_num[rho_cell_line_ratios == 0]
+rho_cell_line_ratios = rho_cell_line_ratios[~np.isnan(rho_cell_line_ratios)]
+rho_cell_line_ratios = rho_cell_line_ratios[rho_cell_line_ratios > 0]
 
 ######### Parameters ##########
-# ratios = [beta_drug_ratios, rho_drug_ratios]
-# num_zero_pos = [beta_drug_num_zero_pos, rho_drug_num_zero_pos]
-ratios = [beta_protein_ratios, rho_protein_ratios]
-num_zero_pos = [beta_protein_num_zero_pos, rho_protein_num_zero_pos]
+ratios = [beta_drug_ratios, rho_drug_ratios]
+num_zero_pos = [beta_drug_num_zero_pos, rho_drug_num_zero_pos]
+# ratios = [beta_cell_line_ratios, rho_cell_line_ratios]
+# num_zero_pos = [
+#     beta_cell_line_num_zero_pos,
+#     rho_cell_line_num_zero_pos,
+# ]
 ###############################
 
 fig, ax = plt.subplots(figsize=(3.2, 2.8))
@@ -79,7 +88,7 @@ ax.spines["right"].set_visible(False)
 figs_folder = f"{RESULTS_DIR}/figs/data_analysis/{dataset}"
 os.makedirs(figs_folder, exist_ok=True)
 fig.tight_layout()
-file_name = f"{figs_folder}/drug_ratios.svg"
+file_name = f"{figs_folder}/entity_ratios.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
 
@@ -105,6 +114,6 @@ ax.spines["right"].set_visible(False)
 figs_folder = f"{RESULTS_DIR}/figs/data_analysis/{dataset}"
 os.makedirs(figs_folder, exist_ok=True)
 fig.tight_layout()
-file_name = f"{figs_folder}/drug_hist_num_neg_for_zero_pos.svg"
+file_name = f"{figs_folder}/entity_hist_num_neg_for_zero_pos.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
