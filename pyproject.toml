@@ -19,6 +19,7 @@ dependencies = [
     "distributed (>=2025.2.0,<2026.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
     "tensorflow (>=2.18.0,<3.0.0)",
+    "networkx (>=3.5,<4.0)",
 ]
 
 

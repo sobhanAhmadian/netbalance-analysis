@@ -174,3 +174,5 @@ src/netbalance/data_repository
 playground
 
 .python-version
+
+.DS_Store

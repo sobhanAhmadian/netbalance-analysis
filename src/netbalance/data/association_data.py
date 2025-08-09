@@ -55,7 +55,7 @@ class AData(Data):
         Balance associations based on node degrees.
 
         Args:
-            balance_method (str, optional): Balance method: 'beta', 'gamma', 'rho' or None.
+            balance_method (str, optional): Balance method: 'beta' or 'balanced', 'gamma' or 'entity-balanced', 'rho' or full-test or None.
                 Defaults to None.
             negative_ratio (float, optional): Ratio of negative to positive samples. Defaults to 1.0.
             seed (int, optional): Random seed. Defaults to 42.
@@ -86,7 +86,7 @@ class AData(Data):
 
         # Select negative balance method
         samples = []
-        if balance_method == "beta":
+        if balance_method == "beta" or balance_method.lower() == "balanced":
             logger.info("Balancing Data using Beta Method")
             samples = self._beta_neg_sampling(
                 pos_associations=pos_associations,
@@ -95,7 +95,7 @@ class AData(Data):
                 rng=rng,
                 **kwargs,
             )
-        elif balance_method == "rho":
+        elif balance_method == "rho" or balance_method.lower() == "entity-balanced":
             logger.info("Balancing Data using Rho Method")
             samples = self._rho_neg_sampling(
                 pos_associations=pos_associations,
@@ -112,7 +112,7 @@ class AData(Data):
                 negative_ratio=negative_ratio,
                 rng=rng,
             )
-        elif balance_method == "eta":
+        elif balance_method == "eta" or balance_method.lower() == "full-test":
             samples = pos_associations + neg_associations
 
         # Combine and shuffle

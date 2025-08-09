@@ -1,11 +1,12 @@
 import math
-from typing import Union, List
-
-import matplotlib.patches as mpatches
-from matplotlib.ticker import MaxNLocator
-import matplotlib.pyplot as plt
-import numpy as np
 import random
+from typing import List, Union
+
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from matplotlib.patches import Circle, Wedge
+from matplotlib.ticker import MaxNLocator
 
 plt.rcParams.update(
     {
@@ -425,3 +426,157 @@ def plot_xs_vs_y_dist(
     file_name = f"{figs_folder}/{title.lower().replace(' ', '_')}_plot_xs_vs_y_dist.svg"
     plt.savefig(file_name)
     print(f"\nFigure Saved: {file_name}")
+
+
+def draw_bipartite_graph(
+    associations,
+    cluster_a_names,
+    cluster_b_names,
+    ax,
+    node_radius=0.3,
+    ring_width=0.1,
+    pos_edge_width=2.0,
+    neg_edge_width=2.0,
+    a_nodes_position=3.0,
+    b_nodes_position=0.0,
+    pos_color="#66C2A5",
+    neg_color="#D53E4F",
+    a_color="#FEE08B",
+    b_color="#5E4FA2",
+    ring_bg_color="#e0e0e0",
+):
+    """
+    Draw a bipartite graph with A nodes at top and B nodes at bottom,
+    with per-node green/red proportion rings. Supports duplicate names
+    across groups by using internal unique IDs.
+
+    Args:
+        associations (list of tuples): List of (a_idx, b_idx, value) tuples
+            where value is 1 for positive and 0 for negative associations.
+        cluster_a_names (list): List of names for A nodes.
+        cluster_b_names (list): List of names for B nodes.
+        ax (matplotlib.axes.Axes): Axes to draw the graph on.
+        node_radius (float): Radius of the node circles.
+        ring_width (float): Width of the proportion rings.
+        pos_edge_width (float): Width of positive edges.
+        neg_edge_width (float): Width of negative edges.
+        a_nodes_position (float): Y position for A nodes.
+        b_nodes_position (float): Y position for B nodes.
+        pos_color (str): Color for positive edges.
+        neg_color (str): Color for negative edges.
+        a_color (str): Color for A nodes.
+        b_color (str): Color for B nodes.
+        ring_bg_color (str): Background color for the proportion rings.
+    """
+
+    a_ids = [("A", i) for i in range(len(cluster_a_names))]
+    b_ids = [("B", j) for j in range(len(cluster_b_names))]
+
+    labels = {("A", i): cluster_a_names[i] for i in range(len(cluster_a_names))}
+    labels.update({("B", j): cluster_b_names[j] for j in range(len(cluster_b_names))})
+
+    G = nx.Graph()
+    G.add_nodes_from(a_ids, bipartite=0)
+    G.add_nodes_from(b_ids, bipartite=1)
+
+    pos_edges, neg_edges = [], []
+    pos_count = {n: 0 for n in G.nodes()}
+    neg_count = {n: 0 for n in G.nodes()}
+
+    for a_idx, b_idx, val in associations:
+        a = ("A", int(a_idx))
+        b = ("B", int(b_idx))
+        G.add_edge(a, b)
+        if val == 1:
+            pos_edges.append((a, b))
+            pos_count[a] += 1
+            pos_count[b] += 1
+        else:
+            neg_edges.append((a, b))
+            neg_count[a] += 1
+            neg_count[b] += 1
+
+    pos = {}
+    for i, node in enumerate(a_ids):
+        pos[node] = (i, a_nodes_position)
+    for j, node in enumerate(b_ids):
+        pos[node] = (j, b_nodes_position)
+
+    nx.draw_networkx_edges(
+        G, pos, edgelist=pos_edges, edge_color=pos_color, width=pos_edge_width, ax=ax
+    )
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=neg_edges,
+        edge_color=neg_color,
+        width=neg_edge_width,
+        ax=ax,
+    )
+
+    def draw_node_with_ring(x, y, fill_color, p_pos, p_neg):
+        r_outer = node_radius + ring_width
+        # background ring (no seams)
+        ax.add_patch(
+            Wedge(
+                (x, y),
+                r_outer,
+                0,
+                360,
+                width=ring_width,
+                facecolor=ring_bg_color,
+                edgecolor="none",
+            )
+        )
+        if p_pos is not None and p_neg is not None and (p_pos + p_neg) > 0:
+            start_angle = 90.0  # start at top, clockwise
+            ax.add_patch(
+                Wedge(
+                    (x, y),
+                    r_outer,
+                    start_angle,
+                    start_angle + 360.0 * p_pos,
+                    width=ring_width,
+                    facecolor=pos_color,
+                    edgecolor="none",
+                )
+            )
+            ax.add_patch(
+                Wedge(
+                    (x, y),
+                    r_outer,
+                    start_angle + 360.0 * p_pos,
+                    start_angle + 360.0 * (p_pos + p_neg),
+                    width=ring_width,
+                    facecolor=neg_color,
+                    edgecolor="none",
+                )
+            )
+        # node body (no outline so ring looks seamless)
+        ax.add_patch(
+            Circle((x, y), radius=node_radius, facecolor=fill_color, edgecolor="none")
+        )
+
+    for n in a_ids:
+        x, y = pos[n]
+        p, q = pos_count[n], neg_count[n]
+        total = p + q
+        if total > 0:
+            draw_node_with_ring(x, y, a_color, p / total, q / total)
+        else:
+            draw_node_with_ring(x, y, a_color, None, None)
+
+    for n in b_ids:
+        x, y = pos[n]
+        p, q = pos_count[n], neg_count[n]
+        total = p + q
+        if total > 0:
+            draw_node_with_ring(x, y, b_color, p / total, q / total)
+        else:
+            draw_node_with_ring(x, y, b_color, None, None)
+
+    nx.draw_networkx_labels(G, pos, labels=labels, font_size=10, ax=ax)
+
+    ax.set_aspect("equal")
+    ax.set_ylim(-0.5, max(a_nodes_position, b_nodes_position) + 0.5)
+    ax.axis("off")
