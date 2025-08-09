@@ -3,6 +3,7 @@ import pandas as pd
 from netbalance.configs.bernett import (
     BERNETT_INTRA_0_FILE,
     BERNETT_INTRA_1_FILE,
+    BERNETT_INTRA_1N_FILE,
     BERNETT_INTRA_2_FILE,
     BERNETT_PROTEIN_NAMES_FILE,
 )
@@ -24,6 +25,8 @@ class BernettDataset(ADataset):
             self._dataset_file = BERNETT_INTRA_1_FILE
         elif type == "intra2":
             self._dataset_file = BERNETT_INTRA_2_FILE
+        elif type == "intra1n":
+            self._dataset_file = BERNETT_INTRA_1N_FILE
         else:
             raise ValueError(f"Unknown type: {type}")
 
