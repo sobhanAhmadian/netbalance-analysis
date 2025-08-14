@@ -41,3 +41,4 @@ We provide a set of Jupyter notebooks demonstrating how to use this project, rep
 | Notebook | Description |
 |----------|-------------|
 | [`association_data.ipynb`](./examples/association_data.ipynb) | How to create an association data object, apply different data balancing methodologies, and visualize the results. |
+| [`evaluation_framework.ipynb`](./examples/evaluation_framework.ipynb) | How to use netbalnce's evaluation framework to assess the performance of an arbitrary association prediction model on an arbitrary association data. |
