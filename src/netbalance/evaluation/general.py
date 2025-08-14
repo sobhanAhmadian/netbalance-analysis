@@ -152,7 +152,7 @@ def cross_validation(
 
         # Split the data
         train_data, test_data = train_test_spliter.split(i)
-        
+
         # Create model handler
         model_handler = handler_factory.create_handler()
 
@@ -218,6 +218,7 @@ def get_result_of_rcv(
     test_balance_kwargs: dict = {},
     test_balance_negative_ratio: float = 1.0,
     dataset_name: str = None,
+    parallel: bool = True,
 ):
     logger.info(get_header_format("Repeated Cross Validation From Prediction Files"))
     general_cv_result = ACrossValidationResult()
@@ -266,21 +267,25 @@ def get_result_of_rcv(
 
             for j in range(num_negative_sampling):
                 tasks.append(dask.delayed(task)(i, k, j, associations, df))
+    if parallel:
+        local_cluster = LocalCluster(
+            n_workers=int(os.getenv("NUM_WORKERS")),
+            threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
+        )
+        with (
+            Client(local_cluster) as client,
+            tqdm(total=len(tasks), desc="Calc Result of RCV") as pbar,
+        ):
+            futures = client.compute(tasks)
 
-    local_cluster = LocalCluster(
-        n_workers=int(os.getenv("NUM_WORKERS")),
-        threads_per_worker=int(os.getenv("THREADS_PER_WORKER")),
-    )
-    with Client(
-        local_cluster
-    ) as client, tqdm(total=len(tasks), desc="Calc Result of RCV") as pbar:
-        futures = client.compute(tasks)
+            for future in dask.distributed.as_completed(futures):
+                pbar.update(1)
+                general_cv_result.add_fold_result(future.result())
 
-        for future in dask.distributed.as_completed(futures):
-            pbar.update(1)
-            general_cv_result.add_fold_result(future.result())
-        
-        local_cluster.close()
+            local_cluster.close()
+    else:
+        for task in tqdm(tasks, desc="Calc Result of RCV"):
+            general_cv_result.add_fold_result(task.compute())
 
     general_cv_result.calculate_cv_result()
     return general_cv_result

@@ -197,7 +197,7 @@ def _save_hit_k_of_cv_folds(
         ys_upper = np.minimum(mean_ys + std_ys, 1)
         ys_lower = np.maximum(mean_ys - std_ys, 0)
 
-        fig, axe = plt.subplots(figsize=(6, 5))
+        fig, axe = plt.subplots(figsize=(4, 4))
 
         axe.plot(
             x_common,
@@ -297,7 +297,7 @@ def _save_mean_precisions_of_cv_folds(
 
 
 def _save_roc_fig(results: ACrossValidationResult, dir_path: str):
-    fig, axe = plt.subplots(figsize=(5, 5))
+    fig, axe = plt.subplots(figsize=(4, 4))
     results.get_roc_curve(ax=axe)
     fig.tight_layout()
     file_name = f"{dir_path}/roc.svg"
@@ -306,7 +306,7 @@ def _save_roc_fig(results: ACrossValidationResult, dir_path: str):
 
 
 def _save_pr_fig(results: ACrossValidationResult, dir_path: str):
-    fig, axe = plt.subplots(figsize=(5, 5))
+    fig, axe = plt.subplots(figsize=(4, 4))
     results.get_pr_curve(ax=axe)
     fig.tight_layout()
     file_name = f"{dir_path}/pr.svg"
