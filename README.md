@@ -117,3 +117,14 @@ The terminology used in this project slightly differs from that in the paper. Be
 | brfsyn | Stands for "Base line model - Random Forest - drug SYNergy dataset". It's our random forest benchmark model for the drug synergy dataset. |
 | bxgbdti | Stands for "Base line model - XGBoost - Drug Target Interaction dataset". It's our XGBoost benchmark model for the drug-target interaction dataset. |
 | bxgbsyn | Stands for "Base line model - XGBoost - drug SYNergy dataset". It's our XGBoost benchmark model for the drug synergy dataset. |
+
+## 📂 Jobs Directory
+
+The python scripts in the `jobs` directory are designed to be run as standalone scripts. It contains two main directories:
+
+- `data_analysis`: Contains scripts for the dataset analysis.
+- `model_evaluation`: This directory contains scripts for running evaluation frameworks on different models. It is organized into two subdirectories:
+  - `calculations`: Stage 1 of the evaluation framework, as discribed in the tutorials.
+  - `results`: Stage 2 of the evaluation framework, as discribed in the tutorials.
+
+Both `calculations` and `results` are first organized by dataset, and then by training methodology. The `results` directory is further subdivided by evaluation framework—such as `beta`, `eta`, and `rho`. Finally, each of these subdirectories contains scripts for different models.
