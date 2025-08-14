@@ -1,6 +1,6 @@
 # Netbalance:
 
-a Systematic Evaluation Framework For Fair Assessment of Bipartite Graph Link Prediction.
+A Systematic Evaluation Framework For Fair Assessment of Association Prediction Models
 
 ## ⚙️ Installation
 1. Clone the Repository and Enter the Project Directory:
@@ -37,14 +37,13 @@ a Systematic Evaluation Framework For Fair Assessment of Bipartite Graph Link Pr
 
 We provide a set of Jupyter notebooks demonstrating how to use this project, reproduce results, and explore the methodology step-by-step. You can find them in the [`examples/`](./examples) directory.
 
-### Available Tutorials  
 | Notebook | Description |
 |----------|-------------|
 | [`association_data.ipynb`](./examples/association_data.ipynb) | How to create an association data object, apply different data balancing methodologies, and visualize the results. |
 | [`evaluation_framework.ipynb`](./examples/evaluation_framework.ipynb) | How to use netbalnce's evaluation framework to assess the performance of an arbitrary association prediction model on an arbitrary association data. |
 
 
-## Project Structure
+## 📂 Project Structure
 ```bash
 netbalance/
 ├── examples/                 
@@ -93,7 +92,7 @@ For example, the files for the **Random Forest model** on the **Sanger** dataset
     | Stage 2 - Balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py) |
     | Stage 2 - Entity-balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py) |
 
-## Terminology
+## 📚 Terminology
 
 The terminology used in this project slightly differs from that in the paper. Below is a brief explanation of the terms used here.
 
