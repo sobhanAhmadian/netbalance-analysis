@@ -92,3 +92,29 @@ For example, the files for the **Random Forest model** on the **Sanger** dataset
     | Stage 2 - Full Test Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/eta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/eta/brfsyn.py) |
     | Stage 2 - Balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py) |
     | Stage 2 - Entity-balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py) |
+
+## Terminology
+
+The terminology used in this project slightly differs from that in the paper. Below is a brief explanation of the terms used here.
+
+### Evaluation Framework Terminology
+
+| Term | Description |
+|------|-------------|
+| beta | Equivalent to the term “balanced” used in the paper, it refers to employing a balanced dataset, which can be utilized for either training or testing a model. |
+| eta | Equivalent to the term “full test” in the paper, it denotes using the entire dataset. |
+| rho | Equivalent to the term “entity-balanced” in the paper, it refers to using a entity-balanced dataset. |
+| ibeta | In training, it refers to using balanced data in an iterative manner. |
+| irho | In training, it refers to using entity-balanced data in an iterative manner. |
+
+### Model Terminology
+| Term | Description |
+|------|-------------|
+| blindti | Stands for "Base line model - Linear - Drug Target Interaction dataset". It's our linear benchmark model for the drug-target interaction dataset. |
+| blinsyn | Stands for "Base line model - Linear - drug SYNergy dataset". It's our linear benchmark model for the drug synergy dataset. |
+| bmlpdti | Stands for "Base line model - MLP - Drug Target Interaction dataset". It's our MLP benchmark model for the drug-target interaction dataset. |
+| bmlpsyn | Stands for "Base line model - MLP - drug SYNergy dataset". It's our MLP benchmark model for the drug synergy dataset. |
+| brfdti | Stands for "Base line model - Random Forest - Drug Target Interaction dataset". It's our random forest benchmark model for the drug-target interaction dataset. |
+| brfsyn | Stands for "Base line model - Random Forest - drug SYNergy dataset". It's our random forest benchmark model for the drug synergy dataset. |
+| bxgbdti | Stands for "Base line model - XGBoost - Drug Target Interaction dataset". It's our XGBoost benchmark model for the drug-target interaction dataset. |
+| bxgbsyn | Stands for "Base line model - XGBoost - drug SYNergy dataset". It's our XGBoost benchmark model for the drug synergy dataset. |
