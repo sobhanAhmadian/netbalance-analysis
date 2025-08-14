@@ -42,3 +42,53 @@ We provide a set of Jupyter notebooks demonstrating how to use this project, rep
 |----------|-------------|
 | [`association_data.ipynb`](./examples/association_data.ipynb) | How to create an association data object, apply different data balancing methodologies, and visualize the results. |
 | [`evaluation_framework.ipynb`](./examples/evaluation_framework.ipynb) | How to use netbalnce's evaluation framework to assess the performance of an arbitrary association prediction model on an arbitrary association data. |
+
+
+## Project Structure
+```bash
+netbalance/
+├── examples/                 
+├── src/                      
+│   ├── netbalance/           
+│   │   ├── __init__.py 
+│   │   ├── configs/          # Configuration definitions
+│   │   ├── data_repository/  # Repository for data files
+│   │   ├── data/             # Data handling
+│   │   ├── evaluation/       # Evaluation functions
+│   │   ├── features/         # Dataset definitions
+│   │   ├── jobs/             # End-point python scripts
+│   │   ├── methods/          # Algorithms and methods
+│   │   ├── models/           # Model definitions
+│   │   ├── optimization/     # Trainer definitions
+│   │   ├── utils/            # Utility functions
+│   │   └── visualization/    # Visualization functions
+├── .env.example    # Example environment variables file
+├── .gitignore      # Git ignore file
+├── LICENSE         # License file
+├── poetry.lock     # Poetry lock file
+├── pyproject.toml  # Poetry project file
+└── README.md       # Project documentation
+```
+
+For example, the files for the **Random Forest model** on the **Sanger** dataset are located at:
+
++ Dataset Part
+
+    | description | path |
+    |-------------|------|
+    | Sanger dataset Conigs | [`src/netbalance/configs/sanger.py`](./src/netbalance/configs/sanger.py) |
+    | Sanger dataset Handler | [`src/netbalance/features/sanger.py`](./src/netbalance/features/sanger.py) |
+
++ Model Part
+    | description | path |
+    |-------------|------|
+    | Model and Optimizer Configs | [`src/netbalance/configs/brfsyn.py`](./src/netbalance/configs/brfsyn.py) |
+    | Model Defenition | [`src/netbalance/models/brfsyn.py`](./src/netbalance/models/brfsyn.py) |
+    | Trainer Definition | [`src/netbalance/optimization/brfsyn.py`](./src/netbalance/optimization/brfsyn.py) |
++ Evaluation Part
+    | description | path |
+    |-------------|------|
+    | Stage 1 | [`src/netbalance/jobs/model_evaluation/calculations/sanger/beta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/calculations/sanger/beta/brfsyn.py) |
+    | Stage 2 - Full Test Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/eta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/eta/brfsyn.py) |
+    | Stage 2 - Balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/beta/brfsyn.py) |
+    | Stage 2 - Entity-balanced Evaluation | [`src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py`](./src/netbalance/jobs/model_evaluation/results/sanger/beta/rho/brfsyn.py) |
