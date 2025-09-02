@@ -35,7 +35,7 @@ figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/{dataset}/other"
 path_dict = [
     (BMLPDTI_RESULTS_DIR, "beta", "One balanced train dataset"),
     (BMLPDTI_RESULTS_DIR, "ibeta", "30 balanced train datasets"),
-    (BMLPDTI_RESULTS_DIR, "ibeta", "One entity-balanced train datasets"),
+    (BMLPDTI_RESULTS_DIR, "rho", "One entity-balanced train datasets"),
     (BMLPDTI_RESULTS_DIR, "irho", "30 entity-balanced train datasets"),
 ]
 model_names = [r[-1] for r in path_dict]
