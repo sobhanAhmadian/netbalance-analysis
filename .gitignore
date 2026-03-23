@@ -176,3 +176,5 @@ playground
 .python-version
 
 .DS_Store
+
+data_repository/
