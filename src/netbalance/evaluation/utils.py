@@ -12,7 +12,7 @@ from sklearn.metrics import (
 )
 
 from netbalance.data.association_data import AData
-from netbalance.utils import prj_logger
+from netbalance.utils import prj_logger, result
 from netbalance.visualization import plot_x_vs_y_dist
 
 from .result import Result
@@ -72,7 +72,9 @@ def _calc_aupr_metrics(y_predict, y_test, result):
     precision, recall, _ = precision_recall_curve(y_test, y_predict)
     result.precision_curve = precision
     result.recall_curve = recall
-    result.aupr = auc(recall, precision).item()
+    result.aupr = auc(recall, precision)
+    if isinstance(result.aupr, np.ndarray):
+        result.aupr = result.aupr.item()
 
 
 def _calc_max_f1_score(y_predict, y_test, result):
@@ -85,7 +87,9 @@ def _calc_max_f1_score(y_predict, y_test, result):
 def _calc_roc_metrics(y_predict, y_test, result):
     """Calculate ROC AUC and related metrics."""
     fpr, tpr, _ = roc_curve(y_test, y_predict, pos_label=1)
-    result.auc = auc(fpr, tpr).item()
+    result.auc = auc(fpr, tpr)
+    if isinstance(result.auc, np.ndarray):
+        result.auc = result.auc.item()
     result.fpr = fpr
     result.tpr = tpr
 
