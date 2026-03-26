@@ -1,6 +1,10 @@
 import os
 
+from dotenv import load_dotenv
+
 from netbalance import ROOT_DIR
+
+load_dotenv()
 
 DATA_DIR = os.getenv("DATA_DIR", ROOT_DIR + "/data_repository")
 

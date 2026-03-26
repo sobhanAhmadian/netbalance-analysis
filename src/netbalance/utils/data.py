@@ -34,6 +34,7 @@ def analyse_datasest(
     c_neg: str = "#d53e50b5",
     summary_size: int = 30,
     with_negatives: bool = True,
+    xtick_labels: bool = False,
 ) -> None:
     """Analyse the dataset.
 
@@ -54,6 +55,7 @@ def analyse_datasest(
         c_neg (str, optional): Color for negative edges. Defaults to "#ffafcc".
         summary_size (int, optional): The number of nodes to show in the summary plot. Defaults to 40.
         with_negatives (bool, optional): Whether to generate negative edges. Defaults to True.
+        xtick_labels (bool, optional): Whether to show x-axis labels in the plots. Defaults to False.
     """
     if not os.path.exists(figs_folder):
         os.makedirs(figs_folder, exist_ok=True)
@@ -105,6 +107,7 @@ def analyse_datasest(
             num_pos_list=test_stats[symb]["num_pos"],
             c_pos=c_pos,
             c_neg=c_neg,
+            xtick_labels=xtick_labels,
         )
 
         print(f"\n>> Cluster {symb.upper()} Per Node Stats (Summary)")
@@ -117,6 +120,7 @@ def analyse_datasest(
             c_pos=c_pos,
             c_neg=c_neg,
             max_k=summary_size,
+            xtick_labels=xtick_labels,
         )
 
         ratios = (test_stats[symb]["num_pos"]) / (test_stats[symb]["num"])

@@ -101,6 +101,7 @@ def plot_per_group_associations(
     c_pos: str,
     c_neg: str,
     max_k: Union[None, int] = None,
+    xtick_labels: bool = False,
 ) -> None:
     """This function plots the number of positive and negative associations per each node in the cluster.
 
@@ -113,6 +114,7 @@ def plot_per_group_associations(
         c_pos (str): Color for the positive associations.
         c_neg (str): Color for the negative associations.
         max_k (Union[None, int], optional): Maximum number of nodes to plot. Defaults to None. If None, all nodes are plotted.
+        xtick_labels (bool, optional): Whether to set the x-axis labels. Defaults to False.
     """
     per_page_num = 50
     if max_k is None or max_k > len(num_list):
@@ -171,7 +173,8 @@ def plot_per_group_associations(
         axs[page].set_xticklabels(
             ["" for _ in range(len(sorted_names[l:u]))], rotation=90, ha="right"
         )
-        # axs[page].set_xticklabels(sorted_names[l:u], rotation=90, ha="right")
+        if xtick_labels:
+            axs[page].set_xticklabels(sorted_names[l:u], rotation=90, ha="right")
 
         axs[page].set_ylim(top=max(max(sorted_num) + 2, 10))
         axs[page].spines["top"].set_visible(False)
