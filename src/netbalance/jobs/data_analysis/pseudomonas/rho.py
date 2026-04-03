@@ -7,8 +7,8 @@ c_pos = "#66c2a5d3"
 c_neg = "#d53e50d5"
 save_figs = True  # Parameter
 dataset = "pseudomonas"  # Parameter
-num_cross_validation = 1  # Parameter
-num_negative_sampling = 1  # Parameter
+num_cross_validation = 5  # Parameter
+num_negative_sampling = 5  # Parameter
 k = 5  # Parameter
 test_balance_method = "rho"  # Parameter
 test_balance_kwargs = {
@@ -18,6 +18,7 @@ test_balance_kwargs = {
     "initial_temp": 10.0,
     "ent_desired": 1.0,
     "shrinkage": 1.0,
+    "gamma_penalty": 0.2,
 }  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 figs_folder = f"{RESULTS_DIR}/figs/data_analysis/{dataset}/{test_balance_method}"

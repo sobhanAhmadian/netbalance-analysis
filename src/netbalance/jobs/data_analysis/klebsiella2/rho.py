@@ -12,12 +12,13 @@ num_negative_sampling = 1  # Parameter
 k = 5  # Parameter
 test_balance_method = "rho"  # Parameter
 test_balance_kwargs = {
-    "max_iter": 50000,
+    "max_iter": 10000,
     "delta": 0.1,
     "cooling_rate": 0.99,
-    "initial_temp": 20.0,
+    "initial_temp": 10.0,
     "ent_desired": 1.0,
     "shrinkage": 1.0,
+    "gamma_penalty": 0.2,
 }  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 figs_folder = f"{RESULTS_DIR}/figs/data_analysis/{dataset}/{test_balance_method}"

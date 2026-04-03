@@ -1,17 +1,17 @@
 import os
 
-from netbalance.configs.weighted_mean_degree_ratio import (
-    WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,  # Parameter
-)
+from netbalance.configs.b_degree_ratio import (
+    B_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,
+)  # Parameter
 from netbalance.evaluation.general import get_result_of_rcv
-from netbalance.features.pseudomonas import PseudomonasDataset as Dataset  # Parameter
+from netbalance.features.klebsiella2 import Klebsiella2Dataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
 from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
-model_name = "weighted_mean_degree_ratio"  # Parameter
-dataset = "pseudomonas"  # Parameter
+model_name = "b_degree_ratio"  # Parameter
+dataset = "klebsiella2"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 
 test_balance_method = "rho"  # Parameter

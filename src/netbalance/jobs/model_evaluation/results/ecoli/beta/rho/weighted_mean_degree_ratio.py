@@ -4,30 +4,30 @@ from netbalance.configs.weighted_mean_degree_ratio import (
     WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR as RESULTS_DIR,  # Parameter
 )
 from netbalance.evaluation.general import get_result_of_rcv
-from netbalance.features.pseudomonas import PseudomonasDataset as Dataset  # Parameter
+from netbalance.features.ecoli import EcoliDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
 from netbalance.utils.result import process_results
 
 logger = prj_logger.getLogger(__name__)
 
 model_name = "weighted_mean_degree_ratio"  # Parameter
-dataset = "pseudomonas"  # Parameter
+dataset = "ecoli"  # Parameter
 train_neg_samp_method = "beta"  # Parameter
 
 test_balance_method = "rho"  # Parameter
 test_balance_kwargs = {
-    "max_iter": 10000,
-    "delta": 0.1,
+    "max_iter": 50000,
+    "delta": 0.05,
     "cooling_rate": 0.99,
-    "initial_temp": 10.0,
+    "initial_temp": 20.0,
     "ent_desired": 1.0,
     "shrinkage": 1.0,
     "gamma_penalty": 0.2,
 }  # Parameter
 test_balance_negative_ratio = 1.0  # Parameter
 
-num_cross_validation = 5  # Parameter
-num_negative_sampling = 5  # Parameter
+num_cross_validation = 1  # Parameter
+num_negative_sampling = 1  # Parameter
 
 model_result_dir = os.path.join(
     RESULTS_DIR,
