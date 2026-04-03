@@ -60,6 +60,11 @@ def analyse_datasest(
     if not os.path.exists(figs_folder):
         os.makedirs(figs_folder, exist_ok=True)
 
+    dir_path = (
+        f"{RESULTS_DIR}/numeric/data_analysis/{dataset_name}/{test_balance_method}"
+    )
+    os.makedirs(dir_path, exist_ok=True)
+
     def get_data():
         return AData(
             associations=dataset.get_associations(with_negatives=with_negatives),
@@ -81,6 +86,28 @@ def analyse_datasest(
         data_list=data_list,
         node_names=dataset.get_node_names(),
     )
+
+    graph_list = [data.associations for data in data_list]
+    stats_list = [data.get_stats() for data in data_list]
+
+    # save entropies
+    entropies = [s["ent"] for s in stats_list]
+    file_name = f"{dir_path}/entropies.txt"
+    np.savetxt(file_name, entropies, delimiter=",")
+    print(f"\nSaved entropies list to {file_name}")
+
+    for i in range(len(dataset.cluster_names)):
+        cluster_name = chr(i + 97)
+        entropies = [s[cluster_name]["ent"] for s in stats_list]
+        file_name = f"{dir_path}/{dataset.cluster_names[i]}_entropies.txt"
+        np.savetxt(file_name, entropies, delimiter=",")
+        print(f"\nSaved entropies list to {file_name}")
+
+    # save graph sizes
+    graph_sizes = [len(g) for g in graph_list]
+    file_name = f"{dir_path}/graph_sizes.txt"
+    np.savetxt(file_name, graph_sizes, delimiter=",")
+    print(f"\nSaved graph sizes list to {file_name}")
 
     print("\n>> Entropy")
     for i in range(len(dataset.cluster_names)):
@@ -124,10 +151,7 @@ def analyse_datasest(
         )
 
         ratios = (test_stats[symb]["num_pos"]) / (test_stats[symb]["num"])
-        dir_path = (
-            f"{RESULTS_DIR}/numeric/data_analysis/{dataset_name}/{test_balance_method}"
-        )
-        os.makedirs(dir_path, exist_ok=True)
+
         filename = "ratios_" + dataset.cluster_names[i] + ".txt"
         np.savetxt(f"{dir_path}/{filename}", ratios, delimiter=",")
         print(f"\nSaved ratios list to {dir_path}/{filename}")
