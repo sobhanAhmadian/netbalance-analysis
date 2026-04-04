@@ -1,12 +1,16 @@
+import os
 import random
 from abc import ABC, abstractmethod
 from itertools import product
 
 import numpy as np
 
+from netbalance.configs.common import RESULTS_DIR
 from netbalance.utils.logger import logging as prj_logger
 
 logger = prj_logger.getLogger(__name__)
+
+cache_dir = os.path.join(RESULTS_DIR, ".cache")
 
 
 class ADataset(ABC):
@@ -37,10 +41,23 @@ class ADataset(ABC):
             numpy.ndarray: Array of associations (n, num_clusters + 1).
         """
 
+        # Check cache first
+        cache_file = os.path.join(
+            cache_dir,
+            f"dataset-{'-'.join(self.get_dataset_file_path().split('/')[-2:])}.cache",
+        )
+        if os.path.exists(cache_file) and with_negatives:
+            logger.info(f"Loading from cache: {cache_file}")
+            return np.load(cache_file, allow_pickle=True).astype(np.int32)
+
+        os.makedirs(cache_dir, exist_ok=True)
+
         rng = random.Random(0)
 
         dataset_file_path = self.get_dataset_file_path()
-        associations = np.loadtxt(dataset_file_path, delimiter=",", dtype=np.int32).tolist()
+        associations = np.loadtxt(
+            dataset_file_path, delimiter=",", dtype=np.int32
+        ).tolist()
 
         # Extract positive samples
         positive_samples = [samp for samp in associations if samp[-1] == 1]
@@ -58,4 +75,10 @@ class ADataset(ABC):
         samples = positive_samples + negative_samples
         rng.shuffle(samples)
         logger.info(f"Total samples generated: {len(samples)}")
-        return np.array(samples, dtype=np.int32)
+
+        result = np.array(samples, dtype=np.int32)
+
+        if with_negatives:
+            np.save(cache_file, result)
+            logger.info(f"Saved to cache: {cache_file}")
+        return result
