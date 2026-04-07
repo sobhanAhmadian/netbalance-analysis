@@ -175,6 +175,7 @@ class AData(Data):
         shrinkage=0.5,
         ent_desired=1,
         gamma_penalty=1.0,
+        entropy_track_path=None,
     ):
         """
         Perform rho-based negative sampling using Simulated Annealing.
@@ -194,6 +195,7 @@ class AData(Data):
             gamma_penalty (float, optional): Penalty factor for updating weights. Defaults to 1.0.
                 when a negative sample is selected, the weights of all samples sharing the same node
                 in any cluster will be reduced by gamma_penalty.
+            entropy_track_path (str, optional): If provided, the entropy track will be saved to the specified file.
         """
 
         num_negative = int(len(pos_associations) * negative_ratio)
@@ -221,6 +223,7 @@ class AData(Data):
 
         temperature = initial_temp
 
+        entropy_track = [current_ent_score]
         for k in range(max_iter):
 
             pos_edges = [edge for edge in current_graph if edge[-1] == 1]
@@ -259,6 +262,7 @@ class AData(Data):
             new_ent_score, new_len_score = self._calculate_graph_score(
                 current_graph, initial_graph_len
             )
+            entropy_track.append(new_ent_score)
             new_score = self._combine_scores(
                 new_ent_score, new_len_score, delta, ent_desired
             )
@@ -290,6 +294,10 @@ class AData(Data):
         logger.info(f"Best length score achieved: {best_len_score}")
         logger.info(f"Best score achieved: {best_score}")
         logger.info(f"Graph size: {len(best_graph)}")
+
+        if entropy_track_path is not None:
+            np.savetxt(entropy_track_path, np.array(entropy_track), delimiter=",")
+            logger.info(f"Entropy track saved to {entropy_track_path}")
 
         return best_graph
 
