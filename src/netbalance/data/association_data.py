@@ -176,6 +176,7 @@ class AData(Data):
         ent_desired=1,
         gamma_penalty=1.0,
         entropy_track_path=None,
+        with_gamma=True,
     ):
         """
         Perform rho-based negative sampling using Simulated Annealing.
@@ -196,18 +197,28 @@ class AData(Data):
                 when a negative sample is selected, the weights of all samples sharing the same node
                 in any cluster will be reduced by gamma_penalty.
             entropy_track_path (str, optional): If provided, the entropy track will be saved to the specified file.
+            with_gamma (bool, optional): Whether to use gamma negative sampling for generating the initial graph. Defaults to True.
+                if False, uses beta negative sampling for generating the initial graph.
         """
 
         num_negative = int(len(pos_associations) * negative_ratio)
         initial_graph_len = num_negative + len(pos_associations)
 
-        current_graph = self._gamma_neg_sampling(
-            pos_associations=pos_associations,
-            neg_associations=neg_associations,
-            negative_ratio=negative_ratio,
-            rng=rng,
-            gamma_penalty=gamma_penalty,
-        )
+        if with_gamma:
+            current_graph = self._gamma_neg_sampling(
+                pos_associations=pos_associations,
+                neg_associations=neg_associations,
+                negative_ratio=negative_ratio,
+                rng=rng,
+                gamma_penalty=gamma_penalty,
+            )
+        else:
+            current_graph = self._beta_neg_sampling(
+                pos_associations=pos_associations,
+                neg_associations=neg_associations,
+                negative_ratio=negative_ratio,
+                rng=rng,
+            )
         current_ent_score, current_len_score = self._calculate_graph_score(
             current_graph, initial_graph_len
         )

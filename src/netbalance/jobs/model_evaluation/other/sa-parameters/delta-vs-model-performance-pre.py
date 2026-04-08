@@ -68,68 +68,13 @@ def task(
 
 tasks = []
 
-seeds = [0, 1, 2]
-
-# initial temp
-for initial_temp in [1.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0]:
-    for seed in seeds:
-
-        temp_data = copy.deepcopy(train_data)
-        tasks.append(
-            dask.delayed(task)(
-                input_data=temp_data,
-                seed=seed,
-                max_iter=40000,
-                delta=0.1,
-                cooling_rate=0.99,
-                initial_temp=initial_temp,
-            )
-        )
-
-# cooling rate
-for cooling_rate in [0.9, 0.95, 0.99, 0.995, 0.999]:
-    for seed in seeds:
-
-        temp_data = copy.deepcopy(train_data)
-        tasks.append(
-            dask.delayed(task)(
-                input_data=temp_data,
-                seed=seed,
-                max_iter=40000,
-                delta=0.1,
-                cooling_rate=cooling_rate,
-                initial_temp=40.0,
-            )
-        )
+seeds = list(range(30))
 
 # delta
 for delta in [
     0.0,
-    0.0001,
-    0.0002,
-    0.0003,
-    0.0004,
-    0.0005,
     0.001,
-    0.002,
-    0.003,
-    0.004,
-    0.005,
-    0.01,
-    0.02,
-    0.03,
-    0.04,
-    0.05,
-    0.1,
-    0.2,
-    0.3,
-    0.4,
-    0.5,
-    1.0,
     2.0,
-    3.0,
-    4.0,
-    5.0,
 ]:
     for seed in seeds:
 
