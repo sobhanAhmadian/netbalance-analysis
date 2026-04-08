@@ -32,7 +32,7 @@ spliter = BGTrainTestSpliter(data=bg_data, seed=0, k=5)
 train_data, test_data = spliter.split(0)
 
 
-def task(input_data, seed):
+def task(input_data, seed, with_gamma=True):
     train_kwargs = {
         "max_iter": 100000,
         "delta": 0.1,
@@ -42,20 +42,33 @@ def task(input_data, seed):
         "shrinkage": 1.0,
     }
 
-    entropy_track_path = os.path.join(save_dir, f"rho_entropy_track_{seed}.txt")
+    if with_gamma:
+        entropy_track_path = os.path.join(save_dir, f"rho_entropy_track_{seed}.txt")
 
-    input_data.balance_data(
-        balance_method="rho",
-        seed=seed,
-        entropy_track_path=entropy_track_path,
-        **train_kwargs,
-    )
+        input_data.balance_data(
+            balance_method="rho",
+            seed=seed,
+            entropy_track_path=entropy_track_path,
+            **train_kwargs,
+        )
+    else:
+        entropy_track_path = os.path.join(
+            save_dir, f"rho_without_gamma_entropy_track_{seed}.txt"
+        )
+        input_data.balance_data(
+            balance_method="rho",
+            seed=seed,
+            entropy_track_path=entropy_track_path,
+            with_gamma=False,
+            **train_kwargs,
+        )
 
 
 tasks = []
 for seed in [0, 1, 2, 3, 4]:
     input_data = copy.deepcopy(train_data)
     tasks.append(dask.delayed(task)(input_data=input_data, seed=seed))
+    tasks.append(dask.delayed(task)(input_data=input_data, seed=seed, with_gamma=False))
 
 if __name__ == "__main__":
     local_cluster = LocalCluster(
