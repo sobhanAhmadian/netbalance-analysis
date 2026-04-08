@@ -16,10 +16,6 @@ logger = prj_logger.getLogger(__name__)
 
 dataset = "luodti"
 
-save_dir = os.path.join(
-    RESULTS_DIR, "numeric", "other", f"dataset-{dataset}-sa-parameters-ablation"
-)
-
 ds = Dataset()
 
 associations = ds.get_associations(with_negatives=True)
