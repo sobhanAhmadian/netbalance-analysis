@@ -30,6 +30,9 @@ os.makedirs(figs_folder, exist_ok=True)
 
 seeds = list(range(30))
 
+file_name = os.path.join(save_dir, "beta_entropies.npy")
+beta_entropies = np.load(file_name)
+
 file_name = os.path.join(save_dir, "heuristic_entropies.npy")
 heuristic_entropies = np.load(file_name)
 
@@ -40,11 +43,13 @@ file_name = os.path.join(save_dir, "sa_entropies.npy")
 sa_entropies = np.load(file_name)
 
 average_entropies = [
+    np.mean(beta_entropies),
     np.mean(heuristic_entropies),
     np.mean(sa_entropies),
     np.mean(both_entropies),
 ]
 std_entropies = [
+    np.std(beta_entropies),
     np.std(heuristic_entropies),
     np.std(sa_entropies),
     np.std(both_entropies),
@@ -53,10 +58,10 @@ std_entropies = [
 fig = plt.figure(figsize=(2.0, 3.0))
 ax = fig.add_subplot(111)
 
-x = [0, 1, 2]
+x = [0, 1, 2, 3]
 bar_width = 0.4
 
-y0 = 0.7
+y0 = 0.4
 
 ax.bar(
     x,
@@ -67,13 +72,13 @@ ax.bar(
     yerr=std_entropies,
     ecolor="black",
     error_kw=dict(lw=1, alpha=0.7),
-    color=("#fdae61", "#8c6bb1", "#d53e4f"),
+    color=("#fdae61", "#8c6bb1", "#d53e4f", "#3c23ff"),
     alpha=1.0,
 )
 
 ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
 ax.set_ylim(
-    0.7,
+    y0,
 )
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)

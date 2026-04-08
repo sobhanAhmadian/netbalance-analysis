@@ -64,6 +64,16 @@ def get_entropies(
 
 seeds = list(range(30))
 
+beta_entorpies = np.zeros((len(seeds)))
+for seed in seeds:
+    temp_data = copy.deepcopy(train_data)
+    train_data.balance_data(
+        balance_method="beta",
+        negative_ratio=1.0,
+        seed=seed,
+    )
+    beta_entorpies[seed] = train_data.get_stats()["ent"]
+
 heuristic_entropies = np.zeros((len(seeds)))
 for seed in seeds:
     heuristic_entropies[seed] = get_entropies(
@@ -88,6 +98,10 @@ for seed in seeds:
         max_iter=40000,
         with_gamma=False,
     )
+
+file_name = os.path.join(save_dir, "beta_entropies.npy")
+np.save(file_name, beta_entorpies)
+print(f"Beta entropies saved to {file_name}")
 
 file_name = os.path.join(save_dir, "heuristic_entropies.npy")
 np.save(file_name, heuristic_entropies)
