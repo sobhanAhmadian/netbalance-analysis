@@ -32,6 +32,12 @@ os.makedirs(figs_folder, exist_ok=True)
 seeds = [0, 1, 2]
 
 delta_list = [
+    0.0,
+    0.0001,
+    0.0002,
+    0.0003,
+    0.0004,
+    0.0005,
     0.001,
     0.002,
     0.003,

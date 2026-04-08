@@ -61,6 +61,12 @@ tasks = []
 seeds = [0, 1, 2]
 
 delta_list = [
+    0.0,
+    0.0001,
+    0.0002,
+    0.0003,
+    0.0004,
+    0.0005,
     0.001,
     0.002,
     0.003,
@@ -83,8 +89,8 @@ delta_list = [
     5.0,
 ]
 
-entropies = np.zeros((len(seeds), 20))
-dataset_sizes = np.zeros((len(seeds), 20))
+entropies = np.zeros((len(seeds), len(delta_list)))
+dataset_sizes = np.zeros((len(seeds), len(delta_list)))
 
 # delta
 for i, delta in enumerate(delta_list):
