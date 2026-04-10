@@ -34,21 +34,31 @@ max_iter = 100000
 x = list(range(max_iter + 1))
 
 
-def get_entropy_track(seed):
-    entropy_track_path = os.path.join(save_dir, f"rho_entropy_track_{seed}.txt")
+def get_entropy_track(seed, with_gamma=True):
+    if with_gamma:
+        entropy_track_path = os.path.join(save_dir, f"rho_entropy_track_{seed}.txt")
+    else:
+        entropy_track_path = os.path.join(
+            save_dir, f"rho_without_gamma_entropy_track_{seed}.txt"
+        )
     track = np.loadtxt(entropy_track_path)
     return track
 
 
-tracks = [get_entropy_track(seed) for seed in [0, 1, 2, 3, 4]]
+with_gamma_tracks = [get_entropy_track(seed) for seed in [0, 1, 2, 3, 4]]
+without_gamma_tracks = [
+    get_entropy_track(seed, with_gamma=False) for seed in [0, 1, 2, 3, 4]
+]
 
 fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
 
-for idx, track in enumerate(tracks):
+for idx, track in enumerate(with_gamma_tracks):
     ax.plot(x, track, color="#9970ab", alpha=0.7, lw=0.4)
 
+for idx, track in enumerate(without_gamma_tracks):
+    ax.plot(x, track, color="#4393c3", alpha=0.7, lw=0.4)
 
-ax.set_ylim(0.65, 1.05)
+ax.set_ylim(0.4, 1.05)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 ax.tick_params(axis="x", rotation=10)
