@@ -344,6 +344,7 @@ class AData(Data):
         weights = np.zeros(dims, dtype=float)
 
         for neg_asso in neg_associations:
+            weights[tuple(neg_asso[:-1])] += 0.0000001
             for pos_asso in pos_associations:
                 for i in range(len(dims)):
                     if neg_asso[i] == pos_asso[i]:
@@ -356,7 +357,7 @@ class AData(Data):
             weights_sum = weights.sum()
             if weights_sum == 0:
                 raise ValueError(
-                    "No more valid negative samples to select. Decrease the gamma_penalty."
+                    "No more valid negative samples to select."
                 )
             normalized_weights = weights / weights_sum
 
