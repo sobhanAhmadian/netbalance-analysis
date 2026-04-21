@@ -49,7 +49,7 @@ datasets = {
     "vibrio": VibrioDataset(),
 }
 
-figs_folder = f"{RESULTS_DIR}/figs/model_evaluation/results/noonan"
+figs_folder = f"{RESULTS_DIR}/figs/other/noonan"
 os.makedirs(figs_folder, exist_ok=True)
 
 # (Model Result Dir, Train Method, Display Name)
@@ -274,7 +274,7 @@ fig = plt.figure(figsize=(len(datasets) * 0.9, 1.8))
 axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
 
 x = np.arange(len(datasets))  # [0, 1, ..., N-1]
-bar_width = 0.2
+bar_width = 0.3
 
 average_entropies = [
     np.mean(data["entropy"]["beta"][dataset]["both"]) for dataset in datasets.keys()
@@ -297,7 +297,7 @@ std_bacteria_entropies = [
 ]
 
 axe.bar(
-    x - bar_width - 0.02,
+    x - bar_width / 2 - 0.02,
     average_bacteria_entropies,
     bar_width,
     yerr=std_bacteria_entropies,
@@ -308,7 +308,7 @@ axe.bar(
     alpha=1.0,
 )
 axe.bar(
-    x,
+    x + bar_width / 2 + 0.02,
     average_phage_entropies,
     bar_width,
     yerr=std_phage_entropies,
@@ -318,17 +318,17 @@ axe.bar(
     color=color_phage,
     alpha=1.0,
 )
-axe.bar(
-    x + bar_width + 0.02,
-    average_entropies,
-    bar_width,
-    yerr=std_entropies,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_both,
-    alpha=1.0,
-)
+# axe.bar(
+#     x + bar_width + 0.02,
+#     average_entropies,
+#     bar_width,
+#     yerr=std_entropies,
+#     capsize=1.0,
+#     ecolor="black",
+#     error_kw=dict(lw=1, alpha=0.7),
+#     color=color_both,
+#     alpha=1.0,
+# )
 
 
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
@@ -347,7 +347,7 @@ fig = plt.figure(figsize=(len(datasets) * 0.9, 1.8))
 axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
 
 x = np.arange(len(datasets))  # [0, 1, ..., N-1]
-bar_width = 0.2
+bar_width = 0.3
 
 average_entropies = [
     np.mean(data["entropy"]["rho"][dataset]["both"]) for dataset in datasets.keys()
@@ -370,7 +370,7 @@ std_bacteria_entropies = [
 ]
 
 axe.bar(
-    x - bar_width - 0.02,
+    x - bar_width / 2 - 0.02,
     average_bacteria_entropies,
     bar_width,
     yerr=std_bacteria_entropies,
@@ -381,7 +381,7 @@ axe.bar(
     alpha=1.0,
 )
 axe.bar(
-    x,
+    x + bar_width / 2 + 0.02,
     average_phage_entropies,
     bar_width,
     yerr=std_phage_entropies,
@@ -391,17 +391,17 @@ axe.bar(
     color=color_phage,
     alpha=1.0,
 )
-axe.bar(
-    x + bar_width + 0.02,
-    average_entropies,
-    bar_width,
-    yerr=std_entropies,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_both,
-    alpha=1.0,
-)
+# axe.bar(
+#     x + bar_width + 0.02,
+#     average_entropies,
+#     bar_width,
+#     yerr=std_entropies,
+#     capsize=1.0,
+#     ecolor="black",
+#     error_kw=dict(lw=1, alpha=0.7),
+#     color=color_both,
+#     alpha=1.0,
+# )
 
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
 axe.set_ylim(0, 1.0)
@@ -420,7 +420,7 @@ print(f"\nFigure Saved: {file_name}")
 fig = plt.figure(figsize=(len(datasets) * 0.9, 1.8))
 axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
 x = np.arange(len(datasets))  # [0, 1, ..., N-1]
-bar_width = 0.2
+bar_width = 0.3
 average_aucs = [
     np.mean(data["auc"]["beta"][dataset]["both"]) for dataset in datasets.keys()
 ]
@@ -440,7 +440,7 @@ std_bacteria_aucs = [
 ]
 
 axe.bar(
-    x - bar_width - 0.02,
+    x - bar_width / 2 - 0.02,
     average_bacteria_aucs,
     bar_width,
     yerr=std_bacteria_aucs,
@@ -451,7 +451,7 @@ axe.bar(
     alpha=1.0,
 )
 axe.bar(
-    x,
+    x + bar_width / 2 + 0.02,
     average_phage_aucs,
     bar_width,
     yerr=std_phage_aucs,
@@ -461,20 +461,20 @@ axe.bar(
     color=color_phage,
     alpha=1.0,
 )
-axe.bar(
-    x + bar_width + 0.02,
-    average_aucs,
-    bar_width,
-    yerr=std_aucs,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_both,
-    alpha=1.0,
-)
+# axe.bar(
+#     x + bar_width + 0.02,
+#     average_aucs,
+#     bar_width,
+#     yerr=std_aucs,
+#     capsize=1.0,
+#     ecolor="black",
+#     error_kw=dict(lw=1, alpha=0.7),
+#     color=color_both,
+#     alpha=1.0,
+# )
 
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
-axe.set_ylim(0.4, 1.0)
+axe.set_ylim(0.5, 1.0)
 axe.set_xticks([])
 
 axe.spines["top"].set_visible(False)
@@ -489,7 +489,7 @@ print(f"\nFigure Saved: {file_name}")
 fig = plt.figure(figsize=(len(datasets) * 0.9, 1.8))
 axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
 x = np.arange(len(datasets))  # [0, 1, ..., N-1]
-bar_width = 0.2
+bar_width = 0.3
 average_aucs = [
     np.mean(data["auc"]["rho"][dataset]["both"]) for dataset in datasets.keys()
 ]
@@ -509,7 +509,7 @@ std_bacteria_aucs = [
 ]
 
 axe.bar(
-    x - bar_width - 0.02,
+    x - bar_width / 2 - 0.02,
     average_bacteria_aucs,
     bar_width,
     yerr=std_bacteria_aucs,
@@ -520,7 +520,7 @@ axe.bar(
     alpha=1.0,
 )
 axe.bar(
-    x,
+    x + bar_width / 2 + 0.02,
     average_phage_aucs,
     bar_width,
     yerr=std_phage_aucs,
@@ -530,23 +530,23 @@ axe.bar(
     color=color_phage,
     alpha=1.0,
 )
-axe.bar(
-    x + bar_width + 0.02,
-    average_aucs,
-    bar_width,
-    yerr=std_aucs,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_both,
-    alpha=1.0,
-)
+# axe.bar(
+#     x + bar_width + 0.02,
+#     average_aucs,
+#     bar_width,
+#     yerr=std_aucs,
+#     capsize=1.0,
+#     ecolor="black",
+#     error_kw=dict(lw=1, alpha=0.7),
+#     color=color_both,
+#     alpha=1.0,
+# )
 
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
-axe.set_ylim(0.4, 1.0)
+axe.set_ylim(0.5, 1.0)
 axe.set_xticks([])
 axe.set_yticks([])
-    
+
 axe.spines["top"].set_visible(False)
 axe.spines["right"].set_visible(False)
 
@@ -554,166 +554,3 @@ file_name = f"{figs_folder}/compare_auc_under_rho_evaluation.svg"
 fig.savefig(file_name, transparent=True, bbox_inches="tight", pad_inches=0.0)
 print(f"\nFigure Saved: {file_name}")
 
-
-## AUC of all phage-baseline vs aucs reported in Noonan et al. 2026
-
-fig = plt.figure(figsize=(len(datasets) * 0.9, 2))
-axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
-x = np.arange(len(datasets))  # [0, 1, ..., N-1]
-bar_width = 0.2
-average_phage_aucs = [
-    np.mean(data["auc"]["beta"][dataset]["phage"]) for dataset in datasets.keys()
-]
-average_bacteria_aucs = [
-    np.mean(data["auc"]["beta"][dataset]["bacteria"]) for dataset in datasets.keys()
-]
-noonan_aucs = [0.745, 0.674, 0.878, 0.869, 0.941]
-axe.bar(
-    x - bar_width - 0.02,
-    average_bacteria_aucs,
-    bar_width,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_bacteria,
-    alpha=1.0,
-)
-axe.bar(
-    x,
-    average_phage_aucs,
-    bar_width,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_phage,
-    alpha=1.0,
-)
-axe.bar(
-    x + bar_width + 0.02,
-    noonan_aucs,
-    bar_width,
-    capsize=1.0,
-    ecolor="black",
-    error_kw=dict(lw=1, alpha=0.7),
-    color=color_noonan,
-    alpha=1.0,
-)
-
-axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
-axe.set_ylim(0.4, 1.0)
-axe.set_xticks([])
-
-axe.spines["top"].set_visible(False)
-axe.spines["right"].set_visible(False)
-
-file_name = f"{figs_folder}/compare_noonan_aucs_vs_ours.svg"
-fig.savefig(file_name, transparent=True, bbox_inches="tight", pad_inches=0.0)
-print(f"\nFigure Saved: {file_name}")
-
-## Scatter plot of both-baseline AUCs vs Noonan AUCs with only 5 points (one per dataset)
-fig = plt.figure(figsize=(2.0, 2.0))
-axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
-
-average_aucs = [
-    np.mean(data["auc"]["beta"][dataset]["both"]) for dataset in datasets.keys()
-]
-
-
-axe.scatter(average_aucs, noonan_aucs, color=color_both, s=50, alpha=0.7)
-
-slope, intercept, r_value, p_value, std_err = linregress(average_aucs, noonan_aucs)
-line_x = np.array([min(average_aucs), max(average_aucs)])
-line_y = slope * line_x + intercept
-axe.plot(line_x, line_y, color="black", linestyle="--", linewidth=1)
-
-corr, corr_pvalue = pearsonr(average_aucs, noonan_aucs)
-
-axe.text(
-    0.05,
-    0.95,
-    f"Corr = {corr:.3f}",
-    transform=axe.transAxes,
-    verticalalignment="bottom",
-    fontsize=8,
-)
-
-axe.spines["top"].set_visible(False)
-axe.spines["right"].set_visible(False)
-axe.set_ylim(0.4, 1.0)
-axe.set_yticks([])
-
-file_name = f"{figs_folder}/scatter_noonan_vs_ours_both.svg"
-fig.savefig(file_name, transparent=True, bbox_inches="tight", pad_inches=0.0)
-print(f"\nFigure Saved: {file_name}")
-print(f"R²: {r_value**2:.3f}")
-print(f"Correlation: {corr:.3f}")
-
-## Scatter plot of phage-baseline AUCs vs Noonan AUCs
-fig = plt.figure(figsize=(2.0, 2.0))
-axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
-
-axe.scatter(average_phage_aucs, noonan_aucs, color=color_phage, s=50, alpha=0.7)
-
-slope, intercept, r_value, p_value, std_err = linregress(
-    average_phage_aucs, noonan_aucs
-)
-line_x = np.array([min(average_phage_aucs), max(average_phage_aucs)])
-line_y = slope * line_x + intercept
-axe.plot(line_x, line_y, color="black", linestyle="--", linewidth=1)
-
-corr, corr_pvalue = pearsonr(average_phage_aucs, noonan_aucs)
-
-axe.text(
-    0.05,
-    0.95,
-    f"Corr = {corr:.3f}",
-    transform=axe.transAxes,
-    verticalalignment="bottom",
-    fontsize=8,
-)
-
-axe.spines["top"].set_visible(False)
-axe.spines["right"].set_visible(False)
-axe.set_yticks([])
-axe.set_ylim(0.4, 1.0)
-
-file_name = f"{figs_folder}/scatter_noonan_vs_ours_phage.svg"
-fig.savefig(file_name, transparent=True, bbox_inches="tight", pad_inches=0.0)
-print(f"\nFigure Saved: {file_name}")
-print(f"R²: {r_value**2:.3f}")
-print(f"Correlation: {corr:.3f}")
-
-## Scatter plot of bacteria-baseline AUCs vs Noonan AUCs with only 5 points (one per dataset)
-fig = plt.figure(figsize=(2.0, 2.0))
-axe = fig.add_axes([0.15, 0.2, 0.8, 0.75])
-
-axe.scatter(average_bacteria_aucs, noonan_aucs, color=color_bacteria, s=50, alpha=0.7)
-
-slope, intercept, r_value, p_value, std_err = linregress(
-    average_bacteria_aucs, noonan_aucs
-)
-line_x = np.array([min(average_bacteria_aucs), max(average_bacteria_aucs)])
-line_y = slope * line_x + intercept
-axe.plot(line_x, line_y, color="black", linestyle="--", linewidth=1)
-
-corr, corr_pvalue = pearsonr(average_bacteria_aucs, noonan_aucs)
-
-axe.text(
-    0.05,
-    0.95,
-    f"Corr = {corr:.3f}",
-    transform=axe.transAxes,
-    verticalalignment="bottom",
-    fontsize=8,
-)
-
-axe.spines["top"].set_visible(False)
-axe.spines["right"].set_visible(False)
-axe.set_ylim(0.4, 1.0)
-axe.set_yticks([])
-
-file_name = f"{figs_folder}/scatter_noonan_vs_ours_bacteria.svg"
-fig.savefig(file_name, transparent=True, bbox_inches="tight", pad_inches=0.0)
-print(f"\nFigure Saved: {file_name}")
-print(f"R²: {r_value**2:.3f}")
-print(f"Correlation: {corr:.3f}")
