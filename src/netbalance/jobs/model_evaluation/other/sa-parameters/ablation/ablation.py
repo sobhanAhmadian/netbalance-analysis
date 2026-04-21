@@ -55,37 +55,34 @@ std_entropies = [
     np.std(both_entropies),
 ]
 
-fig = plt.figure(figsize=(2.0, 3.0))
+fig = plt.figure(figsize=(1.5, 3.0))
 ax = fig.add_subplot(111)
 
 x = [0, 1, 2, 3]
-bar_width = 0.4
-
-y0 = 0.4
+bar_width = 0.5
 
 ax.bar(
     x,
-    [v - y0 for v in average_entropies],
+    average_entropies,
     bar_width,
-    bottom=y0,
     capsize=1.0,
     yerr=std_entropies,
     ecolor="black",
     error_kw=dict(lw=1, alpha=0.7),
-    color=("#fdae61", "#8c6bb1", "#d53e4f", "#3c23ff"),
+    color=("#fdae61", "#4393c3", "#bf812d", "#d53e4f"),
     alpha=1.0,
 )
 
 ax.set_xlim(x[0] - 0.5, x[-1] + 0.5)
 ax.set_ylim(
-    y0,
+    0.4,
 )
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
 ax.set_xticks([])
 
-fig.tight_layout()
+fig.subplots_adjust(left=0, right=1, top=1, bottom=0.1)
 
 file_name = f"{figs_folder}/ablation.svg"
 fig.savefig(file_name, bbox_inches="tight", pad_inches=0.1)

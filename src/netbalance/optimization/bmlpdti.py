@@ -100,6 +100,9 @@ class BalanceBMLPDTITrainer(Trainer):
             save_name = (
                 f"i{config.i_balance_method}_bmlpdti_{hash_associations}_{num_bal}"
             )
+            if getattr(config, "i_add_kwargs_to_save_name", False):
+                for key, value in config.i_balance_kwargs.items():
+                    save_name += f"_{key}_{value}"
             logger.info(
                 f"Parallel balancing data with {config.i_balance_method} in epoch {num_bal}"
             )
@@ -126,6 +129,9 @@ class BalanceBMLPDTITrainer(Trainer):
             save_name = (
                 f"i{config.i_balance_method}_bmlpdti_{hash_associations}_{num_bal}"
             )
+            if getattr(config, "i_add_kwargs_to_save_name", False):
+                for key, value in config.i_balance_kwargs.items():
+                    save_name += f"_{key}_{value}"
 
             e_data = copy.deepcopy(data)
             e_data.balance_data(
@@ -309,3 +315,50 @@ class WeightedBMLPDTITrainer(Trainer):
         scores = scores / scores.max()
         logger.info(f"scores between 0 and 1: {scores.min()}, {scores.max()}")
         return scores
+
+
+class BalanceBMLPDTITrainer2(Trainer):
+
+    def train(
+        self,
+        model_handler: BMLPDTIModelHandler,
+        data: BGData,
+        config: BMLPDTIOptimizerConfig,
+    ) -> Result:
+        logger.info(get_header_format("Training the model"))
+
+        if config.fair:
+            model_handler.fe.build(data.associations)
+        else:
+            model_handler.fe.build()
+
+        associations_list = config.associations_list
+
+        for e in range(config.n_epoch):
+            num_bal = e % len(associations_list)
+            associations = associations_list[num_bal]
+            dp_embed = model_handler.fe.extract_features(
+                associations[:, 0], associations[:, 1]
+            ).numpy()
+            y = np.array(associations[:, 2].tolist(), dtype=np.float32).reshape(-1, 1)
+            simple_data = PytorchData(
+                X=torch.tensor(dp_embed).to(device),
+                y=torch.tensor(y).to(device),
+            )
+
+            pytorch_trainer = PytorchTrainer()
+            pytorch_trainer.train(model_handler, simple_data, config)
+
+        test_batch_size = 1000
+        preds = np.zeros(data.associations.shape[0])
+        for j in range(0, data.associations.shape[0], test_batch_size):
+            preds[j : j + test_batch_size] = model_handler.predict(
+                [
+                    data.associations[j : j + test_batch_size, 0],
+                    data.associations[j : j + test_batch_size, 1],
+                ]
+            )
+        result = evaluate_binary_classification_simple(
+            data.associations[:, 2], preds.reshape(-1), config.threshold
+        )
+        return result

@@ -72,14 +72,14 @@ std_dataset_sizes = np.std(dataset_sizes, axis=0)
 
 
 # Entropy vs Delta
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(3.8, 2.2))
 
-ax.plot(x, mean_entropies, color="#bf812d", linestyle="-", lw=1.1)
+ax.plot(x, mean_entropies, color="#66c2a5d3", linestyle="-", lw=1.1)
 ax.fill_between(
     x,
     mean_entropies - std_entropies,
     mean_entropies + std_entropies,
-    color="#bf812d",
+    color="#66c2a5d3",
     alpha=0.2,
 )
 ax.set_xticks(x)
@@ -88,13 +88,14 @@ ax.set_xticklabels(delta_list, rotation=90)
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
-fig.tight_layout()
+fig.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.25)
+
 file_name = f"{figs_folder}/delta_vs_entropy.svg"
-plt.savefig(file_name)
+plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")
 
 # Dataset Size vs Delta
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(3.8, 2.2))
 
 ax.plot(x, mean_dataset_sizes, color="#9970ab", linestyle="-", lw=1.1)
 ax.fill_between(
@@ -104,13 +105,21 @@ ax.fill_between(
     color="#9970ab",
     alpha=0.2,
 )
-ax.set_xticks(x)
-ax.set_xticklabels(delta_list, rotation=90)
+ax.set_xticks([])
+# ax.set_xticklabels(delta_list, rotation=90)
+
+ax.set_yticks([1500, 2000, 3000])
+ax.set_yticklabels(["1.5K", "2.5K", "3K"])
 
 ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
+ax.spines["left"].set_visible(False)
+ax.spines["bottom"].set_visible(False)
 
-fig.tight_layout()
+ax.yaxis.tick_right()
+ax.yaxis.set_label_position("right")
+
+fig.subplots_adjust(left=0.05, right=0.85, top=0.95, bottom=0.25)
+
 file_name = f"{figs_folder}/delta_vs_dataset_sizes.svg"
-plt.savefig(file_name)
+plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")

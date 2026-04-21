@@ -43,9 +43,9 @@ beta_similarities = np.load(beta_file)
 np.fill_diagonal(rho_similarities, np.nan)
 np.fill_diagonal(beta_similarities, np.nan)
 
-fig1 = plt.figure(figsize=(2.0, 2.0))
-fig2 = plt.figure(figsize=(2.0, 2.0))
-fig3 = plt.figure(figsize=(0.1, 2.0))
+fig1 = plt.figure(figsize=(2.2, 2.2))
+fig2 = plt.figure(figsize=(2.2, 2.2))
+fig3 = plt.figure(figsize=(0.1, 2.2))
 ax1 = fig1.add_subplot(111)
 ax2 = fig2.add_subplot(111)
 cax = fig3.add_subplot(111)
@@ -97,22 +97,41 @@ print(f"\nFigure Saved: {file_name}")
 # Boxplots of pairwise similarities #
 #####################################
 
-fig4 = plt.figure(figsize=(2.0, 3.0))
+fig4 = plt.figure(figsize=(1.3, 2.2))
 ax4 = fig4.add_subplot(111)
 
 # Prepare data for boxplot
 rho_flat = rho_similarities[~np.isnan(rho_similarities)]
 beta_flat = beta_similarities[~np.isnan(beta_similarities)]
 
-ax4.boxplot([rho_flat, beta_flat], tick_labels=["", ""], patch_artist=True)
+x = [0, 1]
+bar_width = 0.4
+average_sizes = [np.mean(rho_flat), np.mean(beta_flat)]
+std_sizes = [np.std(rho_flat), np.std(beta_flat)]
 
+ax4.bar(
+    x,
+    average_sizes,
+    bar_width,
+    capsize=1.0,
+    yerr=std_sizes,
+    ecolor="black",
+    error_kw=dict(lw=1, alpha=0.7),
+    color=(color3, color1),
+    alpha=1.0,
+)
+
+ax4.set_xlim(x[0] - 0.5, x[-1] + 0.5)
+ax4.set_ylim(cax.get_ylim())
 ax4.set_xticks([])
+ax4.set_yticklabels([])
 ax4.spines["top"].set_visible(False)
 ax4.spines["right"].set_visible(False)
 
-fig4.tight_layout()
+fig4.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
 file_name = f"{figs_folder}/pairwise_similarities_boxplot.svg"
-fig4.savefig(file_name, bbox_inches="tight", pad_inches=0.1)
+fig4.savefig(file_name, bbox_inches="tight", pad_inches=0.0)
 print(f"\nFigure Saved: {file_name}")
 
 
@@ -126,7 +145,7 @@ beta_file = os.path.join(save_dir, "ibeta_dataset_sizes.npy")
 rho_sizes = np.load(rho_file)
 beta_sizes = np.load(beta_file)
 
-fig5 = plt.figure(figsize=(2.0, 3.0))
+fig5 = plt.figure(figsize=(1.3, 2.2))
 ax5 = fig5.add_subplot(111)
 
 x = [0, 1]
@@ -147,14 +166,14 @@ ax5.bar(
 )
 
 ax5.set_xlim(x[0] - 0.5, x[-1] + 0.5)
-ax5.set_ylim(1000, max(average_sizes) + 200)
+ax5.set_ylim(900, max(average_sizes) + 200)
 ax5.spines["top"].set_visible(False)
 ax5.spines["right"].set_visible(False)
 
 ax5.set_xticks([])
 
-fig5.tight_layout()
+fig5.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
 file_name = f"{figs_folder}/dataset_sizes_barplot.svg"
-fig5.savefig(file_name, bbox_inches="tight", pad_inches=0.1)
+fig5.savefig(file_name, bbox_inches="tight", pad_inches=0.0)
 print(f"\nFigure Saved: {file_name}")

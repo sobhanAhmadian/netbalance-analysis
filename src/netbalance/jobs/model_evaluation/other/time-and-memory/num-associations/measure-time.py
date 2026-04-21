@@ -72,11 +72,7 @@ num_associations_list = [
     1900,
     2000,
 ]
-seeds = [
-    0,
-    1,
-    2,
-]
+seeds = list(range(10))
 time_usages_both = np.zeros((len(num_associations_list), len(seeds)))
 time_usages_heuristic = np.zeros((len(num_associations_list), len(seeds)))
 time_usages_sa = np.zeros((len(num_associations_list), len(seeds)))

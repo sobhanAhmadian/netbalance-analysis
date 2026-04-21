@@ -40,25 +40,26 @@ mean_entropies = np.mean(entropies, axis=0)
 std_entropies = np.std(entropies, axis=0)
 
 # Entropy vs Initial Temperature
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(3.5, 2.0))
 
-ax.plot(x, mean_entropies, color="#bf812d", linestyle="-", lw=1.1)
+ax.plot(x, mean_entropies, color="#9970ab", linestyle="-", lw=1.1)
 ax.fill_between(
     x,
     mean_entropies - std_entropies,
     mean_entropies + std_entropies,
-    color="#bf812d",
+    color="#9970ab",
     alpha=0.2,
 )
 ax.set_xticks(x)
-ax.set_xticklabels(initial_temp_list, rotation=90)
+ax.set_xticklabels([str(int(temp)) for temp in initial_temp_list])
+ax.set_ylim(0.949, 1.01)
 
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
-ax.set_ylim(0.95, 1.0)
 
-fig.tight_layout()
+fig.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
+
 file_name = f"{figs_folder}/initial_temp_vs_entropy.svg"
-plt.savefig(file_name)
+plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")

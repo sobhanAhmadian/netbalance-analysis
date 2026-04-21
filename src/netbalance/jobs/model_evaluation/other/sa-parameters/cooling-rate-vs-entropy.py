@@ -40,25 +40,29 @@ mean_entropies = np.mean(entropies, axis=0)
 std_entropies = np.std(entropies, axis=0)
 
 # Entropy vs Cooling Rate
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(3.5, 2.0))
 
-ax.plot(x, mean_entropies, color="#bf812d", linestyle="-", lw=1.1)
+ax.plot(x, mean_entropies, color="#66c2a5d3", linestyle="-", lw=1.1)
 ax.fill_between(
     x,
     mean_entropies - std_entropies,
     mean_entropies + std_entropies,
-    color="#bf812d",
+    color="#66c2a5d3",
     alpha=0.2,
 )
 ax.set_xticks(x)
-ax.set_xticklabels(cooling_rate_list, rotation=90)
+ax.set_xticklabels([str(cr) for cr in cooling_rate_list])
+ax.xaxis.tick_top()
+ax.xaxis.set_label_position("top")
+ax.set_ylim(0.949, 1.01)
+ax.set_yticks([])
 
-ax.spines["top"].set_visible(False)
+ax.spines["bottom"].set_visible(False)
 ax.spines["right"].set_visible(False)
+ax.spines["left"].set_visible(False)
 
-ax.set_ylim(0.95, 1.0)
+fig.subplots_adjust(left=0.15, right=0.95, top=0.85, bottom=0.05)
 
-fig.tight_layout()
 file_name = f"{figs_folder}/cooling_rate_vs_entropy.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")

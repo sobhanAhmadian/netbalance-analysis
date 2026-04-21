@@ -85,22 +85,22 @@ std_memory_usages_sa = np.std(memory_usages_sa, axis=1)
 
 
 # Time vs Number of Associations
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(4, 2.2))
 
 ax.plot(
-    num_associations_list, mean_time_usages_both, color="#ff248e", linestyle="-", lw=1.1
+    num_associations_list, mean_time_usages_both, color="#d53e4f", linestyle="-", lw=1.1
 )
 ax.fill_between(
     num_associations_list,
     mean_time_usages_both - std_time_usages_both,
     mean_time_usages_both + std_time_usages_both,
-    color="#ff248e",
+    color="#d53e4f",
     alpha=0.2,
 )
 ax.plot(
     num_associations_list,
     mean_time_usages_heuristic,
-    color="#80b1d3",
+    color="#4393c3",
     linestyle="-",
     lw=1.1,
 )
@@ -108,39 +108,40 @@ ax.fill_between(
     num_associations_list,
     mean_time_usages_heuristic - std_time_usages_heuristic,
     mean_time_usages_heuristic + std_time_usages_heuristic,
-    color="#80b1d3",
+    color="#4393c3",
     alpha=0.2,
 )
 ax.plot(
-    num_associations_list, mean_time_usages_sa, color="#fdb462", linestyle="-", lw=1.1
+    num_associations_list, mean_time_usages_sa, color="#bf812d", linestyle="-", lw=1.1
 )
 ax.fill_between(
     num_associations_list,
     mean_time_usages_sa - std_time_usages_sa,
     mean_time_usages_sa + std_time_usages_sa,
-    color="#fdb462",
+    color="#bf812d",
     alpha=0.2,
 )
 
-ax.set_xticks(num_associations_list)
-ax.set_xticklabels(num_associations_list, rotation=10)
+ax.set_xticks([100, 500, 1000, 1500, 2000])
+ax.set_xticklabels([100, 500, 1000, 1500, 2000])
 
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
-fig.tight_layout()
+fig.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
+
 file_name = f"{figs_folder}/time_usage_vs_num_associations.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
 
 
 # Memory vs Number of Associations
-fig, ax = plt.subplots(1, 1, figsize=(4, 2.3))
+fig, ax = plt.subplots(1, 1, figsize=(4, 2.2))
 
 ax.plot(
     num_associations_list,
     mean_memory_usages_both,
-    color="#ff248e",
+    color="#d53e4f",
     linestyle="-",
     lw=1.1,
     alpha=0.8,
@@ -149,13 +150,13 @@ ax.fill_between(
     num_associations_list,
     mean_memory_usages_both - std_memory_usages_both,
     mean_memory_usages_both + std_memory_usages_both,
-    color="#ff248e",
+    color="#d53e4f",
     alpha=0.2,
 )
 ax.plot(
     num_associations_list,
     mean_memory_usages_heuristic,
-    color="#80b1d3",
+    color="#4393c3",
     linestyle="-",
     lw=1.1,
     alpha=0.8,
@@ -164,26 +165,26 @@ ax.fill_between(
     num_associations_list,
     mean_memory_usages_heuristic - std_memory_usages_heuristic,
     mean_memory_usages_heuristic + std_memory_usages_heuristic,
-    color="#80b1d3",
+    color="#4393c3",
     alpha=0.2,
 )
 ax.plot(
-    num_associations_list, mean_memory_usages_sa, color="#fdb462", linestyle="-", lw=1.1
+    num_associations_list, mean_memory_usages_sa, color="#bf812d", linestyle="-", lw=1.1
 )
 ax.fill_between(
     num_associations_list,
     mean_memory_usages_sa - std_memory_usages_sa,
     mean_memory_usages_sa + std_memory_usages_sa,
-    color="#fdb462",
+    color="#bf812d",
     alpha=0.2,
 )
-ax.set_xticks(num_associations_list)
-ax.set_xticklabels(num_associations_list, rotation=10)
+ax.set_xticks([100, 500, 1000, 1500, 2000])
+ax.set_xticklabels([100, 500, 1000, 1500, 2000])
 
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
 
-fig.tight_layout()
+fig.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
 file_name = f"{figs_folder}/memory_usage_vs_num_associations.svg"
 plt.savefig(file_name)
 print(f"\nFigure Saved: {file_name}")
