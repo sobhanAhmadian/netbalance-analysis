@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import LogFormatterMathtext, LogLocator
 
 from netbalance.configs.common import RESULTS_DIR
 from netbalance.utils import prj_logger
@@ -59,7 +60,8 @@ delta_list = [
     4.0,
     5.0,
 ]
-x = np.arange(len(delta_list))
+# x = np.arange(len(delta_list))
+x = delta_list
 
 entropies = np.load(os.path.join(save_dir, "delta_entropies.npy"))
 dataset_sizes = np.load(os.path.join(save_dir, "delta_dataset_sizes.npy"))
@@ -82,8 +84,9 @@ ax.fill_between(
     color="#66c2a5d3",
     alpha=0.2,
 )
-ax.set_xticks(x)
-ax.set_xticklabels(delta_list, rotation=90)
+ax.set_xscale("log")
+ax.xaxis.set_major_locator(LogLocator(base=10))
+ax.xaxis.set_major_formatter(LogFormatterMathtext())
 
 ax.spines["top"].set_visible(False)
 ax.spines["right"].set_visible(False)
@@ -105,7 +108,7 @@ ax.fill_between(
     color="#9970ab",
     alpha=0.2,
 )
-ax.set_xticks([])
+
 # ax.set_xticklabels(delta_list, rotation=90)
 
 ax.set_yticks([1500, 2000, 3000])
@@ -117,6 +120,11 @@ ax.spines["bottom"].set_visible(False)
 
 ax.yaxis.tick_right()
 ax.yaxis.set_label_position("right")
+
+ax.set_xscale("log")
+ax.xaxis.set_major_locator(LogLocator(base=10))
+ax.xaxis.set_major_formatter(LogFormatterMathtext())
+ax.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
 
 fig.subplots_adjust(left=0.05, right=0.85, top=0.95, bottom=0.25)
 
