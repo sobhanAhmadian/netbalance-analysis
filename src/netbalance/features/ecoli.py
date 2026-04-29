@@ -4,6 +4,8 @@ from netbalance.configs.ecoli import (
     ECOLI_BACTERIA_NAMES_FILE,
     ECOLI_PHAGE_NAMES_FILE,
     ECOLI_DATASET_FILE,
+    ECOLI_STRAIN_FEATURE_NAMES_FILE,
+    ECOLI_PHAGE_FEATURE_NAMES_FILE,
 )
 from netbalance.utils import prj_logger
 
@@ -33,3 +35,11 @@ class EcoliDataset(ADataset):
 
     def get_dataset_file_path(self):
         return ECOLI_DATASET_FILE
+
+    def get_strain_feature_names(self):
+        names = pd.read_csv(ECOLI_STRAIN_FEATURE_NAMES_FILE, index_col=0)
+        return list(names.iloc[:, 0])
+
+    def get_phage_feature_names(self):
+        names = pd.read_csv(ECOLI_PHAGE_FEATURE_NAMES_FILE, index_col=0)
+        return list(names.iloc[:, 0])

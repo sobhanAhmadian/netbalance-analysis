@@ -51,13 +51,6 @@ def _batch_optimize(
                 logger.info(f"loss: {loss:.4f}    [{epoch + 1}, {j + 1:5d}]")
                 running_loss = 0
 
-        if config.save:
-            if epoch % 5 == 0 or epoch == config.n_epoch - 1:
-                m = os.path.join(
-                    config.save_path, model_handler.model_config.model_name + ".pth"
-                )
-                torch.save(model_handler.classifier.state_dict(), m)
-
 
 def _evaluate(model: ModelHandler, loader, config: OptimizerConfig):
     model.model.eval()

@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 from dask.distributed import Client, LocalCluster
 from tqdm import tqdm
+from copy import deepcopy
 
 from netbalance.configs import OptimizerConfig
 from netbalance.data import TrainTestSplitter
@@ -105,12 +106,19 @@ def repeated_cross_validation(
             save_preds_dir_re = os.path.join(save_preds_dir, f"cv_{j + 1}")
             data = get_data()
 
+            temp_optimizer_config = deepcopy(optimizer_config)
+            if temp_optimizer_config.save:
+                if temp_optimizer_config.save_path is not None:
+                    temp_optimizer_config.save_path = (
+                        f"{temp_optimizer_config.save_path}_cv_{j + 1}"
+                    )
+
             spliter = SplitterClass(data=data, seed=j, **splitter_kwargs)
             cross_validation(
                 train_test_spliter=spliter,
                 handler_factory=handler_factory,
                 trainer=trainer,
-                config=optimizer_config,
+                config=temp_optimizer_config,
                 save_preds_dir=save_preds_dir_re,
                 test_batch_size=test_batch_size,
                 pbar=pbar,
@@ -156,8 +164,13 @@ def cross_validation(
         # Create model handler
         model_handler = handler_factory.create_handler()
 
+        temp_config = deepcopy(config)
+        if temp_config.save:
+            if temp_config.save_path is not None:
+                temp_config.save_path = f"{temp_config.save_path}_fold_{i + 1}"
+
         # Train the model
-        trainer.train(model_handler=model_handler, data=train_data, config=config)
+        trainer.train(model_handler=model_handler, data=train_data, config=temp_config)
 
         # Save Test Predictions
         if isinstance(model_handler.model, torch.nn.Module):
