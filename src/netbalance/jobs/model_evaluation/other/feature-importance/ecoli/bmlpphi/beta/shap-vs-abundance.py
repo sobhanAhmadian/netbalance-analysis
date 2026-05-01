@@ -54,7 +54,7 @@ feature_abundance = np.concatenate([strain_features, phage_features])
 num_strain_features = len(ds.get_strain_feature_names())
 num_phage_features = len(ds.get_phage_feature_names())
 
-min_shap_value = 0.02
+min_shap_value = 0.02110365
 top_mask = mean_abs_shap >= min_shap_value
 
 top_idx = np.where(top_mask)[0]
@@ -163,6 +163,6 @@ for spine in ["top", "right"]:
 
 fig.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.12)
 
-file_name = f"{figs_folder}/shap_vs_abundance.svg"
+file_name = f"{figs_folder}/shap_vs_abundance_{min_shap_value}.svg"
 plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")
