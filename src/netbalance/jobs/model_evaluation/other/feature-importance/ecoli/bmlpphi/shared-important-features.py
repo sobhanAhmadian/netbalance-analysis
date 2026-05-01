@@ -1,0 +1,100 @@
+import os
+
+from matplotlib_venn import venn2, venn2_circles
+import matplotlib.pyplot as plt
+import numpy as np
+
+from netbalance.configs.bmlpphi import BMLPPHI_RESULTS_DIR as RESULTS_DIR
+from netbalance.features.ecoli import EcoliDataset as Dataset
+from netbalance.utils import prj_logger
+
+plt.rcParams.update(
+    {
+        "font.weight": "normal",  # options: 'normal', 'light', 'regular'
+        "axes.labelsize": 9,
+        "xtick.labelsize": 8,
+        "ytick.labelsize": 8,
+        "axes.labelweight": "regular",
+        "axes.titleweight": "regular",
+    }
+)
+
+logger = prj_logger.getLogger(__name__)
+
+dataset = "ecoli"
+
+beta_save_dir = os.path.join(
+    RESULTS_DIR,
+    "numeric",
+    "other",
+    "feature_importance",
+    f"dataset-{dataset}",
+    "train_neg_samp-beta",
+)
+irho_save_dir = os.path.join(
+    RESULTS_DIR,
+    "numeric",
+    "other",
+    "feature_importance",
+    f"dataset-{dataset}",
+    "train_neg_samp-irho",
+)
+
+figs_folder = f"{RESULTS_DIR}/figs/other/feature_importance/ecoli/bmlpphi"
+os.makedirs(figs_folder, exist_ok=True)
+
+ds = Dataset()
+feature_names = ds.get_strain_feature_names() + ds.get_phage_feature_names()
+
+beta_mean_abs_shap = np.load(os.path.join(beta_save_dir, "mean-abs-shap-values.npy"))
+irho_mean_abs_shap = np.load(os.path.join(irho_save_dir, "mean-abs-shap-values.npy"))
+
+num_strain_features = len(ds.get_strain_feature_names())
+num_phage_features = len(ds.get_phage_feature_names())
+
+# [0.02110365 0.01701945 0.01526282]
+min_shap_value = 0.02110365
+beta_top_mask = beta_mean_abs_shap >= min_shap_value
+irho_top_mask = irho_mean_abs_shap >= min_shap_value
+
+STRAIN_COLOR = "#d9f0d3"
+PHAGE_COLOR = "#9970ab"
+
+fig = plt.figure(figsize=(3, 2.5))
+
+beta_only = beta_top_mask & ~irho_top_mask
+irho_only = irho_top_mask & ~beta_top_mask
+shared = beta_top_mask & irho_top_mask
+
+n_beta_only = beta_only.sum()
+n_irho_only = irho_only.sum()
+n_shared = shared.sum()
+
+
+ax = fig.add_subplot(111)
+v = venn2(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    set_labels=("", ""),
+    set_colors=(STRAIN_COLOR, PHAGE_COLOR),
+    alpha=0.6,
+    ax=ax,
+)
+
+# Style the counts
+for lbl in ["10", "01", "11"]:
+    if v.get_label_by_id(lbl):
+        v.get_label_by_id(lbl).set_fontsize(10)
+
+# Outline circles
+c = venn2_circles(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    linestyle="solid",
+    linewidth=0.8,
+    color="grey",
+    ax=ax,
+)
+
+fig.tight_layout()
+file_name = f"{figs_folder}/shared-important-features.svg"
+plt.savefig(file_name, transparent=True)
+print(f"\nFigure Saved: {file_name}")
