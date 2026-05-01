@@ -112,6 +112,7 @@ class BalanceBMLPPHITrainer(Trainer):
         ]
 
         if config.i_parallel_balance:
+            dask.config.set({"admin.tick.interval": "20ms", "admin.tick.limit": "3h"})
             with (
                 tqdm(
                     total=config.i_max_num_bal,
