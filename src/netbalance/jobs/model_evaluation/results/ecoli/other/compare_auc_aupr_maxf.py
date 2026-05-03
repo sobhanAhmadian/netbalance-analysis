@@ -35,9 +35,9 @@ color11 = "#fdae61"
 color21 = "#8c6bb1"
 color31 = "#d53e4f"
 
-with_eta = False
+with_eta = True
 
-measure = "auc"  # max_f1, auc, aupr
+measure = "max_f1"  # max_f1, auc, aupr
 
 dataset = "ecoli"
 
