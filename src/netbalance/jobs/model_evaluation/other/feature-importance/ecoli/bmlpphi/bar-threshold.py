@@ -60,6 +60,7 @@ shared_percentage = []
 phage_shared_percentage = []
 bacterial_shared_percentage = []
 
+thresholds = np.sort(irho_mean_abs_shap)[::-1]
 for i in range(num_strain_features + num_phage_features):
     threshold = np.sort(irho_mean_abs_shap)[-i - 1]
     beta_top_mask = beta_mean_abs_shap >= threshold
@@ -111,7 +112,26 @@ ax.plot(
     alpha=0.7,
 )
 
+ax.set_xticks(
+    [
+        1,
+        len(feature_names) // 4,
+        2 * len(feature_names) // 4,
+        3 * len(feature_names) // 4,
+        len(feature_names),
+    ]
+)
+ax.set_xticklabels(
+    [
+        f"{thresholds[0]:.4f}",
+        f"{thresholds[len(feature_names) // 4 - 1]:.4f}",
+        f"{thresholds[len(feature_names) // 2 - 1]:.4f}",
+        f"{thresholds[3 * len(feature_names) // 4 - 1]:.4f}",
+        f"{thresholds[-1]:.4f}",
+    ]
+)
+
 fig.tight_layout()
-file_name = f"{figs_folder}/shared-important-features-bar.svg"
+file_name = f"{figs_folder}/bar-threshold.svg"
 plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")

@@ -53,12 +53,12 @@ num_strain_features = len(ds.get_strain_feature_names())
 num_phage_features = len(ds.get_phage_feature_names())
 
 # [0.02110365 0.01701945 0.01526282]
-min_shap_value = 0.02110365
+min_shap_value = 0.01526282
 beta_top_mask = beta_mean_abs_shap >= min_shap_value
 irho_top_mask = irho_mean_abs_shap >= min_shap_value
 
-STRAIN_COLOR = "#d9f0d3"
-PHAGE_COLOR = "#9970ab"
+beta_color = "#d9f0d3"
+irho_color = "#9970ab"
 
 fig = plt.figure(figsize=(3, 2.5))
 
@@ -75,7 +75,7 @@ ax = fig.add_subplot(111)
 v = venn2(
     subsets=(n_beta_only, n_irho_only, n_shared),
     set_labels=("", ""),
-    set_colors=(STRAIN_COLOR, PHAGE_COLOR),
+    set_colors=(beta_color, irho_color),
     alpha=0.6,
     ax=ax,
 )
@@ -95,6 +95,106 @@ c = venn2_circles(
 )
 
 fig.tight_layout()
-file_name = f"{figs_folder}/shared-important-features.svg"
+file_name = f"{figs_folder}/ven-threshold-{min_shap_value}.svg"
+plt.savefig(file_name, transparent=True)
+print(f"\nFigure Saved: {file_name}")
+
+
+# Strain features only
+beta_top_mask = beta_mean_abs_shap >= min_shap_value
+irho_top_mask = irho_mean_abs_shap >= min_shap_value
+
+beta_strain_mask = np.arange(len(feature_names)) < num_strain_features
+irho_strain_mask = np.arange(len(feature_names)) < num_strain_features
+
+beta_top_mask = beta_top_mask & beta_strain_mask
+irho_top_mask = irho_top_mask & irho_strain_mask
+
+fig = plt.figure(figsize=(3, 2.5))
+
+beta_only = beta_top_mask & ~irho_top_mask
+irho_only = irho_top_mask & ~beta_top_mask
+shared = beta_top_mask & irho_top_mask
+
+n_beta_only = beta_only.sum()
+n_irho_only = irho_only.sum()
+n_shared = shared.sum()
+
+
+ax = fig.add_subplot(111)
+v = venn2(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    set_labels=("", ""),
+    set_colors=(beta_color, irho_color),
+    alpha=0.6,
+    ax=ax,
+)
+
+# Style the counts
+for lbl in ["10", "01", "11"]:
+    if v.get_label_by_id(lbl):
+        v.get_label_by_id(lbl).set_fontsize(10)
+
+# Outline circles
+c = venn2_circles(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    linestyle="solid",
+    linewidth=0.8,
+    color="grey",
+    ax=ax,
+)
+
+fig.tight_layout()
+file_name = f"{figs_folder}/ven-threshold-{min_shap_value}-strain.svg"
+plt.savefig(file_name, transparent=True)
+print(f"\nFigure Saved: {file_name}")
+
+
+# Phage features only
+beta_top_mask = beta_mean_abs_shap >= min_shap_value
+irho_top_mask = irho_mean_abs_shap >= min_shap_value
+
+beta_strain_mask = np.arange(len(feature_names)) >= num_strain_features
+irho_strain_mask = np.arange(len(feature_names)) >= num_strain_features
+
+beta_top_mask = beta_top_mask & beta_strain_mask
+irho_top_mask = irho_top_mask & irho_strain_mask
+
+fig = plt.figure(figsize=(3, 2.5))
+
+beta_only = beta_top_mask & ~irho_top_mask
+irho_only = irho_top_mask & ~beta_top_mask
+shared = beta_top_mask & irho_top_mask
+
+n_beta_only = beta_only.sum()
+n_irho_only = irho_only.sum()
+n_shared = shared.sum()
+
+
+ax = fig.add_subplot(111)
+v = venn2(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    set_labels=("", ""),
+    set_colors=(beta_color, irho_color),
+    alpha=0.6,
+    ax=ax,
+)
+
+# Style the counts
+for lbl in ["10", "01", "11"]:
+    if v.get_label_by_id(lbl):
+        v.get_label_by_id(lbl).set_fontsize(10)
+
+# Outline circles
+c = venn2_circles(
+    subsets=(n_beta_only, n_irho_only, n_shared),
+    linestyle="solid",
+    linewidth=0.8,
+    color="grey",
+    ax=ax,
+)
+
+fig.tight_layout()
+file_name = f"{figs_folder}/ven-threshold-{min_shap_value}-phage.svg"
 plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")
