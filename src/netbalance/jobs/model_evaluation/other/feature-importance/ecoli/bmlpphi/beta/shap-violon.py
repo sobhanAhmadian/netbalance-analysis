@@ -5,6 +5,10 @@ import numpy as np
 import pandas as pd
 import shap
 
+from netbalance.configs.ecoli import (
+    ECOLI_PHAGE_FEATURES_ANNOTATIONS_FILE,
+    ECOLI_STRAIN_FEATURES_ANNOTATIONS_FILE,
+)
 from netbalance.configs.bmlpphi import BMLPPHI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.features.ecoli import EcoliDataset as Dataset  # Parameter
 from netbalance.utils import prj_logger
@@ -33,6 +37,10 @@ save_dir = os.path.join(
     "train_neg_samp-beta",
 )
 
+pfa = pd.read_csv(ECOLI_PHAGE_FEATURES_ANNOTATIONS_FILE)
+sfa = pd.read_csv(ECOLI_STRAIN_FEATURES_ANNOTATIONS_FILE)
+fa = pd.concat([sfa, pfa], ignore_index=True)
+
 figs_folder = f"{RESULTS_DIR}/figs/other/feature_importance/ecoli/bmlpphi/beta"
 os.makedirs(figs_folder, exist_ok=True)
 
@@ -59,7 +67,10 @@ stacked_features = np.concatenate(
 )  # Shape: (num_samples, num_features)
 
 mean_abs_shap = np.abs(stacked_shap_values).mean(axis=0)
-sorted_idx = np.argsort(mean_abs_shap)[::-1][:20][::-1]  # Top 20, most important on top
+
+sorted_idx = np.argsort(mean_abs_shap)[::-1][:100][
+    ::-1
+]  # Top 100, most important on top
 
 n_features = len(sorted_idx)
 
@@ -106,7 +117,10 @@ for i, feat_idx in enumerate(sorted_idx):
 
 # ── Axes ──────────────────────────────────────────────────────────────────────
 ax.set_yticks(range(n_features))
-ax.set_yticklabels([feature_names[i] for i in sorted_idx], fontsize=9)
+ax.set_yticklabels(
+    [feature_names[i] + " (" + fa["Description"].iloc[i] + ")" for i in sorted_idx],
+    fontsize=9,
+)
 ax.axvline(0, color="black", linewidth=0.8, linestyle="--", alpha=0.5)
 ax.spines[["top", "right"]].set_visible(False)
 ax.grid(axis="x", linestyle=":", linewidth=0.5, alpha=0.5)
