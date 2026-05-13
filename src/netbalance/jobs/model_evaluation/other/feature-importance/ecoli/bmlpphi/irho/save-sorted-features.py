@@ -8,6 +8,8 @@ import shap
 from netbalance.configs.ecoli import (
     ECOLI_PHAGE_FEATURES_ANNOTATIONS_FILE,
     ECOLI_STRAIN_FEATURES_ANNOTATIONS_FILE,
+    PHAGE_ANNOTATION_CATEGORIES_FILE,
+    STRAIN_ANNOTATION_CATEGORIES_FILE,
 )
 from netbalance.configs.bmlpphi import BMLPPHI_RESULTS_DIR as RESULTS_DIR  # Parameter
 from netbalance.features.ecoli import EcoliDataset as Dataset  # Parameter
@@ -37,9 +39,15 @@ save_dir = os.path.join(
     "train_neg_samp-irho",
 )
 
+pac = pd.read_csv(PHAGE_ANNOTATION_CATEGORIES_FILE)
+sac = pd.read_csv(STRAIN_ANNOTATION_CATEGORIES_FILE)
+ac = pd.concat([sac, pac], ignore_index=True)["Category"]
+
 pfa = pd.read_csv(ECOLI_PHAGE_FEATURES_ANNOTATIONS_FILE)
 sfa = pd.read_csv(ECOLI_STRAIN_FEATURES_ANNOTATIONS_FILE)
 fa = pd.concat([sfa, pfa], ignore_index=True)
+
+fa = pd.concat([fa, ac], axis=1)
 
 figs_folder = f"{RESULTS_DIR}/figs/other/feature_importance/ecoli/bmlpphi/irho"
 os.makedirs(figs_folder, exist_ok=True)

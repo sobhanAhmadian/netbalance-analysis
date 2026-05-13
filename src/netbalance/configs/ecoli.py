@@ -20,3 +20,14 @@ ECOLI_PHAGE_FEATURES_ANNOTATIONS_FILE = os.path.join(
 ECOLI_STRAIN_FEATURES_ANNOTATIONS_FILE = os.path.join(
     ECOLI_PROCESSED_DATA_DIR, "strains-features-annotations.csv"
 )
+
+ANNOTATION_CATEGORIES_DIR = os.path.join(
+    ECOLI_PROCESSED_DATA_DIR, "annotation-categories"
+)
+
+PHAGE_ANNOTATION_CATEGORIES_FILE = os.path.join(
+    ANNOTATION_CATEGORIES_DIR, "phages-categories.csv"
+)
+STRAIN_ANNOTATION_CATEGORIES_FILE = os.path.join(
+    ANNOTATION_CATEGORIES_DIR, "strains-categories.csv"
+)
