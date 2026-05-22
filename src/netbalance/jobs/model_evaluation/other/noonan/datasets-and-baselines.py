@@ -406,7 +406,7 @@ axe.bar(
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
 axe.set_ylim(0, 1.0)
 axe.set_xticks([])
-axe.set_yticks([])
+# axe.set_yticks([])
 
 axe.spines["top"].set_visible(False)
 axe.spines["right"].set_visible(False)
@@ -545,7 +545,7 @@ axe.bar(
 axe.set_xlim(x[0] - 0.5, x[-1] + 0.5)
 axe.set_ylim(0.5, 1.0)
 axe.set_xticks([])
-axe.set_yticks([])
+# axe.set_yticks([])
 
 axe.spines["top"].set_visible(False)
 axe.spines["right"].set_visible(False)

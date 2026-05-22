@@ -356,9 +356,7 @@ class AData(Data):
             # Normalize weights
             weights_sum = weights.sum()
             if weights_sum == 0:
-                raise ValueError(
-                    "No more valid negative samples to select."
-                )
+                raise ValueError("No more valid negative samples to select.")
             normalized_weights = weights / weights_sum
 
             # Select a negative sample based on weights
