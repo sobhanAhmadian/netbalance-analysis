@@ -52,7 +52,7 @@ path_dict = [
     (BXGBPHI_RESULTS_DIR, "beta", "XGBoost"),
     (BLINPHI_RESULTS_DIR, "beta", "Linear"),
     (WEIGHTED_MEAN_DEGREE_RATIO_RESULTS_DIR, "beta", "Both"),
-    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Phage"),
+    (B_DEGREE_RATIO_RESULTS_DIR, "beta", "Virus"),
     (A_DEGREE_RATIO_RESULTS_DIR, "beta", "Bacteria"),
     (BRANDOM_RESULTS_DIR, "beta", "Random"),
 ]
