@@ -20,12 +20,23 @@ plt.rcParams.update(
     }
 )
 
-figs_folder = f"{RESULTS_DIR}/figs/other/feature_importance/ecoli/bmlpphi"
+dataset = "ecoli"  # Parameter
+
+figs_folder = f"{RESULTS_DIR}/figs/other/feature_importance/{dataset}/bmlpphi"
 os.makedirs(figs_folder, exist_ok=True)
+
+save_dir = os.path.join(
+    RESULTS_DIR,
+    "numeric",
+    "other",
+    f"feature_importance",
+    f"dataset-{dataset}",
+    "go-analyses",
+)
+os.makedirs(save_dir, exist_ok=True)
 
 logger = prj_logger.getLogger(__name__)
 
-dataset = "ecoli"  # Parameter
 
 beta_save_dir = os.path.join(
     RESULTS_DIR,
@@ -142,7 +153,7 @@ def category_enrichment(
 
 
 # --- Usage ---
-n = 100  # ← adjust as needed
+n = 1000  # ← adjust as needed
 beta_results = category_enrichment(beta_df, n=n, category_col="GOs", expand_sep=",")
 irho_results = category_enrichment(irho_df, n=n, category_col="GOs", expand_sep=",")
 
@@ -151,65 +162,9 @@ print(beta_results.to_string(index=False))
 print("IRho top categories:")
 print(irho_results.to_string(index=False))
 
-# Compare absolute numbers
-fig, ax = plt.subplots(figsize=(6, 13))
-
-merged = pd.merge(
-    beta_results[["category", "fg_count", "enriched"]],
-    irho_results[["category", "fg_count", "enriched"]],
-    on="category",
-    suffixes=("_beta", "_irho"),
-)
-merged = merged.sort_values("fg_count_irho", ascending=True)
-merged = merged[merged["category"] != "Other / Unclassified"]
-merged = merged[merged["category"] != "Hypothetical & Unknown Function"]
-
-categories = merged["category"]
-y = np.arange(len(categories))
-bar_height = 0.4
-
-beta_color = "#a6dba0"  # green
-irho_color = "#9970ab"  # red
-
-
-def draw_bars(ax, values, enriched_col, y_positions, height, color):
-    for i, (val, e) in enumerate(zip(values, enriched_col)):
-        hatch = "xx" if e == "enriched" else None
-        ax.barh(
-            y_positions[i],
-            val,
-            height=height,
-            color=color,
-            edgecolor="white",
-            hatch=hatch,
-        )
-
-
-draw_bars(
-    ax,
-    merged["fg_count_beta"],
-    merged["enriched_beta"],
-    y + bar_height / 2,
-    bar_height,
-    beta_color,
-)
-draw_bars(
-    ax,
-    merged["fg_count_irho"],
-    merged["enriched_irho"],
-    y - bar_height / 2,
-    bar_height,
-    irho_color,
-)
-
-ax.set_yticks(y)
-ax.set_yticklabels(categories)
-ax.set_xlabel(f"Count in top {n} features")
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-
-
-fig.tight_layout()
-file_name = f"{figs_folder}/top-{n}-categories.svg"
-plt.savefig(file_name, transparent=True)
-print(f"\nFigure Saved: {file_name}")
+beta_file_name = f"{save_dir}/top-{n}-categories-beta.csv"
+irho_file_name = f"{save_dir}/top-{n}-categories-irho.csv"
+beta_results.to_csv(beta_file_name, index=False)
+irho_results.to_csv(irho_file_name, index=False)
+print(f"Saved beta category enrichment results to {beta_file_name}")
+print(f"Saved irho category enrichment results to {irho_file_name}")

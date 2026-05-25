@@ -2148,7 +2148,7 @@ packages:
 - pypi: ./
   name: netbalance
   version: 0.1.0
-  sha256: d4d9760c631cd9a72b227913779caa9efe0831bc9b0bb1521de5681ce592ada4
+  sha256: c0f1680b9130c9a70660372135414f227c6abb9246f1415cfc362694278d7f4e
   requires_dist:
   - jupyter>=1.1.1,<2.0.0
   - pandas>=2.2.3,<3.0.0
@@ -2166,7 +2166,7 @@ packages:
   - networkx>=3.5,<4.0
   - shap>=0.51.0,<0.52
   - matplotlib-venn>=1.1.2,<2
-  - statsmodels
+  - statsmodels>=0.14.6,<0.15
   requires_python: '>=3.12,<3.13'
 - pypi: https://files.pythonhosted.org/packages/9e/c9/b2622292ea83fbb4ec318f5b9ab867d0a28ab43c5717bb85b0a5f6b3b0a4/networkx-3.6.1-py3-none-any.whl
   name: networkx
