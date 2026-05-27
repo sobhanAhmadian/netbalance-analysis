@@ -3,6 +3,7 @@ import hashlib
 import os
 
 import numpy as np
+import pandas as pd
 
 from netbalance.configs.common import RESULTS_DIR
 from netbalance.data.association_data import BGData, BGTrainTestSpliter
@@ -104,6 +105,25 @@ def compute_pairwise_similarities(associations_list):
             pairwise_similarities[j, i] = sim
     return pairwise_similarities
 
+
+beta_union = set()
+for assocs in beta_associations_list:
+    beta_union.update(map(tuple, assocs))
+beta_union_size = len(beta_union)
+
+rho_union = set()
+for assocs in rho_associations_list:
+    rho_union.update(map(tuple, assocs))
+rho_union_size = len(rho_union)
+size_df = {
+    "method": ["rho", "beta", "original"],
+    "union_size": [rho_union_size, beta_union_size, len(train_data.associations)],
+}
+
+size_df = pd.DataFrame(size_df)
+size_csv_file = os.path.join(save_dir, "dataset_union_sizes.csv")
+size_df.to_csv(size_csv_file, index=False)
+print("Dataset union sizes saved to:", size_csv_file)
 
 rho_similarities = compute_pairwise_similarities(rho_associations_list)
 beta_similarities = compute_pairwise_similarities(beta_associations_list)

@@ -31,7 +31,7 @@ save_dir = os.path.join(
     "other",
     f"feature_importance",
     f"dataset-{dataset}",
-    "go-analyses",
+    "pathway-analyses",
 )
 os.makedirs(save_dir, exist_ok=True)
 
@@ -69,7 +69,13 @@ print(f"Reading sorted feature annotations from {irho_fa_sorted_path}")
 
 
 def category_enrichment(
-    df, n, category_col="Category", fdr_method="fdr_bh", expand_sep=None
+    df,
+    n,
+    category_col="Category",
+    fdr_method="fdr_bh",
+    expand_sep=None,
+    just_phage=False,
+    just_bacteria=False,
 ):
     """
     Test which categories are enriched in the top-n rows vs. the full background.
@@ -86,6 +92,10 @@ def category_enrichment(
         Multiple-testing correction method passed to statsmodels (default: Benjamini-Hochberg).
     expand_sep : str or None
         If categories are semicolon-separated, set this to ";" to treat each category separately.
+    just_phage : bool
+        If True, only consider rows where 'is_phage' == 1.
+    just_bacteria : bool
+        If True, only consider rows where 'is_phage' == 0.
 
     Returns
     -------
@@ -94,9 +104,18 @@ def category_enrichment(
         category, fg_count, fg_total, bg_count, bg_total,
         fg_pct, bg_pct, odds_ratio, pvalue, padj, enriched
     """
+
     foreground = df.iloc[:n]
     background = df.iloc[n:]  # everything NOT in foreground
-    all_categories = df[category_col].unique()
+
+    if just_phage and just_bacteria:
+        raise ValueError("Cannot set both just_phage and just_bacteria to True.")
+    if just_phage:
+        foreground = foreground[foreground["is_phage"] == 1]
+        background = background[background["is_phage"] == 1]
+    elif just_bacteria:
+        foreground = foreground[foreground["is_phage"] == 0]
+        background = background[background["is_phage"] == 0]
 
     if expand_sep is not None:
         # Expand categories into separate rows
@@ -107,9 +126,9 @@ def category_enrichment(
             **{category_col: background[category_col].str.split(expand_sep)}
         ).explode(category_col)
 
-        all_categories = pd.concat(
-            [foreground[category_col], background[category_col]]
-        ).unique()
+    all_categories = pd.concat(
+        [foreground[category_col], background[category_col]]
+    ).unique()
 
     fg_total = len(foreground)
     bg_total = len(background)
@@ -153,18 +172,53 @@ def category_enrichment(
 
 
 # --- Usage ---
-n = 1000  # ← adjust as needed
-beta_results = category_enrichment(beta_df, n=n, category_col="GOs", expand_sep=",")
-irho_results = category_enrichment(irho_df, n=n, category_col="GOs", expand_sep=",")
 
-print("Beta top categories:")
-print(beta_results.to_string(index=False))
-print("IRho top categories:")
-print(irho_results.to_string(index=False))
+n_list = [100, 500, 1000]
+category_col_list = [
+    "COG_category",
+    "GOs",
+    "KEGG_ko",
+    "KEGG_Pathway",
+    "KEGG_Module",
+    "KEGG_Reaction",
+    "KEGG_rclass",
+    "PFAMs",
+    "BRITE"
+]
+spe_list = ["phage", "bacteria"]
 
-beta_file_name = f"{save_dir}/top-{n}-categories-beta.csv"
-irho_file_name = f"{save_dir}/top-{n}-categories-irho.csv"
-beta_results.to_csv(beta_file_name, index=False)
-irho_results.to_csv(irho_file_name, index=False)
-print(f"Saved beta category enrichment results to {beta_file_name}")
-print(f"Saved irho category enrichment results to {irho_file_name}")
+for n in n_list:
+    for category_col in category_col_list:
+        for spe in spe_list:
+            print(
+                f"\n=== Enrichment for top {n} features by {category_col} ({spe}) ==="
+            )
+
+            beta_results = category_enrichment(
+                beta_df,
+                n=n,
+                category_col=category_col,
+                expand_sep=",",
+                just_phage=(spe == "phage"),
+                just_bacteria=(spe == "bacteria"),
+            )
+            irho_results = category_enrichment(
+                irho_df,
+                n=n,
+                category_col=category_col,
+                expand_sep=",",
+                just_phage=(spe == "phage"),
+                just_bacteria=(spe == "bacteria"),
+            )
+
+            print("Beta top categories:")
+            print(beta_results.to_string(index=False))
+            print("IRho top categories:")
+            print(irho_results.to_string(index=False))
+
+            beta_file_name = f"{save_dir}/{spe}-{category_col}-top-{n}-beta.csv"
+            irho_file_name = f"{save_dir}/{spe}-{category_col}-top-{n}-irho.csv"
+            beta_results.to_csv(beta_file_name, index=False)
+            irho_results.to_csv(irho_file_name, index=False)
+            print(f"Saved beta category enrichment results to {beta_file_name}")
+            print(f"Saved irho category enrichment results to {irho_file_name}")

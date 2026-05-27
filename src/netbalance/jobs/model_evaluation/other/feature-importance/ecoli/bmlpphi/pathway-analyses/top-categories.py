@@ -54,20 +54,17 @@ save_dir = os.path.join(
     "other",
     f"feature_importance",
     f"dataset-{dataset}",
-    "go-analyses",
+    "pathway-analyses",
 )
 
-n = 500
-beta_file_name = f"{save_dir}/top-{n}-categories-beta.csv"
-irho_file_name = f"{save_dir}/top-{n}-categories-irho.csv"
+n = 1000
+spe = "bacteria"
+category_col = "PFAMs"
+
+beta_file_name = f"{save_dir}/{spe}-{category_col}-top-{n}-beta.csv"
+irho_file_name = f"{save_dir}/{spe}-{category_col}-top-{n}-irho.csv"
 beta_results = pd.read_csv(beta_file_name)
 irho_results = pd.read_csv(irho_file_name)
-
-print("Beta top categories:")
-print(beta_results.iloc[:10].to_string(index=False))
-print("IRho top categories:")
-print(irho_results.iloc[:10].to_string(index=False))
-
 
 merged = pd.merge(
     beta_results[["category", "fg_count", "enriched"]],
@@ -97,14 +94,14 @@ irho_color = "#9970ab"  # red
 
 def draw_bars(ax, values, enriched_col, y_positions, height, color):
     for i, (val, e) in enumerate(zip(values, enriched_col)):
-        hatch = "xx" if e == "enriched" else None
+        # hatch = "xx" if e == "enriched" else None
         ax.barh(
             y_positions[i],
             val,
             height=height,
             color=color,
             edgecolor="white",
-            hatch=hatch,
+            # hatch=hatch,
         )
 
 
@@ -138,7 +135,7 @@ ax.spines["right"].set_visible(False)
 
 
 fig.tight_layout()
-file_name = f"{figs_folder}/go-analyses-top-{n}.svg"
+file_name = f"{figs_folder}/{spe}-{category_col}-top-{n}.svg"
 plt.savefig(file_name, transparent=True)
 print(f"\nFigure Saved: {file_name}")
 

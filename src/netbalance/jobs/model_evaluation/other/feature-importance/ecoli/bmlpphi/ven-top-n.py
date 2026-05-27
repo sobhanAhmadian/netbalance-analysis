@@ -53,7 +53,7 @@ num_strain_features = len(ds.get_strain_feature_names())
 num_phage_features = len(ds.get_phage_feature_names())
 
 # Select the first n most important features for each model.
-n_top_features = 10
+n_top_features = 1000
 beta_top_idx = np.argsort(beta_mean_abs_shap)[::-1][:n_top_features]
 irho_top_idx = np.argsort(irho_mean_abs_shap)[::-1][:n_top_features]
 
@@ -65,7 +65,7 @@ irho_top_mask[irho_top_idx] = True
 beta_color = "#d9f0d3"
 irho_color = "#9970ab"
 
-fig = plt.figure(figsize=(3, 2.5))
+fig = plt.figure(figsize=(2.5, 2.0))
 
 beta_only = beta_top_mask & ~irho_top_mask
 irho_only = irho_top_mask & ~beta_top_mask
@@ -117,7 +117,7 @@ irho_strain_mask = np.arange(len(feature_names)) < num_strain_features
 beta_top_mask = beta_top_mask & beta_strain_mask
 irho_top_mask = irho_top_mask & irho_strain_mask
 
-fig = plt.figure(figsize=(3, 2.5))
+fig = plt.figure(figsize=(2.5, 2.0))
 
 beta_only = beta_top_mask & ~irho_top_mask
 irho_only = irho_top_mask & ~beta_top_mask
@@ -169,7 +169,7 @@ irho_strain_mask = np.arange(len(feature_names)) >= num_strain_features
 beta_top_mask = beta_top_mask & beta_strain_mask
 irho_top_mask = irho_top_mask & irho_strain_mask
 
-fig = plt.figure(figsize=(3, 2.5))
+fig = plt.figure(figsize=(2.5, 2.0))
 
 beta_only = beta_top_mask & ~irho_top_mask
 irho_only = irho_top_mask & ~beta_top_mask

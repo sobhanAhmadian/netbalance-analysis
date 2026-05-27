@@ -143,8 +143,8 @@ def category_enrichment(
 
 # --- Usage ---
 n = 100  # ← adjust as needed
-beta_results = category_enrichment(beta_df, n=n, category_col="GOs", expand_sep=",")
-irho_results = category_enrichment(irho_df, n=n, category_col="GOs", expand_sep=",")
+beta_results = category_enrichment(beta_df, n=n, category_col="COG_category", expand_sep=",")
+irho_results = category_enrichment(irho_df, n=n, category_col="COG_category", expand_sep=",")
 
 print("Beta top categories:")
 print(beta_results.to_string(index=False))
