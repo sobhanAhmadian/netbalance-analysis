@@ -174,6 +174,9 @@ class AData(Data):
         delta=1,
         shrinkage=0.5,
         ent_desired=1,
+        gamma_penalty=1.0,
+        entropy_track_path=None,
+        with_gamma=True,
     ):
         """
         Perform rho-based negative sampling using Simulated Annealing.
@@ -190,17 +193,32 @@ class AData(Data):
             delta (float, optional): Parameter for controlling the remove of positive samples
             shrinkage (float, optional): Shrinkage factor for the initial graph. Defaults to 0.5.
             ent_desired (float, optional): Desired entropy value. Defaults to 1.
+            gamma_penalty (float, optional): Penalty factor for updating weights. Defaults to 1.0.
+                when a negative sample is selected, the weights of all samples sharing the same node
+                in any cluster will be reduced by gamma_penalty.
+            entropy_track_path (str, optional): If provided, the entropy track will be saved to the specified file.
+            with_gamma (bool, optional): Whether to use gamma negative sampling for generating the initial graph. Defaults to True.
+                if False, uses beta negative sampling for generating the initial graph.
         """
 
         num_negative = int(len(pos_associations) * negative_ratio)
         initial_graph_len = num_negative + len(pos_associations)
 
-        current_graph = self._gamma_neg_sampling(
-            pos_associations=pos_associations,
-            neg_associations=neg_associations,
-            negative_ratio=negative_ratio,
-            rng=rng,
-        )
+        if with_gamma:
+            current_graph = self._gamma_neg_sampling(
+                pos_associations=pos_associations,
+                neg_associations=neg_associations,
+                negative_ratio=negative_ratio,
+                rng=rng,
+                gamma_penalty=gamma_penalty,
+            )
+        else:
+            current_graph = self._beta_neg_sampling(
+                pos_associations=pos_associations,
+                neg_associations=neg_associations,
+                negative_ratio=negative_ratio,
+                rng=rng,
+            )
         current_ent_score, current_len_score = self._calculate_graph_score(
             current_graph, initial_graph_len
         )
@@ -216,6 +234,7 @@ class AData(Data):
 
         temperature = initial_temp
 
+        entropy_track = [current_ent_score]
         for k in range(max_iter):
 
             pos_edges = [edge for edge in current_graph if edge[-1] == 1]
@@ -254,6 +273,7 @@ class AData(Data):
             new_ent_score, new_len_score = self._calculate_graph_score(
                 current_graph, initial_graph_len
             )
+            entropy_track.append(new_ent_score)
             new_score = self._combine_scores(
                 new_ent_score, new_len_score, delta, ent_desired
             )
@@ -276,10 +296,19 @@ class AData(Data):
             # Update temperature
             temperature *= cooling_rate
 
+        if len(best_graph) == 0:
+            raise ValueError(
+                "No associations left after balancing. Please adjust the parameters."
+            )
+
         logger.info(f"Best entropy score achieved: {best_ent_score}")
         logger.info(f"Best length score achieved: {best_len_score}")
         logger.info(f"Best score achieved: {best_score}")
         logger.info(f"Graph size: {len(best_graph)}")
+
+        if entropy_track_path is not None:
+            np.savetxt(entropy_track_path, np.array(entropy_track), delimiter=",")
+            logger.info(f"Entropy track saved to {entropy_track_path}")
 
         return best_graph
 
@@ -289,6 +318,7 @@ class AData(Data):
         neg_associations,
         negative_ratio,
         rng,
+        gamma_penalty=1.0,
     ):
         """
         Weighted negative sampling with caching for a specific seed.
@@ -299,6 +329,9 @@ class AData(Data):
             neg_associations (np.ndarray): Negative associations.
             negative_ratio (float): Ratio of negative to positive samples.
             rng (numpy.random.Generator): Random number generator.
+            gamma_penalty (float, optional): Penalty factor for updating weights. Defaults to 1.0.
+                when a negative sample is selected, the weights of all samples sharing the same node
+                in any cluster will be reduced by gamma_penalty.
 
         Returns:
             list: List of negative samples as [i, j, 0].
@@ -311,6 +344,7 @@ class AData(Data):
         weights = np.zeros(dims, dtype=float)
 
         for neg_asso in neg_associations:
+            weights[tuple(neg_asso[:-1])] += 0.0000001
             for pos_asso in pos_associations:
                 for i in range(len(dims)):
                     if neg_asso[i] == pos_asso[i]:
@@ -322,8 +356,7 @@ class AData(Data):
             # Normalize weights
             weights_sum = weights.sum()
             if weights_sum == 0:
-                logger.warning("No more valid negative samples to select.")
-                break
+                raise ValueError("No more valid negative samples to select.")
             normalized_weights = weights / weights_sum
 
             # Select a negative sample based on weights
@@ -341,10 +374,11 @@ class AData(Data):
                 temp_range = tuple(
                     [s[r] if i == r else slice(None) for i in range(len(dims))]
                 )
-                weights[temp_range] -= (weights[temp_range] > 0).astype(float)
+                weights[temp_range] -= (
+                    gamma_penalty * (weights[temp_range] >= gamma_penalty)
+                ).astype(float)
 
         logger.info(f"Number of negative samples generated: {len(neg_samples)}")
-
         return neg_samples + pos_associations
 
     def _calculate_graph_score(self, associations, initial_graph_len):
@@ -383,6 +417,8 @@ class AData(Data):
 
     def _combine_scores(self, ent_score, len_score, delta, ent_desired):
         """Combine entropy and length scores."""
+        if len_score == 0:
+            return 0.0
         return (1 - abs(ent_score - ent_desired)) + delta * len_score
 
     def get_stats(

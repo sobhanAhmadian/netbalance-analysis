@@ -19,7 +19,8 @@ dependencies = [
     "distributed (>=2025.2.0,<2026.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
     "tensorflow (>=2.18.0,<3.0.0)",
-    "networkx (>=3.5,<4.0)",
+    "networkx (>=3.5,<4.0)", 
+    "shap>=0.51.0,<0.52", "matplotlib-venn>=1.1.2,<2", "statsmodels>=0.14.6,<0.15",
 ]
 
 
@@ -42,3 +43,4 @@ netbalance = { path = ".", editable = true }
 
 [tool.pixi.dependencies]
 pip = ">=26.0.1,<27"
+black = ">=26.3.1,<27"

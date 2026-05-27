@@ -1,0 +1,16 @@
+import os
+
+from .common import PROCESSED_DATA_DIR, RAW_DATA_DIR
+
+PSEUDOMONAS_RAW_DATA_DIR = os.path.join(RAW_DATA_DIR, "pseudomonas")
+PSEUDOMONAS_PROCESSED_DATA_DIR = os.path.join(PROCESSED_DATA_DIR, "pseudomonas")
+
+PSEUDOMONAS_DATASET_FILE = os.path.join(
+    PSEUDOMONAS_PROCESSED_DATA_DIR, "pseudomonas.txt"
+)
+PSEUDOMONAS_BACTERIA_NAMES_FILE = os.path.join(
+    PSEUDOMONAS_PROCESSED_DATA_DIR, "strains.csv"
+)
+PSEUDOMONAS_PHAGE_NAMES_FILE = os.path.join(
+    PSEUDOMONAS_PROCESSED_DATA_DIR, "phages.csv"
+)

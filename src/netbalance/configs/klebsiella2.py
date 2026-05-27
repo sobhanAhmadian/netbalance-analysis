@@ -1,0 +1,16 @@
+import os
+
+from .common import PROCESSED_DATA_DIR, RAW_DATA_DIR
+
+KLEBSIELLA2_RAW_DATA_DIR = os.path.join(RAW_DATA_DIR, "klebsiella2")
+KLEBSIELLA2_PROCESSED_DATA_DIR = os.path.join(PROCESSED_DATA_DIR, "klebsiella2")
+
+KLEBSIELLA2_DATASET_FILE = os.path.join(
+    KLEBSIELLA2_PROCESSED_DATA_DIR, "klebsiella2.txt"
+)
+KLEBSIELLA2_BACTERIA_NAMES_FILE = os.path.join(
+    KLEBSIELLA2_PROCESSED_DATA_DIR, "strains.csv"
+)
+KLEBSIELLA2_PHAGE_NAMES_FILE = os.path.join(
+    KLEBSIELLA2_PROCESSED_DATA_DIR, "phages.csv"
+)
