@@ -1,5 +1,8 @@
 # Netbalance:
 
+> [!NOTE]
+> This repository contains the **analyses and figures** for the paper cited [below](#-citation). The **netbalance tool itself** (the package for building balanced datasets and evaluating association prediction models) lives at **[sobhanAhmadian/netbalance](https://github.com/sobhanAhmadian/netbalance)**. If you want to use netbalance on your own data, please go there.
+
 A Systematic Evaluation Framework For Fair Assessment of Association Prediction Models
 
 ## ⚙️ Installation

@@ -2,6 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite the paper below."
 title: "Netbalance"
 type: software
+repository-code: "https://github.com/sobhanAhmadian/netbalance-analysis"
+url: "https://github.com/sobhanAhmadian/netbalance"
 authors:
   - family-names: Ahmadian
     given-names: Sobhan
