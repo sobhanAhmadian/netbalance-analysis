@@ -73,6 +73,27 @@ The terminology used in this project slightly differs from that in the paper. Be
 | bxgbdti | Stands for "Base line model - XGBoost - Drug Target Interaction dataset". It's our XGBoost benchmark model for the drug-target interaction dataset. |
 | bxgbsyn | Stands for "Base line model - XGBoost - drug SYNergy dataset". It's our XGBoost benchmark model for the drug synergy dataset. |
 
+## 📝 Citation
+
+If you use this code, please cite:
+
+> Sobhan Ahmadian, Lucas Paoli, Hesam Montazeri. **Reliable evaluation and learning in multi-input biological association prediction.** *Briefings in Bioinformatics*, Volume 27, Issue 4, July 2026, bbag376. https://doi.org/10.1093/bib/bbag376
+
+```bibtex
+@article{ahmadian2026reliable,
+  author  = {Ahmadian, Sobhan and Paoli, Lucas and Montazeri, Hesam},
+  title   = {Reliable evaluation and learning in multi-input biological association prediction},
+  journal = {Briefings in Bioinformatics},
+  volume  = {27},
+  number  = {4},
+  pages   = {bbag376},
+  year    = {2026},
+  month   = jul,
+  doi     = {10.1093/bib/bbag376},
+  url     = {https://doi.org/10.1093/bib/bbag376}
+}
+```
+
 ## 📂 Project Structure
 ```bash
 netbalance/
